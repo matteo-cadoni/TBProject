@@ -1,6 +1,15 @@
-thresholding: otsu
-preprocessing_tecnique: sharp
-
 load:
   czi_path: extern_Synlab_2156_17_3_MTB.czi
-  tile: 5 # None if whole smear, otherwise number of tile
+  tile: 673 # None if whole smear, otherwise number of tile
+
+preprocessing:
+  algorithm: sharp
+  split: True  # whether to split the image into tiles or not before applying thresholding algorithm
+  tile_size: 16 # size of single tiles if split is True
+
+
+thresholding:
+  algorithm: otsu #otsu, hard, adaptive, gaussian
+  threshold: 5000 #only used if thresholding_alg is hard
+  block_size: 10 #only for adaptive (not sure what it is)
+  c: 10 #only for adaptive (not sure what it is)
