@@ -1,0 +1,6 @@
+thresholding: otsu
+preprocessing_tecnique: sharp
+
+load:
+  czi_path: extern_Synlab_2156_17_3_MTB.czi
+  tile: 5 # None if whole smear, otherwise number of tile
