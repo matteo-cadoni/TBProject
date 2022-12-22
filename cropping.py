@@ -1,3 +1,4 @@
+import numpy as np
 #given image and connected componets stats find center of mass of each connected component
 def find_center_of_mass( stats):
     center_of_mass = []
@@ -20,3 +21,12 @@ def crop_images(image, center_of_mass):
         y = center_of_mass[i][1]
         cropped_images.append(image[y-25:y+25, x-25:x+25])
     return cropped_images
+
+#padding arrays to 50x50 pixels
+def padd_images(image):
+    padded_image=np.zeros((50,50))
+    if image.shape[0] < 50 or image.shape[1] < 50:
+        padded_image[0:image.shape[0], 0:image.shape[1]] = image
+        return padded_image
+    else:
+        return image

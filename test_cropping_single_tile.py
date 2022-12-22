@@ -1,3 +1,4 @@
+import pandas as pd
 from aicsimageio import AICSImage
 
 import aicspylibczi
@@ -30,5 +31,25 @@ chunks_to_ignore=ignore_connected_component_list(tile)
 cleaned_stats=remove_tiles_to_ignore(stats, chunks_to_ignore)
 center_of_masses=find_center_of_mass(cleaned_stats)
 _5050bacilli=crop_images(tile, center_of_masses)
-visualize_napari(_5050bacilli[0],"primo")
 
+# open file in write mode
+#with open(r'/cropped_images.txt', 'w') as fp:
+    #for item in _5050bacilli:
+        # write each item on a new line
+       # fp.write("%s\n" % item)
+    #print('Done')
+a=np.array(_5050bacilli[0])
+b=np.array(_5050bacilli[1])
+numpylist=np.stack((a,b), axis=0)
+
+for i,img in enumerate(_5050bacilli):
+    if i>1:
+        c=np.array(_5050bacilli[i])
+        c=padd_images(c)
+
+        numpylist=np.concatenate((numpylist,[c]), axis=0)
+
+
+#np.savetxt("cropped_images_real.txt", numpylist, delimiter=",")
+#save 3d numpy array
+np.save('cropped_images_real.npy', numpylist)

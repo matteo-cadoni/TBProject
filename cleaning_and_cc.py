@@ -122,7 +122,7 @@ def delete_duplicates(list):
 
 #given stats, remove from stats the connected components that are in the list of tiles to ignore
 def remove_tiles_to_ignore(stats, list_tiles_to_ignore):
-    print(stats)
+
     stats_cleaned=np.array([[0,0,0,0,0]])
     list_tiles_to_ignore=delete_duplicates(list_tiles_to_ignore)
 
@@ -133,7 +133,7 @@ def remove_tiles_to_ignore(stats, list_tiles_to_ignore):
             stats_cleaned=np.vstack((stats_cleaned,stats[i,:]))
 
 
-    print(stats_cleaned)
+
     stats_cleaned=stats_cleaned[1:,:]
     return stats_cleaned
 
