@@ -12,7 +12,7 @@ from torch.utils.data import Dataset, DataLoader
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 6, 4)
+        self.conv1 = nn.Conv2d(3, 6, 4)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.fc1 = nn.Linear(16 * 9 * 9, 120)
@@ -44,13 +44,19 @@ class MyDataset(Dataset):
 
 if __name__ == '__main__':
         #load data
-        data = np.load('cropped_images_real.npy')
-        labels=np.array([1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,0,1,1,1,0,0,
-                         1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,1,1,1,0,
-                         0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,1,0,0,0,
-                         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0])
+        data = np.load('cropped_images_real_674.npy')
+        #convert grayscale to rgb
+        data = np.stack((data,)*3, axis=-1)
 
+        #labels_673=np.array([1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,0,1,1,1,0,0,
+                 #        1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                 #        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,1,1,1,0,
+                 #       0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,1,0,0,0,
+                 #        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0])
+
+        labels_674=np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,1,1,1,0,0,1,0,1,0,0,1,0,0,0,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,0,0,1,1,1,0,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0
+                             ,1,1,1,0,1,1,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,
+                             1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1,1,1,0,1,1,0,1,1,1,1,1,0,1,1])
         #create pandas dataframe
         df = pd.DataFrame()
 
@@ -59,7 +65,7 @@ if __name__ == '__main__':
 
 
 
-            d={'image':[data[i,:,:]],'label':labels[i]}
+            d={'image':[data[i,:,:,:]],'label':labels_674[i]}
 
             df2=pd.DataFrame(d)
 
@@ -71,10 +77,8 @@ if __name__ == '__main__':
 
         train_dataset = MyDataset(train)
         test_dataset = MyDataset(test)
-        train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True)
-        test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
-
-
+        train_loader = DataLoader(train_dataset, batch_size=4, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=4, shuffle=False)
 
         # train model
         net = Net()
@@ -88,6 +92,9 @@ if __name__ == '__main__':
                 # get the inputs
                 inputs, labels = data
                 inputs = torch.tensor(inputs, dtype=torch.float32)
+                inputs=inputs.view(inputs.shape[0],3,50,50)
+
+
                 labels = torch.tensor(labels, dtype=torch.long)
                 #inputs = inputs.unsqueeze(1)
                 # zero the parameter gradients
@@ -115,6 +122,7 @@ if __name__ == '__main__':
             for data in test_loader:
                 images, labels = data
                 images = torch.tensor(images, dtype=torch.float32)
+                images=images.view(images.shape[0],3,50,50)
                 labels = torch.tensor(labels, dtype=torch.long)
                 #images = images.unsqueeze(1)
                 outputs = net(images)
