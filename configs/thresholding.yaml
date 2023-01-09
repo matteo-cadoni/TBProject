@@ -1,12 +1,12 @@
 load:
-  czi_path: TB_sample/extern_Synlab_2156_17_3_MTB.czi 
-  tile: 672 # None if whole smear, otherwise number of tile
+  czi_path: TB_sample/extern_Synlab_2156_17_3_MTB.czi
+  tile: None # None if whole smear, otherwise number of tile
 
 preprocessing:
   algorithm: sharp
 
 thresholding:
-  algorithm: otsu #otsu, hard, adaptive, gaussian  (only otsu is supported for now)
+  algorithm: otsu #otsu, hard, adaptive, gaussian  (only otsu with split = True is supported for now)
   hard_threshold_param: 5000 # only used if thresholding_algorithm is hard
   block_size: 10 # only for adaptive (not sure what it is)
   c: 10 #only for adaptive (not sure what it is)

@@ -63,7 +63,7 @@ class Postprocessing:
         # find connected components
         num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(np.uint8(whole_tile), connectivity=8)
         # stats = x,y,w,h,area
-
+        print("Number of connected components before cleaning: ", num_labels)
         # put to black connected components which area is equal to 1 or 2
         for i in range(1, num_labels):
             if stats[i][4] < 3:
@@ -81,8 +81,10 @@ class Postprocessing:
                             or (whole_tile[i,j-1]==255 and whole_tile[i+1,j+1]==255) or (whole_tile[i,j-1]==255 and whole_tile[i-1,j+1]==255)\
                             or (whole_tile[i,j+1]==255 and whole_tile[i+1,j-1]==255) or (whole_tile[i,j+1]==255 and whole_tile[i-1,j-1]==255):
                         whole_tile[i,j] = 255
-
-        return whole_tile
+        num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(np.uint8(whole_tile), connectivity=8)
+        
+        print("Number of connected components after cleaning: ", num_labels)
+        return whole_tile, num_labels
     
     
             
@@ -92,5 +94,5 @@ class Postprocessing:
         
         whole_img = self.reconstruct_image(cleaned_tiles)
         
-        whole_img_cleaned = self.clean_connected_components(whole_img)
-        return whole_img_cleaned
+        whole_img_cleaned, num_bacilli = self.clean_connected_components(whole_img)
+        return whole_img_cleaned, num_bacilli
