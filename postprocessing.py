@@ -92,7 +92,7 @@ class Postprocessing:
         print("Applying postprocessing...")
         cleaned_tiles = self.cleaning_tiles()
         
-        whole_img = self.reconstruct_image(cleaned_tiles)
-        
+        whole_img_not_cleaned = self.reconstruct_image(cleaned_tiles)
+        whole_img = whole_img_not_cleaned.copy()
         whole_img_cleaned, num_bacilli = self.clean_connected_components(whole_img)
-        return whole_img_cleaned, num_bacilli
+        return whole_img_not_cleaned, whole_img_cleaned, num_bacilli
