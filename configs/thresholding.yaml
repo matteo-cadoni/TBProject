@@ -1,7 +1,6 @@
 load:
-  czi_path: extern_Synlab_2156_17_3_MTB.czi
-  smear: 1 # for now only 1 is available
-  tile: 673 # None if whole smear, otherwise number of tile
+  czi_path: TB_sample/extern_Synlab_2156_17_3_MTB.czi 
+  tile: 672 # None if whole smear, otherwise number of tile
 
 preprocessing:
   algorithm: sharp

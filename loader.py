@@ -7,14 +7,15 @@ import os
 
 class Loader():
 # Given a single sputum smear image made up of multiple tiles, load and transform it to numpy array
-    def __init__(self, czi_path, smear, tile):
+    def __init__(self, czi_path, tile):
         self.czi_path = czi_path
         self.tile = tile
-        self.smear = smear
-        if self.tile == 'None':
-            self.dataset_name = f'smear_{self.smear}'
-        else:
-            self.dataset_name = f'tile_{tile}_smear_{self.smear}'
+        smear_folder = self.czi_path.split('/')[-1]
+        smear_number = smear_folder.split('_')[2:5]
+        if self.tile == 'None': #whole smear
+            self.dataset_name = f'smear_{smear_number[0]}_{smear_number[1]}_{smear_number[2]}'
+        else: #single tile
+            self.dataset_name = f'tile_{tile}_smear_{smear_number[0]}_{smear_number[1]}_{smear_number[2]}'
         
     def read_array_from_h5(self, h5_path):
         # read the array from h5 file

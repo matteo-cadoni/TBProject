@@ -11,7 +11,7 @@ import sys
 from loader import Loader
 from preprocess import Preprocessing
 from thresholding import Thresholding
-from postprocess import Postprocessing
+#from postprocess import Postprocessing
 from visualization import Visualizer
 
 def arguments_parser():
@@ -31,7 +31,7 @@ def main():
     
     ####### BEGIN LOADING #######
     load_config = config['load']
-    loader = Loader(load_config['czi_path'], load_config['smear'] ,load_config['tile'])
+    loader = Loader(load_config['czi_path'], load_config['tile'])
     loader.load()
     img = loader.data_array
     print(f"Image succesfully loaded, shape: {img.shape}")
@@ -57,10 +57,12 @@ def main():
     ######## END THRESHOLDING ########
     
     ######## BEGIN POSTPROCESSING ########
+    """
     postprocessing_config = config['postprocessing']
     postprocess = Postprocessing(thresholded_img, split, postprocessing_config)
     if split:
         thresholded_img = postprocess.reconstruct_image(thresholded_img)
+    """
     ######## END POSTPROCESSING ########     
     
     
