@@ -5,9 +5,9 @@ class Thresholding:
         self.img = img
         self.split = split
         self.config = config
-        print("Thresholding image...")
+        print("Appliying thresholding to image(s)...")
         
-    def check_algorithm_from_config(self):
+    def check_algorithm(self):
         if self.config['algorithm'] == 'otsu':
             return self.otsu_thresholding()
         
@@ -29,13 +29,13 @@ class Thresholding:
         """
         if self.split:
             print("Applying Otsu's thresholding to each tile...")
-            thresholded_tiles_sharp=[]
+            thresholded_tiles=[]
             thresholded_tiles_treshold=[]
             for t in self.img:
                 ret,th = cv.threshold(t, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
-                thresholded_tiles_sharp.append(th)
+                thresholded_tiles.append(th)
                 thresholded_tiles_treshold.append(ret)
-            return thresholded_tiles_treshold, thresholded_tiles_sharp
+            return thresholded_tiles_treshold, thresholded_tiles
         else:
             print("Applying Otsu's thresholding...")
             ret,th = cv.threshold(self.img, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
@@ -80,3 +80,6 @@ class Thresholding:
         print("Applying gaussian thresholding...")
         th = cv.adaptiveThreshold(self.img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, block_size, c)
         return th
+
+    def apply(self):
+        return self.check_algorithm()

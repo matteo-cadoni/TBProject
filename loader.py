@@ -7,28 +7,26 @@ import os
 
 class Loader():
 # Given a single sputum smear image made up of multiple tiles, load and transform it to numpy array
-    def __init__(self, czi_path, tile):
+    def __init__(self, czi_path, smear, tile):
         self.czi_path = czi_path
         self.tile = tile
+        self.smear = smear
         if self.tile == 'None':
-            self.dataset_name = 'smear'
+            self.dataset_name = f'smear_{self.smear}'
         else:
-            self.dataset_name = f'tile_{tile}'
-        #self.reader = CziReader(self.path)
-        #self.metadata = self.reader.metadata
-        #self.data = self.reader.data
+            self.dataset_name = f'tile_{tile}_smear_{self.smear}'
         
     def read_array_from_h5(self, h5_path):
         # read the array from h5 file
         print(f"Reading array from {h5_path}...")
-        h5f = h5py.File(h5_path, 'r')
-        self.data_array = h5f[self.dataset_name][:]
+        h5file = h5py.File(h5_path, 'r')
+        self.data_array = h5file[self.dataset_name][:]
         
     def save_array_to_h5(self, h5_path):
         # save the array to h5 file
         print(f"Saving array to {h5_path}...")
-        h5f = h5py.File(h5_path, 'w')
-        h5f.create_dataset(self.dataset_name, data=self.data_array)
+        h5file = h5py.File(h5_path, 'w')
+        h5file.create_dataset(self.dataset_name, data=self.data_array)
                   
     def read_array_from_czi(self):
         # read the array from czi file
@@ -42,7 +40,7 @@ class Loader():
         
     def load(self):
         #load the image
-        print(f"###### BEGIN LOADING {self.dataset_name} ######")
+        print(f"Loading {self.dataset_name}...")
         
         #check if h5_file exists, otherwise create it
         h5_path = os.path.join('h5_data', self.dataset_name + '.h5')
@@ -59,11 +57,13 @@ class Loader():
             #check time to read czi file
             print("h5 file does not exist!")
             start_time = time.time()
-            
+            # create folder /h5_data if it does not exist
+            if not os.path.exists('h5_data'):
+                print("Folder h5_data not found, creating it")
+                os.makedirs('h5_data')
             assert os.path.isfile(self.czi_path), "Please specify the path to the czi file"
             
             self.read_array_from_czi()
             end_time = time.time()
             print("Time to read czi file: ", end_time - start_time)
-            print("Saving array to h5 file")
             self.save_array_to_h5(h5_path)
