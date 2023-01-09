@@ -11,7 +11,7 @@ import sys
 from loader import Loader
 from preprocess import Preprocessing
 from thresholding import Thresholding
-#from postprocess import Postprocessing
+from postprocessing import Postprocessing
 from visualization import Visualizer
 
 def arguments_parser():
@@ -39,37 +39,28 @@ def main():
     
     ######## BEGIN PREPROCESSING ########
     preprocess_config = config['preprocessing']
-    split = preprocess_config['split']
     preprocess = Preprocessing(img)
-    sharpened_img = preprocess.sharpen()
-    if split:
-        split_sharpened_img = preprocess.split_into_tiles(sharpened_img, preprocess_config['tile_size'])
+    if preprocess_config['algorithm'] == "sharp":
+        sharpened_img = preprocess.sharpen()
     ######## END PREPROCESSING ########
     
     ######## BEGIN THRESHOLDING ########
     threshold_config = config['thresholding']
-    
-    if split:
-        threshold = Thresholding(split_sharpened_img, split, threshold_config)
-    #else:
-    #    threshold = Thresholding(sharpened_img, split, threshold_config)
-    th, thresholded_img = threshold.apply()
+    threshold = Thresholding(sharpened_img, threshold_config)
+    thresholded_img = threshold.apply()
     ######## END THRESHOLDING ########
     
     ######## BEGIN POSTPROCESSING ########
-    """
     postprocessing_config = config['postprocessing']
-    postprocess = Postprocessing(thresholded_img, split, postprocessing_config)
-    if split:
-        thresholded_img = postprocess.reconstruct_image(thresholded_img)
-    """
+    postprocess = Postprocessing(thresholded_img, postprocessing_config)
+    final_image = postprocess.apply()
     ######## END POSTPROCESSING ########     
     
     
     ######## BEGIN VISUALIZATION ########
-    #visualizer = Visualizer(thresholded_img) #visualize the image with napari using its numpy array
-    visualizer = Visualizer(img)
+    visualizer = Visualizer(final_image)
     #currently opening the napari visualizer stops the execution of the code
     ######## END VISUALIZATION ########
+    
 if __name__ == "__main__":
     main()

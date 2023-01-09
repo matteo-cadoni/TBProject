@@ -4,19 +4,17 @@ load:
 
 preprocessing:
   algorithm: sharp
-  split: True  # whether to split the image into tiles or not before applying thresholding algorithm 
-  # for now only True is supported
-  tile_size: 16 # size of single tiles if split is True
-
 
 thresholding:
   algorithm: otsu #otsu, hard, adaptive, gaussian  (only otsu is supported for now)
-  threshold: 5000 #only used if thresholding_alg is hard
-  block_size: 10 #only for adaptive (not sure what it is)
+  hard_threshold_param: 5000 # only used if thresholding_algorithm is hard
+  block_size: 10 # only for adaptive (not sure what it is)
   c: 10 #only for adaptive (not sure what it is)
+  split: True  # whether to split the image into tiles or not before applying thresholding algorithm 
+  tile_size: 16 # size of single tiles if split is True
 
 postprocessing:
-
+  number_of_black_pixels: 215 # number of black pixels to decide whether a tile is background or not
 
 
 visualization:
