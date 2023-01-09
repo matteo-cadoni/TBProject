@@ -4,11 +4,25 @@ import cv2 as cv
 
 class Postprocessing:
     
-    def __init__(self, img, config):
-        self.img = img
+    def __init__(self, tiles, config):
+        self.tiles = tiles
         self.config = config
-             
-    def check_image(img: np.ndarray):
+
+
+    def cleaning_tiles(self):
+        print("Cleaning tiles...")
+        
+        cleaned_tiles = []
+        for t in self.tiles:
+            # check if image is not a bacilli
+            if self.check_image(t):  # the tile doesn't contain a bacilli
+                t[t > 0] = 0
+                cleaned_tiles.append(t)
+            else: # the tile contains a bacilli
+                cleaned_tiles.append(t)
+        return cleaned_tiles
+
+    def check_image(self, img: np.ndarray):
         """
         For every sub-image we check if its worth keeping or not
         number_of_black_pixels ---> maybe rely on scientific paper to find the optimal number
@@ -23,30 +37,20 @@ class Postprocessing:
             return True
         
         
-    def reconstruct_image(tiles: list, x_tiles: int, y_tiles: int):
+    def reconstruct_image(self, tiles: list):
         """
         :param tiles:    list with the different single tiles
         :param x_tiles:  how many tiles fit in the x axis
         :param y_tiles:  how many tiles fit in the y axis
         :return:         numpy array, reconstructed image
         """
+        x_tiles = self.config['x_tiles']
+        y_tiles = self.config['y_tiles']
         whole_img = np.zeros((x_tiles*tiles[0].shape[0], y_tiles*tiles[0].shape[1]))
         for i in range(x_tiles):
             for j in range(y_tiles):
                 whole_img[i*tiles[0].shape[0]:(i+1)*tiles[0].shape[0], j*tiles[0].shape[1]:(j+1)*tiles[0].shape[1]] = tiles[i*y_tiles+j]
         return whole_img
-
-    def cleaning_tiles(self):
-        print("Cleaning tiles...")
-        
-        cleaned_tiles = []
-        for t in self.img:
-            # check if image is not a bacilli
-            if self.check_image(t):  # the tile doesn't contain a bacilli
-                t[t > 0] = 0
-                cleaned_tiles.append(t)
-            else: # the tile contains a bacilli
-                cleaned_tiles.append(t)
     
     def clean_connected_components(self, whole_tile):
         """

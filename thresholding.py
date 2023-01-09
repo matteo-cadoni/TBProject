@@ -59,7 +59,6 @@ class Thresholding:
         :return: ret: the computed threshold value
                 th: binary image (image with the threshold applied, pixels above threshold are white = 255, pixels below threshold are black= 0)
         """
-        print("Applying Otsu's thresholding...")
         ret,th = cv.threshold(img, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
         return th
 
