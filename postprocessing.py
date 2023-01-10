@@ -86,7 +86,6 @@ class Postprocessing:
         print("Number of connected components after cleaning: ", num_labels)
         return whole_tile, num_labels
     
-    
             
     def apply(self):
         print("Applying postprocessing...")
@@ -95,4 +94,4 @@ class Postprocessing:
         whole_img_not_cleaned = self.reconstruct_image(cleaned_tiles)
         whole_img = whole_img_not_cleaned.copy()
         whole_img_cleaned, num_bacilli = self.clean_connected_components(whole_img)
-        return whole_img_not_cleaned, whole_img_cleaned, num_bacilli
+        return whole_img_not_cleaned, whole_img_cleaned, num_bacilli-1

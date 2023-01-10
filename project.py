@@ -1,6 +1,7 @@
 import argparse
 import yaml
 import sys
+import numpy as np
 
 #from aicsimageio import AICSImage
 #import napari
@@ -12,7 +13,8 @@ from loader import Loader
 from preprocess import Preprocessing
 from thresholding import Thresholding
 from postprocessing import Postprocessing
-from visualization import visualize_all_list_napari
+from cropping import cropping
+from visualization import visualize_all_list_napari, add_bounding_boxes, is_blurry
 
 def arguments_parser():
     '''PARAMETERS'''
@@ -45,26 +47,70 @@ def main():
         for tiles in range(0, smear.shape[0]):
             img = smear[tiles, :, :]
             print("Tile: ", tiles)
+            if load_config['blurry_deselection']:
+                if is_blurry(img):
+                    pass
+                else:
+                    ######## BEGIN PREPROCESSING ########
+                    preprocess_config = config['preprocessing']
+                    preprocess = Preprocessing(img)
+                    if preprocess_config['algorithm'] == "sharp":
+                        sharpened_img = preprocess.sharpen()
+                    ######## END PREPROCESSING ########
 
-            ######## BEGIN PREPROCESSING ########
-            preprocess_config = config['preprocessing']
-            preprocess = Preprocessing(img)
-            if preprocess_config['algorithm'] == "sharp":
-                sharpened_img = preprocess.sharpen()
-            ######## END PREPROCESSING ########
-            
-            ######## BEGIN THRESHOLDING ########
-            threshold_config = config['thresholding']
-            threshold = Thresholding(sharpened_img, threshold_config)
-            thresholded_img = threshold.apply()
-            ######## END THRESHOLDING ########
-            
-            ######## BEGIN POSTPROCESSING ########
-            postprocessing_config = config['postprocessing']
-            postprocess = Postprocessing(thresholded_img, postprocessing_config)
-            final_image, num_bacilli = postprocess.apply()
-            total_number_bacilli += num_bacilli
-            ######## END POSTPROCESSING ########   
+                    ######## BEGIN THRESHOLDING ########
+                    threshold_config = config['thresholding']
+                    threshold = Thresholding(sharpened_img, threshold_config)
+                    thresholded_img = threshold.apply()
+                    ######## END THRESHOLDING ########
+
+                    ######## BEGIN POSTPROCESSING ########
+                    postprocessing_config = config['postprocessing']
+                    postprocess = Postprocessing(thresholded_img, postprocessing_config)
+                    final_image, num_bacilli = postprocess.apply()
+                    total_number_bacilli += num_bacilli
+                    ######## END POSTPROCESSING ########
+
+                    ######## BEGIN CROPPING ########
+                    cropping_config = postprocessing_config['crop']
+                    cropping_function = cropping(img, final_image)
+                    if cropping_config['crop']:
+                        if 'cropped_img' in locals():
+                            cropped_img = cropping_function.crop()
+                        else:
+                            cropped_img = np.concatenate((cropped_img, cropping_function.crop()), axis=0)            #might need square brackets around cropping_function.crop() to make it work
+
+                     ######## END CROPPING ########
+            else:
+                ######## BEGIN PREPROCESSING ########
+                preprocess_config = config['preprocessing']
+                preprocess = Preprocessing(img)
+                if preprocess_config['algorithm'] == "sharp":
+                    sharpened_img = preprocess.sharpen()
+                ######## END PREPROCESSING ########
+
+                ######## BEGIN THRESHOLDING ########
+                threshold_config = config['thresholding']
+                threshold = Thresholding(sharpened_img, threshold_config)
+                thresholded_img = threshold.apply()
+                ######## END THRESHOLDING ########
+
+                ######## BEGIN POSTPROCESSING ########
+                postprocessing_config = config['postprocessing']
+                postprocess = Postprocessing(thresholded_img, postprocessing_config)
+                final_image, num_bacilli = postprocess.apply()
+                total_number_bacilli += num_bacilli
+                ######## END POSTPROCESSING ########
+
+                ######## BEGIN CROPPING ########
+                cropping_config = postprocessing_config['crop']
+                cropping_function = cropping(img, final_image)
+                if cropping_config['crop']:
+                    if tiles == 0:
+                        cropped_img = cropping_function.crop()
+                    else:
+                        cropped_img = np.concatenate((cropped_img, cropping_function.crop()), axis=0)  # might need square brackets around cropping_function.crop() to make it work
+                ######## END CROPPING ########
         print("Total number of bacilli: ", total_number_bacilli)  
     else:
         ######## BEGIN PREPROCESSING ########
@@ -84,12 +130,28 @@ def main():
         postprocessing_config = config['postprocessing']
         postprocess = Postprocessing(thresholded_img, postprocessing_config)
         whole_img_not_cleaned, final_image, num_bacilli = postprocess.apply()
-        ######## END POSTPROCESSING ########   
+        ######## END POSTPROCESSING ########
+
+        ######## BEGIN ADD BOUNDING BOXES ########
+        image_boxes = img.copy()
+        image_boxes = add_bounding_boxes(image_boxes, final_image)
+
+        ######## END BOUNDING BOXES ########
+
+        ######## BEGIN CROPPING ########
+        cropping_config = postprocessing_config['crop']
+        cropping_function= cropping(img, final_image)
+        if cropping_config['crop']:
+            cropped_images=cropping_function.crop_and_pad()
+        ######## END CROPPING ########
 
         ######## BEGIN VISUALIZATION ########
-        images = [img, sharpened_img, whole_img_not_cleaned, final_image]
-        strings_names = ['img', 'sharpened_img', 'whole_img_not_cleaned', 'final_image']
-        visualize_all_list_napari(images, strings_names)
+        visualization_config = config['visualization']
+        show = visualization_config['show']
+        if show:
+            images = [img, sharpened_img, whole_img_not_cleaned, final_image, image_boxes]
+            strings_names = ['img', 'sharpened_img', 'whole_img_not_cleaned', 'final_image','image_boxes']
+            visualize_all_list_napari(images, strings_names)
         #currently opening the napari visualizer stops the execution of the code
         ######## END VISUALIZATION ########
         
