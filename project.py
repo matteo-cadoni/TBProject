@@ -2,6 +2,8 @@ import argparse
 import yaml
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
 
 #from aicsimageio import AICSImage
 #import napari
@@ -13,7 +15,7 @@ from loader import Loader
 from preprocess import Preprocessing
 from thresholding import Thresholding
 from postprocessing import Postprocessing
-from cropping import cropping
+from cropping import Cropping
 from visualization import visualize_all_list_napari, add_bounding_boxes, is_blurry
 
 def arguments_parser():
@@ -67,13 +69,13 @@ def main():
                     ######## BEGIN POSTPROCESSING ########
                     postprocessing_config = config['postprocessing']
                     postprocess = Postprocessing(thresholded_img, postprocessing_config)
-                    final_image, num_bacilli = postprocess.apply()
+                    not_cleaned_img, final_image, num_bacilli = postprocess.apply()
                     total_number_bacilli += num_bacilli
                     ######## END POSTPROCESSING ########
 
                     ######## BEGIN CROPPING ########
                     cropping_config = postprocessing_config['crop']
-                    cropping_function = cropping(img, final_image)
+                    cropping_function = Cropping(img, final_image)
                     if cropping_config['crop']:
                         if 'cropped_img' in locals():
                             cropped_img = cropping_function.crop()
@@ -98,13 +100,13 @@ def main():
                 ######## BEGIN POSTPROCESSING ########
                 postprocessing_config = config['postprocessing']
                 postprocess = Postprocessing(thresholded_img, postprocessing_config)
-                final_image, num_bacilli = postprocess.apply()
+                not_cleaned_img, final_image, num_bacilli = postprocess.apply()
                 total_number_bacilli += num_bacilli
                 ######## END POSTPROCESSING ########
 
                 ######## BEGIN CROPPING ########
                 cropping_config = postprocessing_config['crop']
-                cropping_function = cropping(img, final_image)
+                cropping_function = Cropping(img, final_image)
                 if cropping_config['crop']:
                     if tiles == 0:
                         cropped_img = cropping_function.crop()
@@ -140,10 +142,56 @@ def main():
 
         ######## BEGIN CROPPING ########
         cropping_config = postprocessing_config['crop']
-        cropping_function= cropping(img, final_image)
-        if cropping_config['crop']:
+        cropping_function = Cropping(img, final_image)
+        if cropping_config:
             cropped_images=cropping_function.crop_and_pad()
+        print(cropped_images.shape)
         ######## END CROPPING ########
+
+        ######## BEGIN INTERACTIVE LABELING #######
+
+        labels=np.array([])
+        number_correlated_to_label=np.array([])
+        order=input("do you want to choose which bacilli to see? (y/n)")
+        if order=="y":
+            for i in range(0, cropped_images.shape[0]):
+                number=input("Which bacilli do you want to see? from 0 to " + str(cropped_images.shape[0]-1) + "\n ")
+                plt.imshow(cropped_images[int(number)], cmap='gray')
+                plt.show(block=False)
+                #ask for a 1 or a 0 in prompt
+                label=int(input("Is this a bacillus? (1 = tub bacilli /0 = not), when finished type another number \n "))
+
+                if label == 1 or label==0:
+                    labels = np.append(labels, label)
+                    number_correlated_to_label = np.append(number_correlated_to_label, number)
+                else:
+                    break
+                plt.close()
+        else:
+            for i in range(0, cropped_images.shape[0]):
+
+                plt.imshow(cropped_images[i], cmap='gray')
+                plt.show(block=False)
+                # ask for a 1 or a 0 in prompt
+                label = int(
+                    input("Is this a bacillus? (1 = tub bacilli /0 = not), when finished type another number \n "))
+
+                if label == 1 or label == 0:
+                    labels = np.append(labels, label)
+                    number_correlated_to_label = np.append(number_correlated_to_label, i)
+                else:
+                    break
+                plt.close()
+
+        ######### END INTERACTIVE LABELING ########
+
+        ######## BEGIN DATASET CREATION ########
+        dataframe = pd.DataFrame()
+        for i in range(0, labels.shape[0]):
+            d = {'image': [cropped_images[int(number_correlated_to_label[i])]], 'label': [labels[i]]}
+            df2 = pd.DataFrame(d)
+            dataframe = pd.concat([dataframe, df2], ignore_index=True)
+        ######## END DATASET CREATION ########
 
         ######## BEGIN VISUALIZATION ########
         visualization_config = config['visualization']

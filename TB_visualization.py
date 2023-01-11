@@ -3,7 +3,7 @@ import aicspylibczi
 from aicsimageio.readers import CziReader
 import napari
 
-reader = CziReader("extern_Synlab_2156_17_3_MTB.czi")
+reader = CziReader("TB_sample/extern_Synlab_2156_17_3_MTB.czi")
 
 # img = reader.
 img = reader.get_image_dask_data("MYX", C=0)
