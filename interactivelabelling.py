@@ -22,12 +22,17 @@ class InteractiveLabeling():
 
         bacilli_button.configure(command=self.bacilli_clicked)
         not_bacilli_button.configure(command=self.not_bacilli_clicked)
+
+        finish_button=Button(self.window, text="Finish")
+        finish_button.grid(column=3, row=2)
+        finish_button.configure(command=self.window.destroy)
+
         self.plot_next_image(0)
 
         self.window.mainloop()
         return self.labels
 
-        pass
+
 
     def bacilli_clicked(self):
         self.labels=np.append(self.labels, 1)

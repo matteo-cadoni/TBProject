@@ -17,6 +17,8 @@ from thresholding import Thresholding
 from postprocessing import Postprocessing
 from cropping import Cropping
 from interactivelabelling import InteractiveLabeling
+from interactive_config import InteractiveConfig, change_yaml
+
 from visualization import visualize_all_list_napari, add_bounding_boxes, is_blurry
 
 def arguments_parser():
@@ -33,7 +35,13 @@ def main():
     # read config as dictionary
     with open(pars_arg.config, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
-    
+
+    ####### BEGIN INTERACTIVE CONFIGURATION #######
+    i_c = InteractiveConfig()
+    configurations = i_c.run()
+    config = change_yaml(configurations, config)
+    ####### END INTERACTIVE CONFIGURATION #######
+
     ####### BEGIN LOADING #######
     load_config = config['load']
     loader = Loader(load_config['czi_path'], load_config['tile'])
