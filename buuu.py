@@ -10,6 +10,8 @@ def is_blurry(image):
     measure=laplacian.var()
     #print(measure)
     return measure
+# get the mean value of the pixels in the image
+def mean_value(image):
 
 #PIPELINE (until the end)
 
@@ -17,10 +19,10 @@ def is_blurry(image):
 reader = CziReader("TB_sample\extern_Synlab_2156_17_3_MTB.czi")
 # Get whole image
 smear = reader.get_image_data("MYX", C=0)
+with napari.gui_qt():
+    viewer = napari.Viewer()
+    viewer.add_image(smear, name="smear")
 
-#viewer = napari.view_image(smear, name='smear')
-#viewer.add_image(smear)
-#napari.run()
 
 mes=[]
 for tile in smear:

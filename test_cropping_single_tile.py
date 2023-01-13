@@ -56,6 +56,9 @@ for i,img in enumerate(_5050bacilli):
 
 viewer=napari.view_image(numpylist)
 napari.run()
+
+#print every 10 element in list
+print(res[i ])
 #np.savetxt("cropped_images_real.txt", numpylist, delimiter=",")
 #save 3d numpy array
 #np.save('cropped_images_real_674.npy', numpylist)
