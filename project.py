@@ -165,20 +165,33 @@ def main():
                 dataframe = pd.concat([dataframe, df2], ignore_index=True)
             ######## END DATASET CREATION ########
 
-            ######## BEGIN SAVING ########
-            save_config = config['saving']
-            if save_config['save']:
-                # save dataframe with pandas library
-                labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
-                dataframe.to_pickle(labelled_data_path)
-            ######## END SAVING ########
+        ######## BEGIN DATASET CREATION ########
+        dataframe = pd.DataFrame()
+        for i in range(0, labels.shape[0]):
+            d = {'image': [cropped_images[i]], 'label': [labels[i]]}
+            df2 = pd.DataFrame(d)
+            dataframe = pd.concat([dataframe, df2], ignore_index=True)
+        ######## END DATASET CREATION ########
+
+        ######## BEGIN SAVING ########
+        save_config = config['saving']
+        if save_config['save']:
+            # save dataframe with pandas library
+            labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
+            #check if the folder labelled_data exists, if not create it
+            if not os.path.exists(os.path.dirname("labelled_data")):
+                print("Folder labelled_data not found, creating it")
+                os.makedirs('labelled_data')
+                
+            dataframe.to_pickle(labelled_data_path)
+        ######## END SAVING ########
             
         ######## BEGIN VISUALIZATION ########
         visualization_config = config['visualization']
         show = visualization_config['show']
         if show:
             images = [img, preprocessed_img, whole_img_not_cleaned, final_image, image_boxes]
-            strings_names = ['img', 'sharpened_img', 'whole_img_not_cleaned', 'final_image','image_boxes']
+            strings_names = ['img', 'preprocessed_img', 'whole_img_not_cleaned', 'final_image','image_boxes']
             visualize_all_list_napari(images, strings_names)
         #currently opening the napari visualizer stops the execution of the code
         ######## END VISUALIZATION ########
