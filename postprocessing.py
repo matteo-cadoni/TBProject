@@ -144,3 +144,12 @@ class Postprocessing:
             whole_img_cleaned = self.remove_noise()
             num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(whole_img_cleaned, connectivity=8)
             return self.img, whole_img_cleaned, num_labels-1, stats
+
+        elif self.config['algorithm'] == 'hard': 
+            num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(np.uint8(self.img), connectivity=8)
+            return self.img, self.img, num_labels-1, stats
+
+        elif self.config['algorithm'] == 'adaptive_mean':
+            whole_img_cleaned = self.remove_noise()
+            num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(whole_img_cleaned, connectivity=8)
+            return self.img, whole_img_cleaned, num_labels-1, stats

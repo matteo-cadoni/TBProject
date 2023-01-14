@@ -145,32 +145,33 @@ def main():
 
         ######## END BOUNDING BOXES ########
 
-        ######## BEGIN CROPPING ########
-        cropping_function = Cropping(img, final_image)
-        cropped_images=cropping_function.crop_and_pad()
+        labelling_dataset_config = config['labelling_dataset']
+        if labelling_dataset_config['create_dataset'] == True:
+            ######## BEGIN CROPPING ########
+            cropping_function = Cropping(img, final_image)
+            cropped_images=cropping_function.crop_and_pad()
+            ######## END CROPPING ########
 
-        ######## END CROPPING ########
+            ######## BEGIN INTERACTIVE LABELING #######
+            i_l=InteractiveLabeling(cropped_images)
+            labels= i_l.run()
+            ######### END INTERACTIVE LABELING ########
 
-        ######## BEGIN INTERACTIVE LABELING #######
-        i_l=InteractiveLabeling(cropped_images)
-        labels= i_l.run()
-        ######### END INTERACTIVE LABELING ########
+            ######## BEGIN DATASET CREATION ########
+            dataframe = pd.DataFrame()
+            for i in range(0, labels.shape[0]):
+                d = {'image': [cropped_images[i]], 'label': [labels[i]]}
+                df2 = pd.DataFrame(d)
+                dataframe = pd.concat([dataframe, df2], ignore_index=True)
+            ######## END DATASET CREATION ########
 
-        ######## BEGIN DATASET CREATION ########
-        dataframe = pd.DataFrame()
-        for i in range(0, labels.shape[0]):
-            d = {'image': [cropped_images[i]], 'label': [labels[i]]}
-            df2 = pd.DataFrame(d)
-            dataframe = pd.concat([dataframe, df2], ignore_index=True)
-        ######## END DATASET CREATION ########
-
-        ######## BEGIN SAVING ########
-        save_config = config['saving']
-        if save_config['save']:
-            # save dataframe with pandas library
-            labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
-            dataframe.to_pickle(labelled_data_path)
-        ######## END SAVING ########
+            ######## BEGIN SAVING ########
+            save_config = config['saving']
+            if save_config['save']:
+                # save dataframe with pandas library
+                labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
+                dataframe.to_pickle(labelled_data_path)
+            ######## END SAVING ########
             
         ######## BEGIN VISUALIZATION ########
         visualization_config = config['visualization']

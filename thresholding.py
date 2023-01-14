@@ -17,7 +17,7 @@ class Thresholding:
             return self.reconstruct_image(tiles_thresholded)
         
         if self.config['algorithm'] == 'hard':
-            return self.hard_thresholding(self.config['threshold'])
+            return self.hard_thresholding(self.config['hard_threshold_param'])
         
         if self.config['algorithm'] == 'adaptive_mean':
             return self.adaptive_thresholding(self.config['block_size'], self.config['c'])    
@@ -77,8 +77,8 @@ class Thresholding:
                 th: binary image (pixels above threshold are white = 255, pixels below threshold are black= 0)
         """
         print("Applying hard thresholding...")
-        ret,thresholded_image = cv.threshold(self.img, threshold, 255, cv.THRESH_BINARY)
-        return ret, thresholded_image
+        ret, thresholded_image = cv.threshold(self.img, threshold, 255, cv.THRESH_BINARY)
+        return thresholded_image
 
     def adaptive_thresholding(self, block_size : int, c : int):
         """
@@ -90,7 +90,7 @@ class Thresholding:
         :return: th: binary image (pixels above threshold are white = 255, pixels below threshold are black= 0)
         """
         print("Applying adaptive thresholding...")
-        thresholded_image = cv.adaptiveThreshold(self.img, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, block_size, c)
+        thresholded_image = cv.adaptiveThreshold(np.uint8(self.img), 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY, block_size, c)
         return thresholded_image
 
 

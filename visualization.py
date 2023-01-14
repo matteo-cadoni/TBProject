@@ -36,7 +36,7 @@ def is_blurry_laplacian(image):
     measure=laplacian.var()/np.mean(image)
     #print(measure)
     #if meausure is less than 109, image is blurry
-    if measure < 109:
+    if measure < 109.8:
         return True
     else:
         return False
