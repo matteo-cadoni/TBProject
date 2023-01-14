@@ -7,7 +7,7 @@
 
 Data should be saved under
 ```
-TB_samples/
+TB_sample/
 ```
 
 ---
