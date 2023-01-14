@@ -9,6 +9,7 @@ class InteractiveLabeling():
         self.images = images
         self.labels=np.array([])
         self.window=Tk()
+        self.max_images=images.shape[0]
 
     def run(self):
 
@@ -38,12 +39,16 @@ class InteractiveLabeling():
         self.labels=np.append(self.labels, 1)
         self.figure.clear()
         plt.close(self.figure)
+        if self.labels.shape[0] == self.max_images:
+            self.window.destroy()
         self.plot_next_image(self.labels.shape[0])
 
     def not_bacilli_clicked(self):
         self.labels=np.append(self.labels, 0)
         self.figure.clear()
         plt.close(self.figure)
+        if self.labels.shape[0] == self.max_images:
+            self.window.destroy()
         self.plot_next_image(self.labels.shape[0])
 
     def plot_next_image(self,i):
