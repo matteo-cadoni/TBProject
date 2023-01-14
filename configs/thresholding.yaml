@@ -1,6 +1,32 @@
-thresholding: otsu
-preprocessing_tecnique: sharp
-
 load:
-  czi_path: extern_Synlab_2156_17_3_MTB.czi
-  tile: 5 # None if whole smear, otherwise number of tile
+  czi_path: TB_sample/extern_Synlab_2156_17_3_MTB.czi
+  tile: 673 # None if whole smear, otherwise number of tile
+  blurry_deselection: False # whether to remove blurry tiles or not
+
+preprocessing:
+  algorithm: rescale #sharpen, rescale
+
+thresholding:
+  algorithm: adaptive_gaussian #otsu, hard, adaptive_gaussian, adaptive_mean
+  hard_threshold_param: 5000 # only used 
+  block_size: 25 # only for adaptive (the size of the neighborhood)
+  c: -7 #only for adaptive (constant to substract from the mean)
+  split: True  # whether to split the image into tiles or not before applying thresholding algorithm 
+  tile_size: 16 # size of single tiles if split is True
+  x_tiles: 128
+  y_tiles: 94
+  blurry_deselection: True # whether to remove blurry tiles or not
+
+postprocessing:
+  number_of_black_pixels: 215 # number of black pixels to decide whether a tile is background or not
+  x_tiles: 128
+  y_tiles: 94
+  tile_size: 16 # size of single tiles if split is True
+  algorithm: adaptive_gaussian #otsu, hard, adaptive_gaussian, adaptive_mean
+
+saving: 
+  save: True # whether to save the image or not
+
+visualization:
+  show: True # whether to show the image or not
+  save_path: extern_Synlab_2156_17_3_MTB.png # path to save the image to
