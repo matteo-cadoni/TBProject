@@ -7,7 +7,9 @@ class Postprocessing:
     def __init__(self, img, config):
         self.img = img
         self.config = config
-        self.tiles = self.split_into_tiles(tile_size = self.config['tile_size'])
+        if config['algorithm'] == 'otsu':
+            self.tiles = self.split_into_tiles(tile_size = self.config['tile_size'])
+        
 
     #-----------------------------------CLEANING FOR OTSU THRESHOLDING-----------------------------------
 

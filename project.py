@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
 
 #from aicsimageio import AICSImage
 #import napari
@@ -20,6 +21,7 @@ from interactivelabelling import InteractiveLabeling
 from interactive_config import InteractiveConfig, change_yaml
 
 from visualization import visualize_all_list_napari, add_bounding_boxes, is_blurry
+
 
 def arguments_parser():
     '''PARAMETERS'''
@@ -167,7 +169,6 @@ def main():
         ######## BEGIN INTERACTIVE LABELING #######
         i_l=InteractiveLabeling(cropped_images)
         labels= i_l.run()
-
         ######### END INTERACTIVE LABELING ########
 
         ######## BEGIN DATASET CREATION ########
@@ -178,6 +179,14 @@ def main():
             dataframe = pd.concat([dataframe, df2], ignore_index=True)
         ######## END DATASET CREATION ########
 
+        ######## BEGIN SAVING ########
+        save_config = config['saving']
+        if save_config['save']:
+            # save dataframe with pandas library
+            labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
+            dataframe.to_pickle(labelled_data_path)
+        ######## END SAVING ########
+            
         ######## BEGIN VISUALIZATION ########
         visualization_config = config['visualization']
         show = visualization_config['show']

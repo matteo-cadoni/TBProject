@@ -24,8 +24,9 @@ postprocessing:
   tile_size: 16 # size of single tiles if split is True
   algorithm: adaptive_gaussian #otsu, hard, adaptive_gaussian, adaptive_mean
 
+saving: 
+  save: True # whether to save the image or not
 
 visualization:
   show: True # whether to show the image or not
-  save: True # whether to save the image or not
   save_path: extern_Synlab_2156_17_3_MTB.png # path to save the image to
