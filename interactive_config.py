@@ -10,7 +10,7 @@ class  InteractiveConfig:
         self.window=Tk()
         self.path = StringVar()
         self.path.set('TB_sample/extern_Synlab_2156_17_3_MTB.czi')
-        self.tile = StringVar()
+        self.tile = IntVar()
         self.blur_deselection = BooleanVar()
         self.algorithm = StringVar()
         self.algorithm.set('otsu')
@@ -18,7 +18,7 @@ class  InteractiveConfig:
         self.hard_threshold_value.set(5000)
         self.number_of_black_pixels = IntVar()
         self.number_of_black_pixels.set(215)
-        self.crop = BooleanVar()
+
         self.show_images = BooleanVar()
         self.save_images = BooleanVar()
         self.save_path = StringVar()
@@ -61,10 +61,7 @@ class  InteractiveConfig:
         number_of_black_pixels_entry = Entry(self.window, textvariable=self.number_of_black_pixels)
         number_of_black_pixels_entry.grid(column=1, row=5)
 
-        crop_label = Label(self.window, text="Do you want to crop the image?, to get bacilli images")
-        crop_label.grid(column=0, row=6)
-        crop_entry = Checkbutton(self.window, variable=self.crop)
-        crop_entry.grid(column=1, row=6)
+
 
         show_images_label = Label(self.window, text="Show Images")
         show_images_label.grid(column=0, row=7)
@@ -83,7 +80,7 @@ class  InteractiveConfig:
         self.window.mainloop()
 
         return [self.path, self.tile, self.blur_deselection, self.algorithm, self.hard_threshold_value,
-                self.number_of_black_pixels, self.crop, self.show_images, self.save_path]
+                self.number_of_black_pixels,  self.show_images, self.save_path]
         # get the values from the entry boxes
     def get_values(self):
         self.path=self.path.get()
@@ -92,7 +89,7 @@ class  InteractiveConfig:
         self.algorithm=self.algorithm.get()
         self.hard_threshold_value=self.hard_threshold_value.get()
         self.number_of_black_pixels=self.number_of_black_pixels.get()
-        self.crop=self.crop.get()
+
         self.show_images=self.show_images.get()
         self.save_path=self.save_path.get()
 
@@ -109,9 +106,9 @@ def change_yaml(config_values, config):
     config['thresholding']['algorithm'] = config_values[3]
     config['thresholding']['hard_threshold_value'] = config_values[4]
     config['postprocessing']['number_of_black_pixels'] = config_values[5]
-    config['postprocessing']['crop'] = config_values[6]
-    config['visualization']['show'] = config_values[7]
-    config['visualization']['path'] = config_values[8]
+
+    config['visualization']['show'] = config_values[6]
+    config['visualization']['path'] = config_values[7]
     return config
 
 

@@ -19,7 +19,7 @@ postprocessing:
   number_of_black_pixels: 215 # number of black pixels to decide whether a tile is background or not
   x_tiles: 128
   y_tiles: 94
-  crop: True # whether to crop the image or not
+
 
 visualization:
   show: False # whether to show the image or not

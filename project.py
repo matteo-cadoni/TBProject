@@ -152,8 +152,7 @@ def main():
         ######## BEGIN CROPPING ########
         cropping_config = postprocessing_config['crop']
         cropping_function = Cropping(img, final_image)
-        if cropping_config:
-            cropped_images=cropping_function.crop_and_pad()
+        cropped_images=cropping_function.crop_and_pad()
 
         ######## END CROPPING ########
 
