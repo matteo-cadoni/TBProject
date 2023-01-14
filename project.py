@@ -20,7 +20,7 @@ from cropping import Cropping
 from interactivelabelling import InteractiveLabeling
 from interactive_config import InteractiveConfig, change_yaml
 
-from visualization import visualize_all_list_napari, add_bounding_boxes, is_blurry
+from visualization import visualize_all_list_napari, add_bounding_boxes, is_blurry_laplacian
 
 
 def arguments_parser():
@@ -54,17 +54,21 @@ def main():
         smear = loader.data_array
         print(f"Smear succesfully loaded, shape: {smear.shape}")
         total_number_bacilli = 0
+        counter_of_blurry_images = 0
     else:
         img = loader.data_array
         print(f"Tile succesfully loaded, shape: {img.shape}")
     ######## END LOADING ########
 
     if load_config['tile'] == 'None':
-        for tiles in range(0, smear.shape[0]):
+        for tiles in range(0, smear.shape[0]): 
             img = smear[tiles, :, :]
             print("Tile: ", tiles)
             if load_config['blurry_deselection']:
-                if is_blurry(img):
+                if is_blurry_laplacian(img):
+                    print("It's blurry")
+                    # counter of the blurry images:
+                    counter_of_blurry_images += 1
                     pass
                 else:
                     ######## BEGIN PREPROCESSING ########
@@ -74,7 +78,6 @@ def main():
                         preprocessed_img = preprocess.sharpen()
                     if preprocess_config['algorithm'] == "rescale":
                         preprocessed_img = preprocess.rescale()
-
                     ######## END PREPROCESSING ########
 
                     ######## BEGIN THRESHOLDING ########
@@ -86,51 +89,33 @@ def main():
                     ######## BEGIN POSTPROCESSING ########
                     postprocessing_config = config['postprocessing']
                     postprocess = Postprocessing(thresholded_img, postprocessing_config)
-                    not_cleaned_img, final_image, num_bacilli = postprocess.apply()
+                    whole_img_not_cleaned, final_image, num_bacilli, stats = postprocess.apply()
                     total_number_bacilli += num_bacilli
                     ######## END POSTPROCESSING ########
-
-                    ######## BEGIN CROPPING ########
-                    cropping_config = postprocessing_config['crop']
-                    cropping_function = Cropping(img, final_image)
-                    if cropping_config['crop']:
-                        if 'cropped_img' in locals():
-                            cropped_img = cropping_function.crop()
-                        else:
-                            cropped_img = np.concatenate((cropped_img, cropping_function.crop()), axis=0)            #might need square brackets around cropping_function.crop() to make it work
-
-                     ######## END CROPPING ########
             else:
                 ######## BEGIN PREPROCESSING ########
                 preprocess_config = config['preprocessing']
                 preprocess = Preprocessing(img)
                 if preprocess_config['algorithm'] == "sharp":
-                    sharpened_img = preprocess.sharpen()
+                    preprocessed_img = preprocess.sharpen()
+                if preprocess_config['algorithm'] == "rescale":
+                    preprocessed_img = preprocess.rescale()
                 ######## END PREPROCESSING ########
 
                 ######## BEGIN THRESHOLDING ########
                 threshold_config = config['thresholding']
-                threshold = Thresholding(sharpened_img, threshold_config)
+                threshold = Thresholding(preprocessed_img, threshold_config)
                 thresholded_img = threshold.apply()
                 ######## END THRESHOLDING ########
 
                 ######## BEGIN POSTPROCESSING ########
                 postprocessing_config = config['postprocessing']
                 postprocess = Postprocessing(thresholded_img, postprocessing_config)
-                not_cleaned_img, final_image, num_bacilli = postprocess.apply()
+                whole_img_not_cleaned, final_image, num_bacilli, stats = postprocess.apply()
                 total_number_bacilli += num_bacilli
                 ######## END POSTPROCESSING ########
-
-                ######## BEGIN CROPPING ########
-                cropping_config = postprocessing_config['crop']
-                cropping_function = Cropping(img, final_image)
-                if cropping_config['crop']:
-                    if tiles == 0:
-                        cropped_img = cropping_function.crop()
-                    else:
-                        cropped_img = np.concatenate((cropped_img, cropping_function.crop()), axis=0)  # might need square brackets around cropping_function.crop() to make it work
-                ######## END CROPPING ########
         print("Total number of bacilli: ", total_number_bacilli)  
+        print("Blurry images that were not considered: ", counter_of_blurry_images)
 
     else:
         ######## BEGIN PREPROCESSING ########

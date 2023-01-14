@@ -5,7 +5,7 @@ class Thresholding:
     def __init__(self, img, config):
         self.img = img
         self.config = config
-        print("Appliying thresholding to image(s)...")
+        print("Thresholding...")
         
     def check_algorithm(self):
         if self.config['algorithm'] == 'otsu' and not self.config['split']:

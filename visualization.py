@@ -28,6 +28,20 @@ def add_bounding_boxes(original_img, thresholded_img, stats):
         w = stats[i][2]
         cv.rectangle(original_img, (x, y), (x + w + 10, y + h + 10), (5000, 255, 255), 1)
     return original_img
+
+def is_blurry_laplacian(image):
+    #compute laplacian of image
+    laplacian = cv.Laplacian(image, cv.CV_64F)
+    #compute variance of laplacian
+    measure=laplacian.var()/np.mean(image)
+    #print(measure)
+    #if meausure is less than 109, image is blurry
+    if measure < 109:
+        return True
+    else:
+        return False
+
+
 def is_blurry(image):
     #maybe find better method but we need something like this
     f = np.fft.fft2(image)
