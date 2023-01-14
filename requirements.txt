@@ -1,5 +1,8 @@
+numpy
+matplotlib
 aicsimageio
-napari  
+napari[all]
 opencv-python
 aicsimageio aicspylibczi>=3.0.5 fsspec>=2022.7.1
+
 
