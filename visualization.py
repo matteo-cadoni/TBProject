@@ -12,15 +12,13 @@ def visualize_all_list_napari(numpy_img_list: np.ndarray,names):
         for i, img in enumerate(numpy_img_list):
             viewer.add_image(img, name=names[i])
 
-def add_bounding_boxes(original_img, thresholded_img):
+def add_bounding_boxes(original_img, thresholded_img, stats):
     """
     Add white rectangles around bacilli, based on conected components
 
     :param image: image with bacilli to be boxed
     :param coordinates:  coordinates of the center of the bacillus
     """
-    num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(
-        np.uint8(thresholded_img), connectivity=8)
     for i in range(1, len(stats)):
         x = stats[i][0] - 5
         # x_max = coordinates[i][0]

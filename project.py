@@ -37,9 +37,11 @@ def main():
         config = yaml.load(f, Loader=yaml.FullLoader)
 
     ####### BEGIN INTERACTIVE CONFIGURATION #######
+    """
     i_c = InteractiveConfig()
     configurations = i_c.run()
     config = change_yaml(configurations, config)
+    """
     ####### END INTERACTIVE CONFIGURATION #######
 
     ####### BEGIN LOADING #######
@@ -54,6 +56,7 @@ def main():
         img = loader.data_array
         print(f"Tile succesfully loaded, shape: {img.shape}")
     ######## END LOADING ########
+
     if load_config['tile'] == 'None':
         for tiles in range(0, smear.shape[0]):
             img = smear[tiles, :, :]
@@ -66,12 +69,15 @@ def main():
                     preprocess_config = config['preprocessing']
                     preprocess = Preprocessing(img)
                     if preprocess_config['algorithm'] == "sharp":
-                        sharpened_img = preprocess.sharpen()
+                        preprocessed_img = preprocess.sharpen()
+                    if preprocess_config['algorithm'] == "rescale":
+                        preprocessed_img = preprocess.rescale()
+
                     ######## END PREPROCESSING ########
 
                     ######## BEGIN THRESHOLDING ########
                     threshold_config = config['thresholding']
-                    threshold = Thresholding(sharpened_img, threshold_config)
+                    threshold = Thresholding(preprocessed_img, threshold_config)
                     thresholded_img = threshold.apply()
                     ######## END THRESHOLDING ########
 
@@ -123,41 +129,42 @@ def main():
                         cropped_img = np.concatenate((cropped_img, cropping_function.crop()), axis=0)  # might need square brackets around cropping_function.crop() to make it work
                 ######## END CROPPING ########
         print("Total number of bacilli: ", total_number_bacilli)  
+
     else:
         ######## BEGIN PREPROCESSING ########
         preprocess_config = config['preprocessing']
         preprocess = Preprocessing(img)
         if preprocess_config['algorithm'] == "sharp":
-            sharpened_img = preprocess.sharpen()
+            preprocessed_img = preprocess.sharpen()
+        if preprocess_config['algorithm'] == "rescale":
+            preprocessed_img = preprocess.rescale()
         ######## END PREPROCESSING ########
         
         ######## BEGIN THRESHOLDING ########
         threshold_config = config['thresholding']
-        threshold = Thresholding(sharpened_img, threshold_config)
+        threshold = Thresholding(preprocessed_img, threshold_config)
         thresholded_img = threshold.apply()
         ######## END THRESHOLDING ########
         
         ######## BEGIN POSTPROCESSING ########
         postprocessing_config = config['postprocessing']
         postprocess = Postprocessing(thresholded_img, postprocessing_config)
-        whole_img_not_cleaned, final_image, num_bacilli = postprocess.apply()
+        whole_img_not_cleaned, final_image, num_bacilli, stats = postprocess.apply()
         ######## END POSTPROCESSING ########
 
         ######## BEGIN ADD BOUNDING BOXES ########
         image_boxes = img.copy()
-        image_boxes = add_bounding_boxes(image_boxes, final_image)
+        image_boxes = add_bounding_boxes(image_boxes, final_image, stats)
 
         ######## END BOUNDING BOXES ########
 
         ######## BEGIN CROPPING ########
-        cropping_config = postprocessing_config['crop']
         cropping_function = Cropping(img, final_image)
         cropped_images=cropping_function.crop_and_pad()
 
         ######## END CROPPING ########
 
         ######## BEGIN INTERACTIVE LABELING #######
-
         i_l=InteractiveLabeling(cropped_images)
         labels= i_l.run()
 
@@ -175,7 +182,7 @@ def main():
         visualization_config = config['visualization']
         show = visualization_config['show']
         if show:
-            images = [img, sharpened_img, whole_img_not_cleaned, final_image, image_boxes]
+            images = [img, preprocessed_img, whole_img_not_cleaned, final_image, image_boxes]
             strings_names = ['img', 'sharpened_img', 'whole_img_not_cleaned', 'final_image','image_boxes']
             visualize_all_list_napari(images, strings_names)
         #currently opening the napari visualizer stops the execution of the code

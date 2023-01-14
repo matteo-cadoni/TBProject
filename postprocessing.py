@@ -4,10 +4,28 @@ import cv2 as cv
 
 class Postprocessing:
     
-    def __init__(self, tiles, config):
-        self.tiles = tiles
+    def __init__(self, img, config):
+        self.img = img
         self.config = config
+        self.tiles = self.split_into_tiles(tile_size = self.config['tile_size'])
 
+    #-----------------------------------CLEANING FOR OTSU THRESHOLDING-----------------------------------
+
+    def split_into_tiles(self, tile_size = 16):
+        """
+        split image into tiles of shape tile_size * tile_size
+
+        :param image: image to be split
+        :param tile_size: dimensions of single tiles
+        :return: tiles: list with the different tiles
+        """
+        print("Splitting image into tiles...")
+        tiles = []
+        for i in range(0, self.img.shape[0], tile_size):
+            for j in range(0, self.img.shape[1], tile_size):
+                tile = self.img[i:i+tile_size, j:j+tile_size]
+                tiles.append(tile)
+        return tiles
 
     def cleaning_tiles(self):
         print("Cleaning tiles...")
@@ -35,7 +53,6 @@ class Postprocessing:
             return False
         else: #we have background
             return True
-        
         
     def reconstruct_image(self, tiles: list):
         """
@@ -84,14 +101,44 @@ class Postprocessing:
         num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(np.uint8(whole_tile), connectivity=8)
         
         print("Number of connected components after cleaning: ", num_labels)
-        return whole_tile, num_labels
+        return whole_tile, num_labels, stats
     
-            
+
+    
+    #-----------------------------------CLEANING FOR ADAPTIVE THRESHOLDING-----------------------------------
+    
+    # remove noise
+    def remove_noise(self):
+        """
+        Perform morphological opening and closing to remove noise
+
+        :param img: image to be cleaned
+        :return:    cleaned image
+        """
+
+        # define kernel for opening
+        kernel = cv.getStructuringElement(cv.MORPH_RECT,(2,2))
+
+        # perform morphological opening to remove background noise
+        opening = cv.morphologyEx(self.img, cv.MORPH_OPEN, kernel)
+
+        # perform morphological closing to close small holes inside foreground objects
+        closing = cv.morphologyEx(opening, cv.MORPH_CLOSE, kernel)
+        
+        return closing
+
+
     def apply(self):
         print("Applying postprocessing...")
-        cleaned_tiles = self.cleaning_tiles()
+
+        if self.config['algorithm'] == 'otsu':
+            cleaned_tiles = self.cleaning_tiles()
+            whole_img_not_cleaned = self.reconstruct_image(cleaned_tiles)
+            whole_img_not_cleaned_copy = whole_img_not_cleaned.copy()
+            whole_img_cleaned, num_bacilli, stats = self.clean_connected_components(whole_img_not_cleaned_copy)
+            return whole_img_not_cleaned, whole_img_cleaned, num_bacilli-1, stats
         
-        whole_img_not_cleaned = self.reconstruct_image(cleaned_tiles)
-        whole_img = whole_img_not_cleaned.copy()
-        whole_img_cleaned, num_bacilli = self.clean_connected_components(whole_img)
-        return whole_img_not_cleaned, whole_img_cleaned, num_bacilli-1
+        elif self.config['algorithm'] == 'adaptive_gaussian':
+            whole_img_cleaned = self.remove_noise()
+            num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(whole_img_cleaned, connectivity=8)
+            return self.img, whole_img_cleaned, num_labels-1, stats

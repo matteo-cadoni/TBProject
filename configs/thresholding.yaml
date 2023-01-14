@@ -4,24 +4,28 @@ load:
   blurry_deselection: False # whether to remove blurry tiles or not
 
 preprocessing:
-  algorithm: sharp
+  algorithm: rescale #sharpen, rescale
 
 thresholding:
-  algorithm: otsu #otsu, hard, adaptive, gaussian  (only otsu with split = True is supported for now)
-  hard_threshold_param: 5000 # only used if thresholding_algorithm is hard
-  block_size: 10 # only for adaptive (not sure what it is)
-  c: 10 #only for adaptive (not sure what it is)
+  algorithm: adaptive_gaussian #otsu, hard, adaptive_gaussian, adaptive_mean
+  hard_threshold_param: 5000 # only used 
+  block_size: 25 # only for adaptive (the size of the neighborhood)
+  c: -7 #only for adaptive (constant to substract from the mean)
   split: True  # whether to split the image into tiles or not before applying thresholding algorithm 
   tile_size: 16 # size of single tiles if split is True
+  x_tiles: 128
+  y_tiles: 94
   blurry_deselection: True # whether to remove blurry tiles or not
 
 postprocessing:
   number_of_black_pixels: 215 # number of black pixels to decide whether a tile is background or not
   x_tiles: 128
   y_tiles: 94
+  tile_size: 16 # size of single tiles if split is True
+  algorithm: adaptive_gaussian #otsu, hard, adaptive_gaussian, adaptive_mean
 
 
 visualization:
-  show: False # whether to show the image or not
+  show: True # whether to show the image or not
   save: True # whether to save the image or not
   save_path: extern_Synlab_2156_17_3_MTB.png # path to save the image to
