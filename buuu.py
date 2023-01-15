@@ -3,13 +3,26 @@ import numpy as np
 import napari
 from aicsimageio.readers import CziReader
 
+#add 5 pixels to the y values
+def padd(img):
+    img = np.pad(img, ((0, 1),(0,1)), 'constant')
+    return img
+
 def is_blurry(image):
-    #compute laplacian of image
-    laplacian = cv.Laplacian(image, cv.CV_64F)
-    #compute variance of laplacian
-    measure=laplacian.var()
-    #print(measure)
-    return measure
+    image= padd(image)
+    values=np.array([])
+    kernel = np.array([[0,1,0],[1,-4,1],[0,1,0]])
+    #apply kernel to image and store output in list
+    for i in range(1, image.shape[0]-1):
+        for j in range(1, image.shape[1]-1):
+            #apply kernel to image
+            value = np.sum(kernel*image[i-1:i+2,j-1:j+2])
+
+    #get mean value of the list
+    mean = np.mean(values)
+    return mean
+
+
 # get the mean value of the pixels in the image
 def mean_value(image):
 
