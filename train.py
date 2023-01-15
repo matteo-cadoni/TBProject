@@ -27,65 +27,39 @@ def main():
     with open(pars_arg.config, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
+    # load data from a .pkl file
+    loading_config = config['load']
+    print('Loading data from pkl file')
+    data_paths = loading_config['data_path']
+    print('Data paths: ', data_paths)
+    data = []
+    for i, path in enumerate(data_paths):
+        data.append(pd.read_pickle(path))
+        print("Added data from path and shape: ", path, data[i].shape)
+    data = pd.concat(data)
+    print('Data loaded, shape: ', data.shape)
+
+    train_config = config['train']
+    batch_size = train_config['batch_size']
+    epochs = train_config['epochs']
     
-    
-    #load data
-    print('Loading data')
-    data = np.load('cropped_images_real_674.npy')
-    print("Shape of data: ", data.shape)
-    print("Number of images: ", data.shape[0])
-    #labels_673=np.array([1,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,0,1,1,1,0,0,
-                #        1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                #        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,1,1,1,0,
-                #       0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,1,0,0,0,
-                #        1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0])
-
-    labels_674=np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,1,1,1,0,0,1,0,1,0,0,1,
-                         0,0,0,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,0,0,1,1,1,0,1,0,0,1,
-                         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,
-                         1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                         0,1,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1,0,
-                         1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,
-                         1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,
-                         0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,
-                         1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,0,1,0,1,1,1,0,
-                         1,1,0,1,1,1,1,1,0,1,1])
-    
-    
-    
-    #create pandas dataframe
-    print('Creating dataframe')
-    df = pd.DataFrame()
-
-    
-    for i in range( data.shape[0]):
-
-        d={'image':[data[i,:,:]],'label':labels_674[i]}
-
-        df2=pd.DataFrame(d)
-
-        df=pd.concat([df,df2],ignore_index=True)
-            
-    print('Dataframe shape: ', df.shape)
-    print('Number of images in the Dataframe: ', df.shape[0])
-
-    time.sleep(1)
-    #split data into train and test with pandas
-
-    train, test = train_test_split(df, test_size=0.2)
-    batch_size = config['batch_size']
-    epochs = config['epochs']
-        
+    print('Splitting data into train and test and preparing DataLoader')
+    train, test = train_test_split(data, test_size=0.2)
     train_dataset = MyDataset(train)
     test_dataset = MyDataset(test)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    print("Train data is ready, lenght: ", len(train_dataset))
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    print("Test data is ready, lenght: ", len(test_dataset))
 
     # train model
     #net = Net()
     net = ChatGPT()
+    print("Model loaded")
+    print(net)
     #net = toy_model()
-    #initialise weights
+
+    print('Initialising weights')
     def weights_init(m):
         if isinstance(m, nn.Conv2d):
             torch.nn.init.xavier_uniform_(m.weight)
@@ -99,6 +73,7 @@ def main():
     criterion = nn.BCELoss()
     optimizer = optim.Adam(net.parameters(), lr=0.001)
     net.train()
+    print("Training started")
     for ep in range(epochs):  # loop over the dataset multiple times
         train_loss = []
         for i, data in enumerate(train_loader):
@@ -124,15 +99,16 @@ def main():
             optimizer.step()
         
         print("Epoch: ", ep, " Loss: ", np.sum(train_loss) / len(train_dataset))
-        
     
-                
-        
-                
-
+    print('Finished Training')
+    #print finished training statistics
+    print('Saving model')
+    torch.save(net.state_dict(), 'model_ckpt/model.pth')
+    
 
 
     # test model
+    print('Testing model on validation set')
     correct = 0
     total = 0
     net.eval()
@@ -159,7 +135,7 @@ def main():
             correct += (outputs == labels).sum().item()
             #print("correct: ", correct)
             
-    print('Accuracy of the network on the test images: %d %%' % (
+    print('Accuracy of the network on the validation set: %d %%' % (
             100 * correct / total))
 
 
