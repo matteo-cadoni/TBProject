@@ -1,3 +1,6 @@
-batch_size: 10
+load: 
+  data_path: ['labelled_data/tile_673_smear_2156_17_3.pkl', 'labelled_data/tile_674_smear_2156_17_3.pkl', labelled_data/tile_675_smear_2156_17_3.pkl]
 
-epochs: 500
+train:
+  batch_size: 10
+  epochs: 200
