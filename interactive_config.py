@@ -155,7 +155,6 @@ class  InteractiveConfig:
 
         # if path is not a string or is empty, raise error
         if not isinstance(self.path, str) or self.path == "":
-
             raise ValueError("Path is not a string or is empty")
         tile_number = self.tile.get()
         if tile_number == 'None':
