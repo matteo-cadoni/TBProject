@@ -34,9 +34,11 @@ def is_blurry_laplacian(image):
     #compute laplacian of image
     laplacian = cv.Laplacian(image, cv.CV_64F)
     #compute variance of laplacian
-    measure=laplacian.var()/np.mean(image)
+    measure = laplacian.mean()
+    #/np.mean(image)
     #print(measure)
     #if meausure is less than 109, image is blurry
+    #109has to be redone
     if measure < 109.8:
         return True
     else:
