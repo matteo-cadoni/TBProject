@@ -40,7 +40,7 @@ class Cropping:
             return image
 
     def crop_and_pad(self):
-        print("cropping..")
+        print("cropping...")
         center_of_mass = self.find_center_of_mass()
         cropped_images = self.crop_images(center_of_mass)
         a = np.array(cropped_images[0])
