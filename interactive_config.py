@@ -35,7 +35,7 @@ class  InteractiveConfig:
         self.c.set('-7')
         #use split otsu
         self.split_otsu = BooleanVar()
-        self.split_otsu.set(True)
+        self.split_otsu.set(False)
         #number of black pixels
         self.number_of_black_pixels = StringVar()
         self.number_of_black_pixels.set('215')
@@ -178,6 +178,8 @@ class  InteractiveConfig:
             raise ValueError("Thresholding algorithm is not hard, otsu, adaptive_gaussian, or adaptive_mean")
         if self.preprocess_algorithm == "sharp" and self.algorithm != "otsu":
             raise ValueError("Wrong combination, sharp only works with otsu ")
+        if self.preprocess_algorithm == "rescale" and self.algorithm == "otsu":
+            raise ValueError("Wrong combination, rescale only works with hard and adaptive")
         try:
             self.hard_threshold_value = int(self.hard_threshold_value.get())
         except ValueError:
@@ -202,7 +204,7 @@ class  InteractiveConfig:
         if (not self.crop) and self.create_dataset:
             raise ValueError("Can't create dataset without cropping")
         self.save_dataset = self.save_dataset.get()
-        if (not self.crop) and (not self.create_dataset) and self.save_dataset:
+        if ((not self.crop) and (not self.create_dataset)) and self.save_dataset:
             raise ValueError("Can't save dataset without cropping and creating dataset")
         self.inference = self.inference.get()
         if not self.crop and self.inference:
