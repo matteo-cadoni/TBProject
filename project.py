@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 import napari
+
 #from aicsimageio import AICSImage
 #import napari
 #from aicsimageio.readers import CziReader
@@ -41,19 +42,12 @@ def main():
 
     ####### BEGIN INTERACTIVE CONFIGURATION #######
     if config['load']['interactive_config']:
-
         while True:
-
             i_c = InteractiveConfig()
-
             configurations = i_c.run()
-
-
             if i_c.error:
-
                 continue
             else:
-                
                 break
         config = change_yaml(configurations, config)
     ####### END INTERACTIVE CONFIGURATION #######
@@ -156,11 +150,11 @@ def main():
         ######## END BOUNDING BOXES ########
 
         labelling_dataset_config = config['labelling_dataset']
-        if labelling_dataset_config['create_dataset'] == True:
+        if labelling_dataset_config['create_dataset']:
             ######## BEGIN CROPPING ########
             cropping_function = Cropping(img, final_image)
             cropped_images = cropping_function.crop_and_pad()
-        ######## END CROPPING ########
+            ######## END CROPPING ########
 
         labelling_dataset_config = config['labelling_dataset']
         if labelling_dataset_config['create_dataset']:
@@ -199,8 +193,6 @@ def main():
             viewer.add_shapes(green_boxes, shape_type='rectangle', edge_color='green',
                               face_color='transparent', name='Bacilli')
             napari.run()
-
-
         ######## END INFERENCE/VISUALIZATION ########
             
         ######## BEGIN VISUALIZATION ########
