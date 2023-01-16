@@ -12,7 +12,7 @@ def visualize_all_list_napari(numpy_img_list: np.ndarray,names):
         for i, img in enumerate(numpy_img_list):
             viewer.add_image(img, name=names[i])
 
-def add_bounding_boxes(original_img, thresholded_img, stats):
+def add_bounding_boxes(original_img, stats):
     """
     Add white rectangles around bacilli, based on conected components
 

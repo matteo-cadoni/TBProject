@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
-
+import napari
 #from aicsimageio import AICSImage
 #import napari
 #from aicsimageio.readers import CziReader
@@ -19,6 +19,7 @@ from postprocessing import Postprocessing
 from cropping import Cropping
 from interactivelabelling import InteractiveLabeling
 from interactive_config import InteractiveConfig, change_yaml
+from inference_visualization import Inference
 
 from visualization import visualize_all_list_napari, add_bounding_boxes, is_blurry_laplacian
 
@@ -39,11 +40,22 @@ def main():
         config = yaml.load(f, Loader=yaml.FullLoader)
 
     ####### BEGIN INTERACTIVE CONFIGURATION #######
-    """
-    i_c = InteractiveConfig()
-    configurations = i_c.run()
-    config = change_yaml(configurations, config)
-    """
+    if config['load']['interactive_config']:
+
+        while True:
+
+            i_c = InteractiveConfig()
+
+            configurations = i_c.run()
+
+
+            if i_c.error:
+
+                continue
+            else:
+                
+                break
+        config = change_yaml(configurations, config)
     ####### END INTERACTIVE CONFIGURATION #######
 
     ####### BEGIN LOADING #######
@@ -141,20 +153,22 @@ def main():
 
         ######## BEGIN ADD BOUNDING BOXES ########
         image_boxes = img.copy()
-        image_boxes = add_bounding_boxes(image_boxes, final_image, stats)
+        image_boxes = add_bounding_boxes(image_boxes, stats)
 
         ######## END BOUNDING BOXES ########
 
-        labelling_dataset_config = config['labelling_dataset']
-        if labelling_dataset_config['create_dataset'] == True:
-            ######## BEGIN CROPPING ########
+        ######## BEGIN CROPPING ########
+        if postprocessing_config['crop']:
             cropping_function = Cropping(img, final_image)
-            cropped_images=cropping_function.crop_and_pad()
-            ######## END CROPPING ########
+            cropped_images = cropping_function.crop_and_pad()
+        ######## END CROPPING ########
+
+        labelling_dataset_config = config['labelling_dataset']
+        if labelling_dataset_config['create_dataset']:
 
             ######## BEGIN INTERACTIVE LABELING #######
-            i_l=InteractiveLabeling(cropped_images)
-            labels= i_l.run()
+            i_l = InteractiveLabeling(cropped_images)
+            labels = i_l.run()
             ######### END INTERACTIVE LABELING ########
 
             ######## BEGIN DATASET CREATION ########
@@ -172,6 +186,23 @@ def main():
                 labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
                 dataframe.to_pickle(labelled_data_path)
             ######## END SAVING ########
+
+        ######## BEGIN INFERENCE/VISUALIZATION ########
+        inference_config = config['inference']
+        if inference_config['do_inference']:
+            inference = Inference(cropped_images, stats)
+            red_boxes, green_boxes = inference.predict()
+
+            viewer = napari.Viewer()
+            viewer.add_image(img, name='Inferenced image')
+            viewer.add_shapes(red_boxes, shape_type='rectangle', edge_color='red',
+                              face_color='transparent', name='Not bacilli')
+            viewer.add_shapes(green_boxes, shape_type='rectangle', edge_color='green',
+                              face_color='transparent', name='Bacilli')
+            napari.run()
+
+
+        ######## END INFERENCE/VISUALIZATION ########
             
         ######## BEGIN VISUALIZATION ########
         visualization_config = config['visualization']
