@@ -140,13 +140,11 @@ def main():
         ######## END POSTPROCESSING ########
 
         ######## BEGIN ADD BOUNDING BOXES ########
-        image_boxes = img.copy()
-        image_boxes = add_bounding_boxes(image_boxes, final_image, stats)
-
+        image_boxes = add_bounding_boxes(img, stats)
         ######## END BOUNDING BOXES ########
 
         labelling_dataset_config = config['labelling_dataset']
-        if labelling_dataset_config['create_dataset'] == True:
+        if labelling_dataset_config['create_dataset']:
             ######## BEGIN CROPPING ########
             cropping_function = Cropping(img, final_image)
             cropped_images=cropping_function.crop_and_pad()
@@ -177,10 +175,15 @@ def main():
         visualization_config = config['visualization']
         show = visualization_config['show']
         if show:
-            images = [img, preprocessed_img, whole_img_not_cleaned, final_image, image_boxes]
-            strings_names = ['img', 'sharpened_img', 'whole_img_not_cleaned', 'final_image','image_boxes']
+            if visualization_config['algorithm'] == 'rescale':
+                images = [img, whole_img_not_cleaned, final_image, image_boxes]
+                strings_names = ['original', 'binarized', 'cleaned binarized','original w/ boxes']
+            else:
+                images = [img, preprocessed_img, whole_img_not_cleaned, final_image, image_boxes]
+                algorithm = visualization_config['algorithm']
+                strings_names = ['original', f'{algorithm}ened', 'binarized', 'cleaned binarized','original w/ boxes']
             visualize_all_list_napari(images, strings_names)
-        #currently opening the napari visualizer stops the execution of the code
+        # currently opening the napari visualizer stops the execution of the code
         ######## END VISUALIZATION ########
         
 if __name__ == "__main__":
