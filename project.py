@@ -149,8 +149,7 @@ def main():
         image_boxes = add_bounding_boxes(img, stats)
         ######## END BOUNDING BOXES ########
 
-        labelling_dataset_config = config['labelling_dataset']
-        if labelling_dataset_config['create_dataset']:
+        if postprocessing_config['crop']:
             ######## BEGIN CROPPING ########
             cropping_function = Cropping(img, final_image)
             cropped_images = cropping_function.crop_and_pad()
@@ -199,7 +198,7 @@ def main():
         visualization_config = config['visualization']
         show = visualization_config['show']
         if show:
-            if visualization_config['algorithm'] == 'rescale':
+            if preprocess_config['algorithm'] == 'rescale':
                 images = [img, whole_img_not_cleaned, final_image, image_boxes]
                 strings_names = ['original', 'binarized', 'cleaned binarized','original w/ boxes']
             else:
