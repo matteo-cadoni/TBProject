@@ -35,7 +35,7 @@ class  InteractiveConfig:
         self.c.set('-7')
         #use split otsu
         self.split_otsu = BooleanVar()
-        self.split_otsu.set(True)
+        self.split_otsu.set(False)
         #number of black pixels
         self.number_of_black_pixels = StringVar()
         self.number_of_black_pixels.set('215')
