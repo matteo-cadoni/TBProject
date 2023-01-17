@@ -115,6 +115,12 @@ py -m build
 ```
 
 
+### Install the package
+```
+pip install -e .
+```
+
+
 
 
 
