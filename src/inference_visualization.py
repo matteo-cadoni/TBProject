@@ -26,6 +26,19 @@ class Inference():
                 image = data
                 image = image.to(torch.float32)
                 image = image.view(1, 1, 50, 50)
+
+                if i == 1:
+                    feature_vector1 = self.model.get_feature_vector(image)
+                    output1 = self.model(image)
+                if i == 2:
+                    feature_vector2 = self.model.get_feature_vector(image)
+                    output2 = self.model(image)
+                if i == 5:
+                    feature_vector3 = self.model.get_feature_vector(image)
+                    output3 = self.model(image)
+                if i == 32:
+                    feature_vector4 = self.model.get_feature_vector(image)
+                    output4 = self.model(image)
                 output = self.model(image)
                 output = output.squeeze(1)
                 if output > 0.5:
@@ -33,8 +46,18 @@ class Inference():
                 else:
                     predictions = np.append(predictions, 0)
 
-
-
+        # asses similarity between feature vectors
+        #similarity = torch.cosine_similarity(feature_vector1, feature_vector2, dim=1)
+        #print(similarity)
+        # print distance between feature vectors
+        #distance = torch.cdist(feature_vector1, feature_vector2, p=2)
+        #similarity1 = torch.cosine_similarity(feature_vector1, feature_vector3, dim=1)
+       # print(similarity1)
+        #print(distance)
+        #print(output1)
+        #print(output2)
+        #print(output3)
+        #print(output4)
 
         red_boxes = np.array([[0,0],[0,0]])
         red_boxes = np.stack((red_boxes, red_boxes), axis=0)
@@ -42,13 +65,13 @@ class Inference():
         green_boxes = np.stack((green_boxes, green_boxes), axis=0)
         #create a rectangle array
 
-        for i in range(1, self.stats.shape[0]-1):
-            y = self.stats[i][0] - 5
+        for i in range(0, predictions.shape[0]):
+            y = self.stats[i+1][0] - 5
             # x_max = coordinates[i][0]
-            x = self.stats[i][1] - 5
+            x = self.stats[i+1][1] - 5
             # y_max = coordinates[i][1]
-            w = self.stats[i][3]
-            h = self.stats[i][2]
+            w = self.stats[i+1][3]
+            h = self.stats[i+1][2]
             if predictions[i] == 0:
                 red_boxes = np.concatenate((red_boxes, [np.array([[x, y], [x + w + 10, y + h + 10]])]), axis=0)
 

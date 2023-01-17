@@ -78,6 +78,26 @@ class ChatGPT(nn.Module):
         out = self.sigmoid(out)
 
         return out
+    #define get feature vector function
+    def get_feature_vector(self, x):
+        # 1st convolutional layer
+        out = self.conv1(x)
+        out = self.relu1(out)
+        out = self.maxpool1(out)
+
+        # 2nd convolutional layer
+        out = self.conv2(out)
+        out = self.relu2(out)
+        out = self.maxpool2(out)
+
+        # Fully connected layers
+        out = out.view(-1, 64 * 12 * 12)
+
+        out = self.fc1(out)
+        out = self.relu3(out)
+        # out = self.dropout(out)
+
+        return out
 
 
 class toy_model(nn.Module):

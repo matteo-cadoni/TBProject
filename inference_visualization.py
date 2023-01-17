@@ -20,9 +20,11 @@ class Inference():
 
     def predict(self):
         predictions = np.array([])
+        print("diocann")
         self.model.eval()
         with torch.no_grad():
             for i, data in enumerate(self.inference_dataset_loader):
+                print("diocann")
                 image = data
                 image = image.to(torch.float32)
                 image = image.view(1, 1, 50, 50)
@@ -59,9 +61,7 @@ class Inference():
         red_boxes = np.delete(red_boxes, 0, axis=0)
         green_boxes = np.delete(green_boxes, 0, axis=0)
         green_boxes = np.delete(green_boxes, 0, axis=0)
-
-
-        return red_boxes, green_boxes
+        return h, red_boxes, green_boxes
 
 
     def get_dataset(self):
