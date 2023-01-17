@@ -52,7 +52,7 @@ packaging_tutorial/
 
 ### pyproject.toml setup
 
-This file tells tools like pip and build how to create your project
+This file tells tools like pip and build how to create your project:
 
 ```
 [build-system]
@@ -68,7 +68,7 @@ build-system.build-backend is the name of Python object that will be used to per
 
 
 ### Setup.cfg setup
-Using setup.cfg is a best practice, but you could have a dynamic setup file using setup.py
+Using setup.cfg is a best practice, but you could have a dynamic setup file using setup.py.
 
 ```
 [metadata]
