@@ -147,6 +147,7 @@ def tile_pipeline(config, img, loader):
     ######## BEGIN INFERENCE/VISUALIZATION ########
     inference_config = config['inference']
     if inference_config['do_inference']:
+        print("Inference...")
         inference = Inference(cropped_images, stats)
         red_boxes, green_boxes = inference.predict()
 
