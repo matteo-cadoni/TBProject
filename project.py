@@ -1,11 +1,9 @@
 import argparse
 import yaml
 import sys
-import numpy as np
+import numpy
 import matplotlib.pyplot as plt
 import pandas as pd
-import os
-import napari
 
 #from aicsimageio import AICSImage
 #import napari
@@ -13,8 +11,9 @@ import napari
 #import cv2 as cv
 #import logging  #maybe useful for debugging
 
-from mixed_functions import *
-
+from utils import *
+from smear_function import *
+from tile_function import *
 
 def arguments_parser():
     '''PARAMETERS'''
@@ -22,8 +21,6 @@ def arguments_parser():
     parser.add_argument('config', type=str, default='configs/thresholding.yaml',
                         help='configure file for thresholding experiments')
     return parser
-
-
 
 def main():
     parser = arguments_parser()

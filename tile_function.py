@@ -2,95 +2,14 @@ import pandas as pd
 import os
 import napari
 
-
-from src.loader import Loader
+from utils import *
 from src.preprocess import Preprocessing
 from src.thresholding import Thresholding
 from src.postprocessing import Postprocessing
 from src.cropping import Cropping
 from src.interactivelabelling import InteractiveLabeling
-from src.interactive_config import InteractiveConfig, change_yaml
 from src.inference_visualization import Inference
 from src.visualization import visualize_all_list_napari, add_bounding_boxes, is_blurry_laplacian
-
-def interactive_config(config):  
-    while True:
-        i_c = InteractiveConfig()
-        configurations = i_c.run()
-        if i_c.error:
-            continue
-        else:
-            break
-    return change_yaml(configurations, config)
-
-def load(load_config):
-    loader = Loader(load_config['czi_path'], load_config['tile'])
-    loader.load()
-    img = loader.data_array
-    if load_config['tile'] == 'None':
-        print(f"Smear succesfully loaded, shape: {img.shape}")
-    else: 
-        print(f"Tile succesfully loaded, shape: {img.shape}")
-    return img, loader
-
-def preprocess(preprocess_config, tile):
-    preprocess = Preprocessing(tile)
-    if preprocess_config['algorithm'] == "sharp":
-        return preprocess.sharpen()
-    if preprocess_config['algorithm'] == "rescale":
-        return preprocess.rescale()
-    
-def smear_pipeline(config, smear):
-    total_number_bacilli = 0
-    counter_of_blurry_images = 0
-    for i, img in enumerate(smear):  
-        print("Tile: ", i)
-        if config['load']['blurry_deselection']:
-            if is_blurry_laplacian(img):
-                print("It's blurry")
-                # counter of the blurry images:
-                counter_of_blurry_images += 1
-                pass
-            else:
-                # Preprocess
-                preprocess_config = config['preprocessing']
-                preprocessed_img = preprocess(preprocess_config, img)
-
-
-                # Threshold
-                threshold_config = config['thresholding']
-                threshold = Thresholding(preprocessed_img, threshold_config)
-                thresholded_img = threshold.apply()
-
-
-                # Postprocess
-                postprocessing_config = config['postprocessing']
-                postprocess = Postprocessing(thresholded_img, postprocessing_config)
-                whole_img_not_cleaned, final_image, num_bacilli, stats = postprocess.apply()
-
-                total_number_bacilli += num_bacilli
-        else:
-            # Preprocess
-            preprocess_config = config['preprocessing']
-            preprocessed_img = preprocess(preprocess_config, img)
-
-
-            # Threshold
-            threshold_config = config['thresholding']
-            threshold = Thresholding(preprocessed_img, threshold_config)
-            thresholded_img = threshold.apply()
-
-
-            # Postprocess
-            postprocessing_config = config['postprocessing']
-            postprocess = Postprocessing(thresholded_img, postprocessing_config)
-            whole_img_not_cleaned, final_image, num_bacilli, stats = postprocess.apply()
-
-            total_number_bacilli += num_bacilli
-            
-    print("Total number of bacilli: ", total_number_bacilli)  
-    print("Blurry images that were not considered: ", counter_of_blurry_images)
-    
     
 def tile_pipeline(config, img, loader):
     # Preprocess
