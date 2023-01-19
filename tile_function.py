@@ -68,7 +68,7 @@ def tile_pipeline(config, img, loader):
     if inference_config['do_inference']:
         print("Inference...")
         inference = Inference(cropped_images, stats)
-        red_boxes, green_boxes = inference.predict()
+        red_boxes, green_boxes = inference.network_prediction()
 
         viewer = napari.Viewer()
         viewer.add_image(img, name='Inferenced image')

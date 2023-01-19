@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from neural_net import ChatGPT
 import pandas as pd
-
+from sklearn.externals import joblib
 
 class Inference():
     def __init__(self, cropped_images, stats):
@@ -18,7 +18,7 @@ class Inference():
         self.inference_dataset_loader = DataLoader(inference_dataset, batch_size=1, shuffle=False)
 
 
-    def predict(self):
+    def network_prediction(self):
         predictions = np.array([])
         self.model.eval()
         with torch.no_grad():
@@ -26,38 +26,40 @@ class Inference():
                 image = data
                 image = image.to(torch.float32)
                 image = image.view(1, 1, 50, 50)
-
-                if i == 1:
-                    feature_vector1 = self.model.get_feature_vector(image)
-                    output1 = self.model(image)
-                if i == 2:
-                    feature_vector2 = self.model.get_feature_vector(image)
-                    output2 = self.model(image)
-                if i == 5:
-                    feature_vector3 = self.model.get_feature_vector(image)
-                    output3 = self.model(image)
-                if i == 32:
-                    feature_vector4 = self.model.get_feature_vector(image)
-                    output4 = self.model(image)
                 output = self.model(image)
                 output = output.squeeze(1)
                 if output > 0.5:
                     predictions = np.append(predictions, 1)
                 else:
                     predictions = np.append(predictions, 0)
+        return self.get_boxes(predictions)
 
-        # asses similarity between feature vectors
-        #similarity = torch.cosine_similarity(feature_vector1, feature_vector2, dim=1)
-        #print(similarity)
-        # print distance between feature vectors
-        #distance = torch.cdist(feature_vector1, feature_vector2, p=2)
-        #similarity1 = torch.cosine_similarity(feature_vector1, feature_vector3, dim=1)
-       # print(similarity1)
-        #print(distance)
-        #print(output1)
-        #print(output2)
-        #print(output3)
-        #print(output4)
+
+    def stats_prediction(self):
+        predictions = np.array([])
+        for i in range(0, self.stats.shape[0]):
+            # get vertically lying bacilli
+            if 4*self.stats[i][2] > self.stats[i][3]:
+                predictions = np.append(predictions, 1)
+            # get horizontally lying bacilli
+            elif 4*self.stats[i][3] > self.stats[i][2]:
+                predictions = np.append(predictions, 1)
+            #get vertical bacilli
+            elif abs(self.stats[i][2] -self.stats[i][3]) < 4 and self.stats[i][4]< 125:
+                predictions = np.append(predictions, 1)
+            else:
+                predictions = np.append(predictions, 0)
+        return self.get_boxes(predictions)
+
+    def svm_prediction(self):
+        #load the svm model
+        loaded_model = joblib.load('svm.pkl')
+        predictions = loaded_model.predict(self.cropped_images)
+        return self.get_boxes(predictions)
+
+
+
+    def get_boxes(self, predictions):
 
         red_boxes = np.array([[0,0],[0,0]])
         red_boxes = np.stack((red_boxes, red_boxes), axis=0)
@@ -82,7 +84,6 @@ class Inference():
         red_boxes = np.delete(red_boxes, 0, axis=0)
         green_boxes = np.delete(green_boxes, 0, axis=0)
         green_boxes = np.delete(green_boxes, 0, axis=0)
-
 
         return red_boxes, green_boxes
 
