@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from neural_net import ChatGPT
 import pandas as pd
-from sklearn.externals import joblib
+import joblib
 
 class Inference():
     def __init__(self, cropped_images, stats):
