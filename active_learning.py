@@ -1,24 +1,32 @@
 import cvxpy as cp
 import numpy as np
+import matplotlib.pyplot as plt
 
 class  active_learning():
     def  __init__(self, vectors, k):
             self .vectors = vectors
             self .k = k
             self.number_of_outliers = int (len(vectors) * 0.05)
+            print("number of outliers: " , self.number_of_outliers)
             self.mip_centers = None
 
     def greedy_k_center(self): #not two time same center dc
             print("greedy k center" )
             centers = [self .vectors[np.random.randint(self .vectors.shape[0])]]
+            print(centers)
             vectors = self .vectors
             vectors = np.delete(vectors, np.where(np.all(vectors == centers[0], axis=1)), axis=0)
+
             for i in range(self.k-1):
-                    if i >0 :
-                          vectors = np.delete(vectors, np.where(np.all(vectors == centers[i-1], axis=1)), axis=0)
-                    dists = np.min(np.sum((self .vectors - centers[-1])**2, axis=1)**0.5)
-                    next_center = self .vectors[np.argmax(dists)]
-                    centers.append(next_center)
+                dists = np.zeros((vectors.shape[0], len(centers)))
+                for k in range(len(vectors)):
+                    for j in range(len(centers)):
+                        dists[k,j] = np.linalg.norm(vectors[k]-centers[j])
+                mindists = np.min(dists, axis=1)
+                next_center = vectors[np.argmax(mindists)]
+                centers.append(next_center)
+                vectors = np.delete(vectors, np.where(np.all(vectors == next_center, axis=1)), axis=0)
+
             centers = np.array(centers)
             return centers
 
@@ -51,7 +59,7 @@ class  active_learning():
         #lower bound
         lb = ub/2
 
-        while ub-lb > 1:
+        while ub-lb > 0.1:
 
             if self.feasible((lb+ub)/2):
                 print("feasible" )
@@ -74,10 +82,11 @@ class  active_learning():
                         dists[i, j] = np.linalg.norm(self.vectors[i] - self.vectors[j])
                 # find distances less than lb+ub/2
                 lessdists = dists[dists >= (lb + ub) / 2]
-                ub = np.min(lessdists)+ np.random.uniform(0, 1)
-            print(ub-lb)
-
-        return self.mip_centers
+                lb = np.min(lessdists)
+            print("ub: " , ub)
+            print("lb: " , lb)
+        centers = vectors[self.mip_centers == 1]
+        return (lb + ub) / 2, centers
 
 
     def feasible(self, distance):
@@ -120,10 +129,11 @@ class  active_learning():
         #solve problem
         mip.solve()
 
-        self.mip_centers = centers.value
+
 
         #check if the problem is feasible
         if mip.status == 'optimal':
+            self.mip_centers = centers.value
             return True
         else:
             return False
@@ -136,9 +146,34 @@ class  active_learning():
 
 
 
+""""
+#create points randomly values between 0 and 50
+vectors = np.random.randint(50, size=(100, 2))
 
-
-vectors = np.array([[3,1],[1,5],[2,3],[2.5, 4],[5,5]])
-a_l = active_learning(vectors, 2)
-centers = a_l.robust_k_center()
+a_l = active_learning(vectors, 3)
+#centers = a_l.robust_k_center()
+centers = a_l.greedy_k_center()
 print(centers)
+#plot points
+plt.scatter(vectors[:,0], vectors[:,1])
+#plot centers
+plt.scatter(centers[:,0], centers[:,1], c='r')
+plt.show()
+
+#1 hot encoded centers
+distance, hotcenters2 = a_l.robust_k_center()
+print(hotcenters2)
+#get actual centers from 1 hot encoded
+centers2 = vectors[hotcenters2 == 1]
+print(centers2)
+#plot points
+plt.scatter(vectors[:,0], vectors[:,1])
+#plot centers
+plt.scatter(centers2[:,0], centers2[:,1], c='r')
+#plot radius of the centers as a circle
+for i in range(centers2.shape[0]):
+    circle = plt.Circle((centers2[i,0], centers2[i,1]), distance, color='r', fill=False)
+    plt.gcf().gca().add_artist(circle)
+
+plt.show()
+"""
