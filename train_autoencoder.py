@@ -1,5 +1,5 @@
 from model.neural_net import Net, ChatGPT, MyDataset, toy_model
-from model.autoencoder import Autoencoder_conv, Autoencoder_mlp
+from model.autoencoder import Autoencoder_conv, Autoencoder_mlp, Autoencoder_dataset
 import pandas as pd
 from torch.utils.data import DataLoader
 import torch.nn as nn
@@ -43,23 +43,38 @@ def main():
     train_config = config['train']
     batch_size = train_config['batch_size']
     epochs = train_config['epochs']
+    type = train_config['type']
     
-    print('Splitting data into train and test and preparing DataLoader')
-    train, test = train_test_split(data, test_size=0.2)
-    train_dataset = MyDataset(train)
-    test_dataset = MyDataset(test)
+    # take the first image in data and put it in a new dataframe
+    overfit = 0 
+    if overfit == 1:
+        data = data.iloc[50:51]
+        train_dataset = Autoencoder_dataset(data)
+        test_dataset = Autoencoder_dataset(data)
+    else:
+        print('Splitting data into train and test and preparing DataLoader')
+        train, test = train_test_split(data, test_size=0.2)
+        train_dataset = Autoencoder_dataset(train)
+        test_dataset = Autoencoder_dataset(test)
+    
+    
+
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     print("Train data is ready, lenght: ", len(train_dataset))
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     print("Test data is ready, lenght: ", len(test_dataset))
 
     # train model
-    #net = Net()
-    net = ChatGPT()
-    #net = Autoencoder_conv()
-    print("Model loaded")
+    if type == 'conv':
+        net = Autoencoder_conv()
+        print("Convolutional autoencoder loaded")
+
+    elif type == 'mlp':
+        net = Autoencoder_mlp()
+        print("MLP autoencoder loaded")
+    
     print(net)
-    #net = toy_model()
+    time.sleep(2)
 
     print('Initialising weights')
     def weights_init(m):
@@ -69,38 +84,41 @@ def main():
         elif isinstance(m, nn.Linear):
             torch.nn.init.xavier_uniform_(m.weight)
             m.bias.data.fill_(0.01)
-        
+    
     net.apply(weights_init)
     
-    criterion = nn.BCELoss()
+    criterion = nn.MSELoss()
     optimizer = optim.Adam(net.parameters(), lr=0.001)
     net.train()
-    print("Training started")
+    loss_epoch = 0
+    print("Training starting")
     for ep in range(epochs):  # loop over the dataset multiple times
         train_loss = []
         for i, data in enumerate(train_loader):
             # get the inputs
-            inputs, labels = data
-            #inputs = inputs.to(torch.float32)
-
-            inputs=torch.unsqueeze(inputs,1)
-            #labels = labels.to(torch.float32)
-            #labels = labels.to(torch.float32)
-            # zero the parameter gradients
+            inputs, _ = data
+            #print("Shape of inputs and labels is: ", inputs.shape)
+            
+            #print("Shape of inputs and labels after unsqueezing is: ", inputs.shape)
             optimizer.zero_grad()
-            # forward + backward + optimize
+            
             outputs = net(inputs)
-            #print(outputs)
-            #breakpoint()
-            outputs = outputs.squeeze(1)
-
-            loss = criterion(outputs, labels)
+            loss = criterion(inputs, outputs)
             train_loss.append(loss.item())
             
             loss.backward()
             optimizer.step()
+            if i % 10 == 0:
+                current_loss = loss / inputs.shape[0]
+                print(f"Epoch: {ep+1}, Batch: {i+1}/{len(train_loader)}, Loss: {current_loss}")
+        current_loss = np.sum(train_loss) / len(train_dataset)
+        print('Epoch: {}, Loss: {:.4f}'.format(ep+1, current_loss))
         
-        print("Epoch: ", ep, " Loss: ", np.sum(train_loss) / len(train_dataset))
+        if ep % 10 == 0:
+            if loss_epoch == np.sum(train_loss) / len(train_dataset):
+                pass
+        loss_epoch = np.sum(train_loss) / len(train_dataset)
+            
     
     print('Finished Training')
     #print finished training statistics
@@ -115,30 +133,15 @@ def main():
     total = 0
     net.eval()
     with torch.no_grad():
+        test_loss = 0
         for data in test_loader:
-            images, labels = data
-            images = images.to(torch.float32)
-            images= images.view(images.shape[0],1,50,50)
-            labels = labels.to(torch.float32)
-            outputs = net(images)
-            #print("Shape of outputs and labels is: ", outputs.shape, labels.shape)
-            #print("outputs: ", outputs)
-            outputs = outputs.squeeze(1)
-            for i, output in enumerate(outputs):
-                if output > 0.5:
-                    outputs[i] = 1
-                else:
-                    outputs[i] = 0
-            #print("outputs and shape", outputs, outputs.shape)
-            #print("labels and shape", labels, labels.shape)
-            total += labels.size(0)
-            #print("total: ", total)
-            
-            correct += (outputs == labels).sum().item()
-            #print("correct: ", correct)
-            
-    print('Accuracy of the network on the validation set: %d %%' % (
-            100 * correct / total))
+            img, _ = data
+            img =torch.unsqueeze(img,1)
+            output = net(img)
+            loss = criterion(output, img)
+            test_loss += loss.item()
+        test_loss /= len(test_dataset)
+        print('Test Loss: {:.4f}'.format(test_loss))
 
 
 if __name__ == '__main__':
