@@ -20,7 +20,7 @@ class  InteractiveConfig:
         self.preprocess_algorithm = StringVar()
         #thresholding algorithm
         self.algorithm = StringVar()
-        self.algorithm.set('otsu')
+        self.algorithm.set('adaptive_gaussian')
         #hard threshold value
         self.hard_threshold_value = StringVar()
         self.hard_threshold_value.set('5000')
@@ -32,7 +32,7 @@ class  InteractiveConfig:
         self.c.set('-7')
         #use split otsu
         self.split_otsu = BooleanVar()
-        self.split_otsu.set(True)
+        self.split_otsu.set(False)
         #number of black pixels
         self.number_of_black_pixels = StringVar()
         self.number_of_black_pixels.set('215')
@@ -50,7 +50,7 @@ class  InteractiveConfig:
         self.inference.set(False)
         #visualize images
         self.show_images = BooleanVar()
-        self.show_images.set(False)
+        self.show_images.set(True)
 
 
 
