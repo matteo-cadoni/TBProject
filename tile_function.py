@@ -45,25 +45,33 @@ def tile_pipeline(config, img, loader):
     labelling_dataset_config = config['labelling_dataset']
     if labelling_dataset_config['create_dataset']:
 
-        ######## BEGIN INTERACTIVE LABELING #######
-        i_l = InteractiveLabeling(cropped_images)
-        labels = i_l.run()
-        ######### END INTERACTIVE LABELING ########
+        # ######## BEGIN INTERACTIVE LABELING #######
+        # i_l = InteractiveLabeling(cropped_images)
+        # labels = i_l.run()
+        # ######### END INTERACTIVE LABELING ########
 
-        ######## BEGIN DATASET CREATION ########
-        dataframe = pd.DataFrame()
-        for i in range(0, labels.shape[0]):
-            d = {'image': [cropped_images[i]], 'label': [labels[i]]}
-            df2 = pd.DataFrame(d)
-            dataframe = pd.concat([dataframe, df2], ignore_index=True)
-        ######## END DATASET CREATION ########
+        # ######## BEGIN DATASET CREATION ########
+        # dataframe = pd.DataFrame()
+        # for i in range(0, labels.shape[0]):
+        #     d = {'image': [cropped_images[i]], 'label': [labels[i]]}
+            
+        #     df2 = pd.DataFrame(d)
+        #     dataframe = pd.concat([dataframe, df2], ignore_index=True)
+        # ######## END DATASET CREATION ########
 
-        ######## BEGIN SAVING ########
+        # ######## BEGIN SAVING ########
         save_config = config['saving']
-        if save_config['save']:
-            # save dataframe with pandas library
-            labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
-            dataframe.to_pickle(labelled_data_path)
+        # if save_config['save']:
+        #     # save dataframe with pandas library
+        #     labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
+        #     dataframe.to_pickle(labelled_data_path)
+        #     print("Dataset saved in: " + labelled_data_path)
+        if save_config['save_stats']:
+            # create dataframe with stats for each sample then save it as a .pkl file
+            stats_dataframe = pd.DataFrame(stats)
+            stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + '.pkl')
+            stats_dataframe.to_pickle(stats_dataframe_path)
+            print("Stats saved in: " + stats_dataframe_path)
         ######## END SAVING ########
 
     ######## BEGIN INFERENCE/VISUALIZATION ########
@@ -71,7 +79,12 @@ def tile_pipeline(config, img, loader):
     if inference_config['do_inference']:
         print("Inference...")
         inference = Inference(cropped_images, stats, final_image)
-        red_boxes, green_boxes = inference.stats_prediction()
+        if inference_config['prediction'] == 'SVM':
+            red_boxes, green_boxes = inference.svm_prediction()
+        elif inference_config['prediction'] == 'CNN':
+            red_boxes, green_boxes = inference.network_prediction()
+        elif inference_config['prediction'] == 'STATS':
+            red_boxes, green_boxes = inference.stats_prediction()
 
         viewer = napari.Viewer()
         viewer.add_image(img, name='Inferenced image')

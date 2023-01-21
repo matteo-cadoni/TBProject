@@ -30,10 +30,12 @@ labelling_dataset:
   create_dataset: True # let's you label the cropped images in an interactive window
 
 saving: 
-  save: False # whether to save the dataset labelled by hand or not
+  save: True # whether to save the dataset labelled by hand or not
+  save_stats: True # whether to save the statistics of the labelled dataset or not
 
 inference:
   do_inference: True # whether to do inference or not
+  prediction: SVM # SVM, CNN, STATS
 
 visualization:
   show: False # whether to show the image or not

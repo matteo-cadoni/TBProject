@@ -100,10 +100,19 @@ class Inference():
 
     
     def svm_prediction(self):
+        
+        #drop first row of stats
+        self.stats = self.stats[1:]
+        #drop first two columns of stats
+        self.stats = self.stats[:,2:]
+        
+        df = pd.DataFrame(self.stats)
+        
         #load the svm model
-        loaded_model = joblib.load('svm.pkl')
-        predictions = loaded_model.predict(self.cropped_images)
+        loaded_model = joblib.load('svm_results/svm.pkl')
+        predictions = loaded_model.predict(df)
         return self.get_boxes(predictions)
+
 
 
 
