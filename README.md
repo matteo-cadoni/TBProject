@@ -12,15 +12,24 @@ TB_sample/
 
 ---
 
+### Import Project
+
+To import the project, run
+
+```
+from tbdetect import project
+```
+
+---
+
 ### Run Project
 
 To run the project, run
-
 ```
-python3 project.py configs/thresholding.yaml
+project.main()
 ```
 
-All parameters can be changed from the config file available in configs/thresholding.yaml or using the interactive interface.
+All parameters can be changed using the interactive interface.
 
 ---
 
