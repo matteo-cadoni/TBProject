@@ -1,6 +1,11 @@
 numpy
 matplotlib
-aicsimageio
 napari[all]
 opencv-python
 aicsimageio aicspylibczi>=3.0.5 fsspec>=2022.7.1
+argparse
+yaml
+pandas
+torch>=1.13.1
+scikit-learn
+h5py
