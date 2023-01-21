@@ -18,6 +18,7 @@ class  InteractiveConfig:
         self.blur_deselection.set(False)
         #preprocessing algorithm
         self.preprocess_algorithm = StringVar()
+        self.preprocess_algorithm.set('rescale')
         #thresholding algorithm
         self.algorithm = StringVar()
         self.algorithm.set('adaptive_gaussian')
