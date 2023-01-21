@@ -39,7 +39,7 @@ All parameters can be changed using the interactive interface.
 
 ## Data
 
-Data should be saved under
+Data, i.e., the smear images, should be saved under
 ```
 TB_sample/
 ```
