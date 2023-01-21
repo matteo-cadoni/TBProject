@@ -27,7 +27,7 @@ To import the project, run
 from tbdetect import project
 ```
 
-### Run project
+## Run project
 
 To run the project, run
 ```
