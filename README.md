@@ -7,7 +7,7 @@ Create an empty environment specifying the python version as "python=3.8", activ
 ```
 pip install -r requirements.txt
 ```
-in order to install all packages required for the package `tbdetect`.
+in order to install all packages required for the package `tbdetect`. This might take a while - do not be concerned.
 
 
 ### Install the package `tbdetect`
@@ -22,10 +22,10 @@ This ensures the scripts are present locally, which enables you to run the provi
 ### Import project
 
 To import the project, run python and then enter the following command:
-
 ```
 from tbdetect import project
 ```
+This might also take some time.
 
 ## Run project
 
