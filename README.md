@@ -3,13 +3,6 @@
 
 ---
 
-### Data
-
-Data should be saved under
-```
-TB_sample/
-```
-
 ### Installation
 
 Create an empty environment specifying the python version as "python=3.8" and run
@@ -24,7 +17,7 @@ in order to install all packages required for the package `tbdetect`.
 ```
 pip install -e .
 ```
-This ensures the scripts are present locally, which enables you to run the provided python scripts. Additionally, this allows you to modify the baseline solutions due to the `-e` option. Furthermore, this ensures the latest version is installed.
+This ensures the scripts are present locally, which enables you to run the provided Python scripts. Additionally, this allows you to modify the baseline solutions due to the `-e` option. Furthermore, this ensures the latest version is installed.
 
 
 ### Import Project
@@ -43,6 +36,15 @@ project.main()
 ```
 
 All parameters can be changed using the interactive interface.
+
+---
+
+### Data
+
+Data should be saved under
+```
+TB_sample/
+```
 
 ---
 
