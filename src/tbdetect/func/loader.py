@@ -1,6 +1,4 @@
-from aicsimageio import AICSImage
 from aicsimageio.readers import CziReader
-import numpy as np
 import h5py
 import time
 import os

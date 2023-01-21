@@ -1,7 +1,6 @@
 import napari
 import numpy as np
 import cv2 as cv
-import matplotlib.pyplot as plt
 
 def visualize_all_list_napari(numpy_img_list: np.ndarray,names):
     """

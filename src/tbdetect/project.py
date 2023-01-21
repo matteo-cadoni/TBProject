@@ -1,11 +1,5 @@
 import argparse
 import yaml
-import sys
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-import os
-import napari
 
 #from aicsimageio import AICSImage
 #import napari
