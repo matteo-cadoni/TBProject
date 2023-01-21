@@ -1,8 +1,6 @@
 
 # Tuberculosis Project [[Project Page]](https://github.com/marinadominguez/TBProject)
 
----
-
 ### Installation
 
 Create an empty environment specifying the python version as "python=3.8" and run
