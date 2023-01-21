@@ -137,6 +137,9 @@ class  InteractiveConfig:
         # finish button
         finish_button = Button(self.window, text="Finish", command=self.finish)
         finish_button.grid(column=0, row=15)
+        # abort button
+        abort_button = Button(self.window, text="Abort", command=self.abort)
+        abort_button.grid(column=0, row=16)
 
         #return entries from window
         self.window.mainloop()
@@ -222,6 +225,9 @@ class  InteractiveConfig:
             messagebox.showerror(e, "Please enter a valid value")
             self.window.destroy()
 
+    def abort(self):
+        self.window.destroy()
+        self.error = False
 
 
 
