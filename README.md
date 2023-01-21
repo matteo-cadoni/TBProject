@@ -25,10 +25,16 @@ All parameters can be changed from the config file available in configs/threshol
 ---
 
 # Package the project
+
 ### Make sure you have an upgraded version of pip
 Windows
 ```
 py -m pip install --upgrade pip
+
+pip install napari-czifile2
+
+python version 3.8
+
 ```
 
 Linux/MAC OS

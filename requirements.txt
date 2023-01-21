@@ -1,10 +1,9 @@
 numpy
 matplotlib
-napari[all]
 opencv-python
-aicsimageio aicspylibczi>=3.0.5 fsspec>=2022.7.1
+napari-aicsimageio
 argparse
-yaml
+ruamel.yaml
 pandas
 torch>=1.13.1
 scikit-learn
