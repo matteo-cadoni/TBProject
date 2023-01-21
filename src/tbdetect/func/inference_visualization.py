@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -9,7 +10,8 @@ class Inference():
     def __init__(self, cropped_images, stats):
         self.cropped_images = cropped_images
         self.stats = stats
-        self.PATH = 'n_networks/model.pth'
+        self.PATH = os.path.join(os.path.dirname(__file__), 'n_networks', 'model.pth')
+        #self.PATH = 'n_networks/model.pth'
         #load model from torch file, pth file
         self.model = ChatGPT()
         self.model.load_state_dict(torch.load(self.PATH))

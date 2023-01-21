@@ -3,9 +3,10 @@ README.md
 pyproject.toml
 setup.cfg
 src/tbdetect/__init__.py
-src/tbdetect/mixed_functions.py
 src/tbdetect/neural_net.py
 src/tbdetect/project.py
+src/tbdetect/run_project.py
+src/tbdetect/utils.py
 src/tbdetect.egg-info/PKG-INFO
 src/tbdetect.egg-info/SOURCES.txt
 src/tbdetect.egg-info/dependency_links.txt

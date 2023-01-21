@@ -1,5 +1,5 @@
-import argparse
 import yaml
+import os
 
 #from aicsimageio import AICSImage
 #import napari
@@ -7,24 +7,26 @@ import yaml
 #import cv2 as cv
 #import logging  #maybe useful for debugging
 
-from tbdetect.mixed_functions import *
+from tbdetect.utils import *
 
-
+"""
 def arguments_parser():
     '''PARAMETERS'''
     parser = argparse.ArgumentParser('Tubercolosis Detection')
-    parser.add_argument('config', type=str, default='configs/thresholding.yaml',
+    parser.add_argument('config', type=str, default='tbdetect/configs/thresholding.yaml',
                         help='configure file for thresholding experiments')
     return parser
-
-
+    """
 
 def main():
+    """
     parser = arguments_parser()
     pars_arg = parser.parse_args()
-    
-    # read config from input .yaml
-    with open(pars_arg.config, 'r') as f:
+    """
+    config_file = os.path.join(os.path.dirname(__file__), 'configs', 'thresholding.yaml')
+
+    # read config from input.yaml
+    with open(config_file, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
     # Interactive config
