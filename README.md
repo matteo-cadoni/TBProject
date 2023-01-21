@@ -10,7 +10,8 @@ pip install -r requirements.txt
 in order to install all packages required for the package `tbdetect`.
 
 
-### Install the package
+### Install the package `tbdetect`
+
 `tbdetect` can be pip-installed by running
 ```
 pip install -e .
@@ -18,7 +19,7 @@ pip install -e .
 This ensures the scripts are present locally, which enables you to run the provided Python scripts. Additionally, this allows you to modify the baseline solutions due to the `-e` option. Furthermore, this ensures the latest version is installed.
 
 
-### Import Project
+### Import project
 
 To import the project, run
 
@@ -26,7 +27,7 @@ To import the project, run
 from tbdetect import project
 ```
 
-### Run Project
+### Run project
 
 To run the project, run
 ```
