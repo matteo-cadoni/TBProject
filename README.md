@@ -1,18 +1,14 @@
 
 # Tuberculosis Project [[Project Page]](https://github.com/marinadominguez/TBProject)
 
----
-
-### Data
+## Data
 
 Data should be saved under
 ```
 TB_sample/
 ```
 
----
-
-### Run Project
+## Run Project
 
 To run the project, run
 
