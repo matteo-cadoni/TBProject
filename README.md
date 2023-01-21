@@ -1,7 +1,7 @@
 
 # Tuberculosis Project [[Project Page]](https://github.com/marinadominguez/TBProject)
 
-### Installation
+# Installation
 
 Create an empty environment specifying the python version as "python=3.8" and run
 ```
@@ -36,16 +36,14 @@ project.main()
 
 All parameters can be changed using the interactive interface.
 
----
 
-### Data
+# Data
 
 Data should be saved under
 ```
 TB_sample/
 ```
 
----
 
 # Package the project
 
