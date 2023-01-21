@@ -17,3 +17,6 @@ python3 project.py configs/thresholding.yaml
 ```
 
 All parameters can be changed from the config file available in configs/thresholding.yaml or using the interactive interface.
+
+## To do: 
+- [ ] Implement sharp preprocessing option in all the thresholding choices. 
