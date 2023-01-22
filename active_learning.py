@@ -1,6 +1,7 @@
 import cvxpy as cp
 import numpy as np
 import matplotlib.pyplot as plt
+import gurobipy as gp
 
 class  active_learning():
     def  __init__(self, vectors, k):
@@ -13,11 +14,12 @@ class  active_learning():
     def greedy_k_center(self): #not two time same center dc
             print("greedy k center" )
             centers = [self .vectors[np.random.randint(self .vectors.shape[0])]]
-            print(centers)
+
             vectors = self .vectors
             vectors = np.delete(vectors, np.where(np.all(vectors == centers[0], axis=1)), axis=0)
 
             for i in range(self.k-1):
+                print(i)
                 dists = np.zeros((vectors.shape[0], len(centers)))
                 for k in range(len(vectors)):
                     for j in range(len(centers)):
@@ -34,12 +36,17 @@ class  active_learning():
 
         # initialize the centers with greedy k-center
         centers_out = self .greedy_k_center()
+        # initialize the centers with random points
+        #centers_out = self.vectors[np.random.choice(self.vectors.shape[0], self.k, replace=False)]
 
         self.mip_centers = centers_out
         vectors = self .vectors
         #remove centers from vector
+        print("centers_out: " , centers_out.shape)
         for i in range(centers_out.shape[0]):
-            vectors = np.delete(vectors, np.where(np.all(self.vectors == centers_out[i], axis=1)), axis=0)
+            print(np.where(np.all(self.vectors == centers_out[i], axis=1)))
+            vectors[ np.where(np.all(self.vectors == centers_out[i], axis=1))] = 0
+        vectors = vectors[vectors[:,0] != 0]
 
         # find maximal distance tthat a point has to its nearest center, do not consider the centers that are already selected
         dists = np.zeros((vectors.shape[0], centers_out.shape[0]))
@@ -61,7 +68,7 @@ class  active_learning():
 
         while ub-lb > 0.1:
 
-            if self.feasible((lb+ub)/2):
+            if self.gurobi_feasible((lb+ub)/2):
                 print("feasible" )
                 #the the upper bound is the maximum distance between two points whose distance is less then lb+up/2
                 #compute all distances between all the points
@@ -85,7 +92,8 @@ class  active_learning():
                 lb = np.min(lessdists)
             print("ub: " , ub)
             print("lb: " , lb)
-        centers = vectors[self.mip_centers == 1]
+
+        centers = self.vectors[self.mip_centers == 1]
         return (lb + ub) / 2, centers
 
 
@@ -137,6 +145,46 @@ class  active_learning():
             return True
         else:
             return False
+    def gurobi_feasible(self, distance):
+        m = gp.Model("k-center")
+        n, d = self.vectors.shape
+        # create decision variables
+        centers = m.addVars(n, vtype=gp.GRB.BINARY, name="centers")
+        w = m.addVars(n, n, vtype=gp.GRB.BINARY, name="w")
+        e = m.addVars(n, n, vtype=gp.GRB.BINARY, name="e")
+        # create constraints
+        # at most self.k centers
+        m.addConstr(gp.quicksum(centers[i] for i in range(n)) == self.k)
+        # at most self.number_of_outliers outliers
+        m.addConstr(gp.quicksum(e[i, j] for i in range(n) for j in range(n)) <= self.number_of_outliers)
+        # each point can be just in one cluster, the sum of each row of w is 1
+        for i in range(n):
+            m.addConstr(gp.quicksum(w[i, j] for j in range(n)) == 1)
+        # w[i,j] <= centers[j] for all i,j
+        for i in range(n):
+            for j in range(n):
+                m.addConstr(w[i, j] <= centers[j])
+        # if dist(i,j) > distance then w[i,j] = e[i,j]
+        for i in range(n):
+            for j in range(n):
+                if np.linalg.norm(self.vectors[i] - self.vectors[j]) > distance:
+                    m.addConstr(w[i, j] == e[i, j])
+        # create objective function
+        m.setObjective(gp.quicksum(e[i, j] for i in range(n) for j in range(n)), gp.GRB.MINIMIZE)
+        # solve problem
+        m.optimize()
+        # check if the problem is feasible
+
+        if m.status == gp.GRB.OPTIMAL:
+            #print the centers
+            self.mip_centers = np.zeros(n)
+            for i in range(n):
+                self.mip_centers[i] = centers[i].x
+
+
+            return True
+        else:
+            return False
 
 
 
@@ -146,27 +194,26 @@ class  active_learning():
 
 
 
-""""
+
+
 #create points randomly values between 0 and 50
-vectors = np.random.randint(50, size=(100, 2))
+vectors = np.random.randint(150, size=(100, 32))
 
-a_l = active_learning(vectors, 3)
+a_l = active_learning(vectors, 5)
 #centers = a_l.robust_k_center()
-centers = a_l.greedy_k_center()
-print(centers)
+#centers = a_l.greedy_k_center()
+#print(centers)
 #plot points
-plt.scatter(vectors[:,0], vectors[:,1])
+#plt.scatter(vectors[:,0], vectors[:,1])
 #plot centers
-plt.scatter(centers[:,0], centers[:,1], c='r')
-plt.show()
+#plt.scatter(centers[:,0], centers[:,1], c='r')
+#plt.show()
 
 #1 hot encoded centers
-distance, hotcenters2 = a_l.robust_k_center()
-print(hotcenters2)
-#get actual centers from 1 hot encoded
-centers2 = vectors[hotcenters2 == 1]
+distance, centers2 = a_l.robust_k_center()
 print(centers2)
 #plot points
+"""
 plt.scatter(vectors[:,0], vectors[:,1])
 #plot centers
 plt.scatter(centers2[:,0], centers2[:,1], c='r')
@@ -176,4 +223,10 @@ for i in range(centers2.shape[0]):
     plt.gcf().gca().add_artist(circle)
 
 plt.show()
+"""
+"""
+#create 3 dimensional points
+vectors = np.random.randint(10, size=(100, 3))
+a_l = active_learning(vectors, 3)
+dist, centers = a_l.robust_k_center()
 """
