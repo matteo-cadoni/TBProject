@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -6,7 +7,8 @@ import pandas as pd
 import joblib
 
 class Inference():
-    def __init__(self, cropped_images, stats):
+    def __init__(self, cropped_images, stats, final_image):
+        self.final_image = final_image
         self.cropped_images = cropped_images
         self.stats = stats
         self.PATH = 'n_networks/model.pth'
@@ -34,7 +36,8 @@ class Inference():
                     predictions = np.append(predictions, 0)
         return self.get_boxes(predictions)
 
-
+    """
+    APPROACH 0: more manual way of seeing bacilli horizontally or vertically
     def stats_prediction(self):
         predictions = np.array([])
         for i in range(0, self.stats.shape[0]):
@@ -50,7 +53,52 @@ class Inference():
             else:
                 predictions = np.append(predictions, 0)
         return self.get_boxes(predictions)
+        """
 
+    
+    """
+    APPROACH 1: ASPECT RATIO - ONLY USEFUL FOR HORIZONTAL BACILLI
+    def get_aspect_ratio(stats):
+        aspect_ratio = np.array([])
+        for i in range(0, stats.shape[0]):
+            aspect_ratio = np.append(aspect_ratio, stats[i][2]/stats[i][3])
+        return aspect_ratio
+    
+    print("Aspect ratio of the bacilli: ", get_aspect_ratio(stats))
+    """
+
+    """
+    APPROACH 2: ELLIPSE FITTING 
+    def get_ellipse_fitting(stats):
+        ellipse_fitting = np.array([])
+        for i in range(0, stats.shape[0]):
+
+            ellipse_fitting = np.append(ellipse_fitting, stats[i][4])
+        return ellipse_fitting
+    
+    print("Ellipse fitting of the bacilli: ", get_ellipse_fitting(stats))
+    """
+
+    """
+    APPROACH 3: HU MOMENTS, using cv2.HuMoments 
+    """
+    def get_hu_moments(self):
+        hu_moments = np.array([])
+        for i in range(1, self.stats.shape[0]):
+            hu_moments = np.append(hu_moments, cv2.HuMoments(cv2.moments(self.final_image[self.stats[i][1]:self.stats[i][1]+self.stats[i][3], self.stats[i][0]:self.stats[i][0]+self.stats[i][2]]))[2])
+        return hu_moments
+
+    def stats_prediction(self):
+        predictions = np.array([])
+        list_hu = self.get_hu_moments()
+        for i in range(0, list_hu.shape[0]):
+            if list_hu[i]>=5e-12: # we consider bacilli
+                predictions = np.append(predictions, 1)
+            else: # we don't consider bacilli
+                predictions = np.append(predictions, 0)
+        return self.get_boxes(predictions)
+
+    
     def svm_prediction(self):
         #load the svm model
         loaded_model = joblib.load('svm.pkl')

@@ -2,7 +2,7 @@ load:
   czi_path: TB_sample/extern_Synlab_2156_17_3_MTB.czi # insert path to file
   tile: 673 # None if whole smear, otherwise number of tile
   blurry_deselection: True # whether to remove blurry tiles or not
-  interactive_config: True # whether to use interactive config or not
+  interactive_config: False # whether to use interactive config or not
 
 preprocessing:
   algorithm: rescale # sharp for Otsu and hard thresholding, rescale for adaptive thresholding
@@ -27,7 +27,7 @@ postprocessing:
   crop: True # whether to crop the image or not (needed for inference)
 
 labelling_dataset: 
-  create_dataset: False # let's you label the cropped images in an interactive window
+  create_dataset: True # let's you label the cropped images in an interactive window
 
 saving: 
   save: False # whether to save the dataset labelled by hand or not
@@ -36,4 +36,4 @@ inference:
   do_inference: True # whether to do inference or not
 
 visualization:
-  show: True # whether to show the image or not
+  show: False # whether to show the image or not
