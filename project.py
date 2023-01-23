@@ -39,7 +39,7 @@ def main():
     img, loader = load(load_config)
 
     if load_config['tile'] == 'None':
-        smear_pipeline(config, img)
+        smear_pipeline(config, img, loader)
     else:
         tile_pipeline(config, img, loader)  
               

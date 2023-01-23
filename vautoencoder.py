@@ -34,9 +34,9 @@ to_pil_image = transforms.ToPILImage()
 
 def image_to_vid(images):
     imgs = [np.array(to_pil_image(img)) for img in images]
-    imageio.mimsave('../outputs/generated_images.gif', imgs)
+    imageio.mimsave('outputs/generated_images.gif', imgs)
 def save_reconstructed_images(recon_images, epoch):
-    save_image(recon_images.cpu(), f"../outputs/output{epoch}.jpg")
+    save_image(recon_images.cpu(), f"outputs/output{epoch}.jpg")
 def save_loss_plot(train_loss, valid_loss):
     # loss plots
     plt.figure(figsize=(10, 7))
@@ -45,7 +45,7 @@ def save_loss_plot(train_loss, valid_loss):
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
     plt.legend()
-    plt.savefig('../outputs/loss.jpg')
+    plt.savefig('outputs/loss.jpg')
     plt.show()
 def final_loss(bce_loss, mu, logvar):
     """
@@ -66,7 +66,7 @@ def train(model, dataloader, dataset, device, optimizer, criterion):
     running_loss = 0.0
     counter = 0
     for i, data in tqdm(enumerate(dataloader), total=int(len(dataset)/dataloader.batch_size)):
-        print(data.shape)
+
         counter += 1
         #data = data[0]
         data = data.to(device)
@@ -168,12 +168,12 @@ class ConvVAE(nn.Module):
 
     def forward(self, x):
         # encoding
-        print(x.shape)
+
         x = F.relu(self.enc1(x))
         x = F.relu(self.enc2(x))
         x = F.relu(self.enc3(x))
         x = F.relu(self.enc4(x))
-        print(x.shape)
+
         batch, _, _, _ = x.shape
         x = F.adaptive_avg_pool2d(x, 1).reshape(batch, -1)
         hidden = self.fc1(x)
@@ -210,9 +210,9 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # initialize the model
 model = ConvVAE().to(device)
 # set the learning parameters
-lr = 0.001
-epochs = 100
-batch_size = 8
+lr = 0.01
+epochs = 200
+batch_size = 64
 optimizer = optim.Adam(model.parameters(), lr=lr)
 criterion = nn.BCELoss(reduction='sum')
 # a list to save all the reconstructed images in PyTorch grid format
@@ -223,9 +223,14 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 # load pandas dataframe, saved as pkl
-my_df = pd.read_pickle('labelled_data/tile_674_smear_2156_17_3.pkl')
+my_df = pd.read_pickle('labelled_data/tile_673_smear_2156_17_3.pkl')
+
+my_df = my_df.append(pd.read_pickle('labelled_data/tile_674_smear_2156_17_3.pkl'))
+my_df = my_df.append(pd.read_pickle('labelled_data/tile_675_smear_2156_17_3.pkl'))
+my_df = my_df.append(pd.read_pickle('labelled_data/tile_676_smear_2156_17_3.pkl'))
+my_df = my_df.append(pd.read_pickle('labelled_data/tile_677_smear_2156_17_3.pkl'))
 #drop labels
-my_df = my_df.drop(['label'], axis=1)
+my_df = my_df.drop(columns=['label'])
 
 dataset = MyDataset(my_df)
 trainset, testset = train_test_split(dataset, test_size=0.2)
