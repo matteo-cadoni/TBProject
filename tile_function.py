@@ -1,13 +1,15 @@
+import cv2
 import pandas as pd
 import os
 import napari
+import numpy as np
 
 from utils import *
 from src.preprocess import Preprocessing
 from src.thresholding import Thresholding
 from src.postprocessing import Postprocessing
 from src.cropping import Cropping
-from src.interactivelabelling import InteractiveLabeling
+from interactivelabelling import InteractiveLabeling
 from src.inference_visualization import Inference
 from src.visualization import visualize_all_list_napari, add_bounding_boxes, is_blurry_laplacian
     
@@ -27,6 +29,7 @@ def tile_pipeline(config, img, loader):
     postprocessing_config = config['postprocessing']
     postprocess = Postprocessing(thresholded_img, postprocessing_config)
     whole_img_not_cleaned, final_image, num_bacilli, stats = postprocess.apply()
+    
     ######## END POSTPROCESSING ########
 
     ######## BEGIN ADD BOUNDING BOXES ########
@@ -67,8 +70,8 @@ def tile_pipeline(config, img, loader):
     inference_config = config['inference']
     if inference_config['do_inference']:
         print("Inference...")
-        inference = Inference(cropped_images, stats)
-        red_boxes, green_boxes = inference.network_prediction()
+        inference = Inference(cropped_images, stats, final_image)
+        red_boxes, green_boxes = inference.stats_prediction()
 
         viewer = napari.Viewer()
         viewer.add_image(img, name='Inferenced image')

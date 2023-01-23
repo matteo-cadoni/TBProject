@@ -28,7 +28,7 @@ class InteractiveLabeling():
         finish_button=Button(self.window, text="Finish")
         finish_button.grid(column=3, row=2)
         finish_button.configure(command=self.window.destroy)
-
+        
         self.plot_next_image(0)
 
         self.window.mainloop()
