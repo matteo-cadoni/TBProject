@@ -1,11 +1,9 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
-from sklearn.model_selection import train_test_split
+import torch.nn.functional as f
+from torch.utils.data import Dataset
 
 
-# define model
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -29,8 +27,8 @@ class Net(nn.Module):
         x = self.pool(self.relu(self.conv4(x)))
 
         x = x.view(-1, 64 * 3 * 3)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = f.relu(self.fc1(x))
+        x = f.relu(self.fc2(x))
         x = self.sigmoid(self.fc3(x))
 
         return x
@@ -78,8 +76,11 @@ class ChatGPT(nn.Module):
         out = self.sigmoid(out)
 
         return out
-    #define get feature vector function
+
     def get_feature_vector(self, x):
+        """
+        Returns the feature vector of the input image, in second last layer
+        """
         # 1st convolutional layer
         out = self.conv1(x)
         out = self.relu1(out)
@@ -100,10 +101,10 @@ class ChatGPT(nn.Module):
         return out
 
 
-class toy_model(nn.Module):
+class ToyModel(nn.Module):
 
     def __init__(self):
-        super(toy_model, self).__init__()
+        super(ToyModel, self).__init__()
 
         self.convolution1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, stride=1, padding=1)
         self.fc1 = nn.Linear(in_features=32 * 50 * 50, out_features=512)

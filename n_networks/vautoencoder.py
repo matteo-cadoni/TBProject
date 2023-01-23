@@ -223,12 +223,12 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 # load pandas dataframe, saved as pkl
-my_df = pd.read_pickle('labelled_data/tile_673_smear_2156_17_3.pkl')
+my_df = pd.read_pickle('../labelled_data/tile_673_smear_2156_17_3.pkl')
 
-my_df = my_df.append(pd.read_pickle('labelled_data/tile_674_smear_2156_17_3.pkl'))
-my_df = my_df.append(pd.read_pickle('labelled_data/tile_675_smear_2156_17_3.pkl'))
-my_df = my_df.append(pd.read_pickle('labelled_data/tile_676_smear_2156_17_3.pkl'))
-my_df = my_df.append(pd.read_pickle('labelled_data/tile_677_smear_2156_17_3.pkl'))
+my_df = my_df.append(pd.read_pickle('../labelled_data/tile_674_smear_2156_17_3.pkl'))
+my_df = my_df.append(pd.read_pickle('../labelled_data/tile_675_smear_2156_17_3.pkl'))
+my_df = my_df.append(pd.read_pickle('../labelled_data/tile_676_smear_2156_17_3.pkl'))
+my_df = my_df.append(pd.read_pickle('../labelled_data/tile_677_smear_2156_17_3.pkl'))
 #drop labels
 my_df = my_df.drop(columns=['label'])
 
