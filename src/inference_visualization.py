@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader, Dataset
 from n_networks.neural_net import ChatGPT
 import pandas as pd
 import joblib
-from utils import clean_stats
+from src.utils import clean_stats
 
 
 class Inference:

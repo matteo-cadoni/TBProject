@@ -60,7 +60,7 @@ def clean_stats(stats):
     # delete
     for i in range(0, stats.shape[0]):
         if stats[i, 4] > 625:
-            stats1 = np.delete(stats1, i, 0)
+            stats1 = np.delete(stats, i, 0)
         if stats[i, 4] < 25:
-            stats1 = np.delete(stats1, i, 0)
+            stats1 = np.delete(stats, i, 0)
     return stats1

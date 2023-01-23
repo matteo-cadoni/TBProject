@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-from utils import clean_stats
+from src.utils import clean_stats
 
 
 def pad_images(image):
@@ -13,6 +13,21 @@ def pad_images(image):
         return padded_image
     else:
         return image
+
+
+def pad_images2(image):
+    """
+    pad image using np.pad
+    """
+    padx1 = np.floor((50 - image.shape[0])/2).astype(int)
+    padx2 = np.ceil((50 - image.shape[0])/2).astype(int)
+    pady1 = np.floor((50 - image.shape[1])/2).astype(int)
+    pady2 = np.ceil((50 - image.shape[1])/2).astype(int)
+    if image.shape[0] == 0 or image.shape[1] == 0:
+        return np.zeros((50, 50))
+    else:
+        padded_image = np.pad(image, ((padx1, padx2), (pady1, pady2)), 'constant', constant_values=0)
+    return padded_image
 
 
 class Cropping:
@@ -65,7 +80,12 @@ class Cropping:
         for i in range(len(center_of_mass)):
             x = center_of_mass[i][0]
             y = center_of_mass[i][1]
-            cropped_images.append(self.original_tile[y - 25:y + 25, x - 25:x + 25])
+            h = self.stats[i+1][2]
+            w = self.stats[i+1][3]
+
+            cropped_images.append(self.original_tile[max(y - w - 4, y - 25):min(y + w + 4, y + 25),
+                                  max(x - h - 4, x - 25): min(x + h + 4, x + 25)])
+
         return cropped_images
 
     def crop_and_pad(self):
@@ -78,17 +98,17 @@ class Cropping:
         cropped_images = self.crop_images(center_of_mass)
         # initialize numpy array
         a = np.array(cropped_images[0])
-        a = pad_images(a)
+        # a = pad_images(a)
+        a = pad_images2(a)
         b = np.array(cropped_images[1])
-        b = pad_images(b)
+        # b = pad_images(b)
+        b = pad_images2(b)
         # stack first two images
         cropped_numpy = np.stack((a, b), axis=0)
         # concatenate the rest of the images
         for i, img in enumerate(cropped_images):
             if i > 1:
                 c = np.array(cropped_images[i])
-                c = pad_images(c)
+                c = pad_images2(c)
                 cropped_numpy = np.concatenate((cropped_numpy, [c]), axis=0)
         return cropped_numpy
-
-
