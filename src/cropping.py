@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 from src.utils import clean_stats
+import time
 
 
 def pad_images(image):
@@ -10,9 +11,12 @@ def pad_images(image):
     padded_image = np.zeros((50, 50))
     if image.shape[0] < 50 or image.shape[1] < 50:
         padded_image[0:image.shape[0], 0:image.shape[1]] = image
+
         return padded_image
     else:
+
         return image
+
 
 
 def pad_images2(image):
@@ -82,9 +86,11 @@ class Cropping:
             y = center_of_mass[i][1]
             h = self.stats[i+1][2]
             w = self.stats[i+1][3]
+            cropped_img = self.original_tile[y-25:y+25, x-25:x+25]
+            #cropped_images.append(self.original_tile[max(y - w - 4, y - 25):min(y + w + 4, y + 25),
+                                  #max(x - h - 4, x - 25): min(x + h + 4, x + 25)])
+            cropped_images.append(cropped_img)
 
-            cropped_images.append(self.original_tile[max(y - w - 4, y - 25):min(y + w + 4, y + 25),
-                                  max(x - h - 4, x - 25): min(x + h + 4, x + 25)])
 
         return cropped_images
 
@@ -96,19 +102,31 @@ class Cropping:
         print("cropping...")
         center_of_mass = self.find_center_of_mass()
         cropped_images = self.crop_images(center_of_mass)
+
         # initialize numpy array
-        a = np.array(cropped_images[0])
-        # a = pad_images(a)
-        a = pad_images2(a)
-        b = np.array(cropped_images[1])
-        # b = pad_images(b)
-        b = pad_images2(b)
-        # stack first two images
-        cropped_numpy = np.stack((a, b), axis=0)
-        # concatenate the rest of the images
-        for i, img in enumerate(cropped_images):
-            if i > 1:
-                c = np.array(cropped_images[i])
-                c = pad_images2(c)
-                cropped_numpy = np.concatenate((cropped_numpy, [c]), axis=0)
-        return cropped_numpy
+        if len(cropped_images) > 1:
+
+
+            a = np.array(cropped_images[0])
+            # a = pad_images(a)
+            a = pad_images(a)
+            b = np.array(cropped_images[1])
+            # b = pad_images(b)
+            b = pad_images(b)
+            # stack first two images
+            cropped_numpy = np.stack((a, b), axis=0)
+            # concatenate the rest of the images
+            for i, img in enumerate(cropped_images):
+                if i > 1:
+                    c = np.array(cropped_images[i])
+                    c = pad_images(c)
+                    cropped_numpy = np.concatenate((cropped_numpy, [c]), axis=0)
+            return cropped_numpy
+        elif len(cropped_images) == 1:
+            a = np.array(cropped_images[0])
+            a = pad_images(a)
+            cropped_numpy = np.expand_dims(a, axis=0)
+            return cropped_numpy
+        else:
+            h = "no images"
+            return h

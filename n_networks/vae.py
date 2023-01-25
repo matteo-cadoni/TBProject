@@ -1,14 +1,12 @@
-from tqdm import tqdm
+from torch.utils.data import Dataset
 import torch
-
-import imageio
+from tqdm import tqdm
+import torch.nn as nn
+import torch.nn.functional as F
 import numpy as np
-import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
-from torchvision.utils import save_image
-from sklearn.model_selection import train_test_split
+import cv2 as cv
+from PIL import Image
 
-from torch.utils.data import DataLoader, Dataset
 class MyDataset(Dataset):
     def __init__(self, data):
         self.data = data
@@ -18,35 +16,45 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         img = self.data.iloc[index]['image']
+        img = self.change_contrast(img, 100)
+        img = np.array(img)
         # change image values to be in 0,1 range instead of 0, 16000
         if img.max() >0:
             img = img / img.max()
+        # reshape image to be 32x32
 
 
-        #reshape image to be 32x32
         img = img[9:41, 9:41]
-
-
-
         return torch.unsqueeze(torch.tensor(img, dtype=torch.float32), 0)
 
-to_pil_image = transforms.ToPILImage()
+    def change_contrast(self, image, level):
+        """
+        Change the contrast of an image
 
-def image_to_vid(images):
-    imgs = [np.array(to_pil_image(img)) for img in images]
-    imageio.mimsave('outputs/generated_images.gif', imgs)
-def save_reconstructed_images(recon_images, epoch):
-    save_image(recon_images.cpu(), f"outputs/output{epoch}.jpg")
-def save_loss_plot(train_loss, valid_loss):
-    # loss plots
-    plt.figure(figsize=(10, 7))
-    plt.plot(train_loss, color='orange', label='train loss')
-    plt.plot(valid_loss, color='red', label='validataion loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.savefig('outputs/loss.jpg')
-    plt.show()
+        param image: image to be changed
+              level: level of contrast change
+        return: image with changed contrast
+        """
+        # rescale image
+        image = np.uint8(self.rescale_image(image))
+        # create image object
+        image = Image.fromarray(image)
+        # define contrast level
+        factor = (259 * (level + 255)) / (255 * (259 - level))
+
+        # function that applies the contrast change
+        def contrast(c):
+            return 128 + factor * (c - 128)
+
+        return image.point(contrast)
+
+    def rescale_image(self, image):
+        if image.max() > 0:
+            image = image - np.min(image)
+            image = image / np.max(image)
+            image = image * 255
+        return image
+
 def final_loss(bce_loss, mu, logvar):
     """
     This function will add the reconstruction loss (BCELoss) and the
@@ -103,15 +111,12 @@ def validate(model, dataloader, dataset, device, criterion):
     return val_loss, recon_images
 
 
-import torch.nn as nn
-import torch.nn.functional as F
 kernel_size = 4 # (4, 4) kernel
 init_channels = 8 # initial number of filters
 image_channels = 1 # MNIST images are grayscale
 latent_dim = 16 # latent dimension for sampling
 
 
-# define a Conv VAE
 class ConvVAE(nn.Module):
     def __init__(self):
         super(ConvVAE, self).__init__()
@@ -155,7 +160,6 @@ class ConvVAE(nn.Module):
             in_channels=init_channels * 2, out_channels=image_channels, kernel_size=kernel_size,
             stride=2, padding=1
         )
-
     def reparameterize(self, mu, log_var):
         """
         :param mu: mean from the encoder's latent space
@@ -191,91 +195,3 @@ class ConvVAE(nn.Module):
         x = F.relu(self.dec3(x))
         reconstruction = torch.sigmoid(self.dec4(x))
         return reconstruction, mu, log_var
-
-
-import torch
-import torch.optim as optim
-import torch.nn as nn
-
-import torchvision.transforms as transforms
-import torchvision
-import matplotlib
-from torch.utils.data import DataLoader
-from torchvision.utils import make_grid
-import pandas as pd
-
-
-matplotlib.style.use('ggplot')
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# initialize the model
-model = ConvVAE().to(device)
-# set the learning parameters
-lr = 0.01
-epochs = 200
-batch_size = 64
-optimizer = optim.Adam(model.parameters(), lr=lr)
-criterion = nn.BCELoss(reduction='sum')
-# a list to save all the reconstructed images in PyTorch grid format
-grid_images = []
-
-transform = transforms.Compose([
-    transforms.Resize((32, 32)),
-    transforms.ToTensor(),
-])
-# load pandas dataframe, saved as pkl
-my_df = pd.read_pickle('../labelled_data/tile_673_smear_2156_17_3.pkl')
-
-my_df = my_df.append(pd.read_pickle('../labelled_data/tile_674_smear_2156_17_3.pkl'))
-my_df = my_df.append(pd.read_pickle('../labelled_data/tile_675_smear_2156_17_3.pkl'))
-my_df = my_df.append(pd.read_pickle('../labelled_data/tile_676_smear_2156_17_3.pkl'))
-my_df = my_df.append(pd.read_pickle('../labelled_data/tile_677_smear_2156_17_3.pkl'))
-#drop labels
-my_df = my_df.drop(columns=['label'])
-
-dataset = MyDataset(my_df)
-trainset, testset = train_test_split(dataset, test_size=0.2)
-trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-testloader = DataLoader(testset, batch_size=batch_size, shuffle=False)
-"""
-# training set and train data loader
-trainset = torchvision.datasets.MNIST(
-    root='../input', train=True, download=True, transform=transform
-)
-
-trainloader = DataLoader(
-    trainset, batch_size=batch_size, shuffle=True
-)
-
- #validation set and validation data loader
-testset = torchvision.datasets.MNIST(
-    root='../input', train=False, download=True, transform=transform
-)
-testloader = DataLoader(
-    testset, batch_size=batch_size, shuffle=False
-)
-"""
-train_loss = []
-valid_loss = []
-for epoch in range(epochs):
-    print(f"Epoch {epoch+1} of {epochs}")
-    train_epoch_loss = train(
-        model, trainloader, trainset, device, optimizer, criterion
-    )
-    valid_epoch_loss, recon_images = validate(
-        model, testloader, testset, device, criterion
-    )
-    train_loss.append(train_epoch_loss)
-    valid_loss.append(valid_epoch_loss)
-    # save the reconstructed images from the validation loop
-    save_reconstructed_images(recon_images, epoch+1)
-    # convert the reconstructed images to PyTorch image grid format
-    image_grid = make_grid(recon_images.detach().cpu())
-    grid_images.append(image_grid)
-    print(f"Train Loss: {train_epoch_loss:.4f}")
-    print(f"Val Loss: {valid_epoch_loss:.4f}")
-
-# save the reconstructions as a .gif file
-image_to_vid(grid_images)
-# save the loss plots to disk
-save_loss_plot(train_loss, valid_loss)
-print('TRAINING COMPLETE')

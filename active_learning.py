@@ -2,6 +2,8 @@ import cvxpy as cp
 import numpy as np
 import matplotlib.pyplot as plt
 import gurobipy as gp
+from geomloss import SamplesLoss
+import kmedoids
 
 class  active_learning():
     def  __init__(self, vectors, k):
@@ -185,6 +187,18 @@ class  active_learning():
             return True
         else:
             return False
+
+    def ot_clustering(self):
+        loss = SamplesLoss(loss="sinkhorn", p=2, blur=.05)
+        # compute the distance matrix with sampleloss
+        dists = np.zeros((self.vectors.shape[0], self.vectors.shape[0]))
+        for i in range(self.vectors.shape[0]):
+            for j in range(self.vectors.shape[0]):
+                if i < j:
+                    dists[i, j] = loss(self.vectors[i], self.vectors[j])
+                    dists[j, i] = dists[i, j]
+        fp = kmedoids.fasterpam(dists, 100)
+        return fp
 
 
 

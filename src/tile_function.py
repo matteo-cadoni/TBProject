@@ -34,61 +34,64 @@ def tile_pipeline(config, img, loader):
 
     # bounding boxes
     image_boxes = add_bounding_boxes(img, stats)
-
+    cropped_images = "no images"
     if postprocessing_config['crop']:
         # Cropping
         cropping_function = Cropping(img, final_image)
         cropped_images = cropping_function.crop_and_pad()
 
-    labelling_dataset_config = config['labelling_dataset']
-    if labelling_dataset_config['create_dataset']:
-        # Interactive labelling
-        i_l = InteractiveLabeling(cropped_images)
-        labels = i_l.run()
+    if cropped_images == "no images":
+        print("No images, cannot label or save dataset or inference")
+    else:
+        labelling_dataset_config = config['labelling_dataset']
+        if labelling_dataset_config['create_dataset']:
+            # Interactive labelling
+            i_l = InteractiveLabeling(cropped_images)
+            labels = i_l.run()
 
-        # dataset creation
-        dataframe = pd.DataFrame()
-        for i in range(0, labels.shape[0]):
-            d = {'image': [cropped_images[i]], 'label': [labels[i]]}
+            # dataset creation
+            dataframe = pd.DataFrame()
+            for i in range(0, labels.shape[0]):
+                d = {'image': [cropped_images[i]], 'label': [labels[i]]}
 
-            df2 = pd.DataFrame(d)
-            dataframe = pd.concat([dataframe, df2], ignore_index=True)
+                df2 = pd.DataFrame(d)
+                dataframe = pd.concat([dataframe, df2], ignore_index=True)
 
-        # save dataset
-        save_config = config['saving']
-        if save_config['save']:
-            # save dataframe with pandas library
-            labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
-            dataframe.to_pickle(labelled_data_path)
-            print("Dataset saved in: " + labelled_data_path)
-        if save_config['save_stats']:
-            # create dataframe with stats for each sample then save it as a .pkl file
-            stats_dataframe = pd.DataFrame(stats)
-            stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + '.pkl')
-            stats_dataframe.to_pickle(stats_dataframe_path)
-            print("Stats saved in: " + stats_dataframe_path)
+            # save dataset
+            save_config = config['saving']
+            if save_config['save']:
+                # save dataframe with pandas library
+                labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
+                dataframe.to_pickle(labelled_data_path)
+                print("Dataset saved in: " + labelled_data_path)
+            if save_config['save_stats']:
+                # create dataframe with stats for each sample then save it as a .pkl file
+                stats_dataframe = pd.DataFrame(stats)
+                stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + '.pkl')
+                stats_dataframe.to_pickle(stats_dataframe_path)
+                print("Stats saved in: " + stats_dataframe_path)
 
-    # Inference visualization
-    inference_config = config['inference']
+        # Inference visualization
+        inference_config = config['inference']
 
-    if inference_config['do_inference']:
-        print("Inference...")
-        # do one of the possible inference
-        inference = Inference(cropped_images, stats, final_image)
-        if inference_config['prediction'] == 'SVM':
-            red_boxes, green_boxes = inference.svm_prediction()
-        elif inference_config['prediction'] == 'CNN':
-            red_boxes, green_boxes = inference.network_prediction()
-        elif inference_config['prediction'] == 'STATS':
-            red_boxes, green_boxes = inference.stats_prediction()
+        if inference_config['do_inference']:
+            print("Inference...")
+            # do one of the possible inference
+            inference = Inference(cropped_images, stats, final_image)
+            if inference_config['prediction'] == 'SVM':
+                red_boxes, green_boxes = inference.svm_prediction()
+            elif inference_config['prediction'] == 'CNN':
+                red_boxes, green_boxes = inference.network_prediction()
+            elif inference_config['prediction'] == 'STATS':
+                red_boxes, green_boxes = inference.stats_prediction()
 
-        viewer = napari.Viewer()
-        viewer.add_image(img, name='Inferenced image')
-        viewer.add_shapes(red_boxes, shape_type='rectangle', edge_color='red',
-                          face_color='transparent', name='Not bacilli')
-        viewer.add_shapes(green_boxes, shape_type='rectangle', edge_color='green',
-                          face_color='transparent', name='Bacilli')
-        napari.run()
+            viewer = napari.Viewer()
+            viewer.add_image(img, name='Inferenced image')
+            viewer.add_shapes(red_boxes, shape_type='rectangle', edge_color='red',
+                              face_color='transparent', name='Not bacilli')
+            viewer.add_shapes(green_boxes, shape_type='rectangle', edge_color='green',
+                              face_color='transparent', name='Bacilli')
+            napari.run()
 
     # visualization
     visualization_config = config['visualization']

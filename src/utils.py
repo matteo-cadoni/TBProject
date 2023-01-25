@@ -57,10 +57,16 @@ def clean_stats(stats):
     """
     # make a copy of stats
     stats1 = stats.copy()
+    #indices to delete
+    indices = []
     # delete
     for i in range(0, stats.shape[0]):
         if stats[i, 4] > 625:
-            stats1 = np.delete(stats, i, 0)
+            # append index
+            indices.append(i)
+
         if stats[i, 4] < 25:
-            stats1 = np.delete(stats, i, 0)
+            indices.append(i)
+    # delete
+    stats1 = np.delete(stats1, indices, axis=0)
     return stats1

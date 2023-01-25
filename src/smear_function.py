@@ -4,7 +4,7 @@ from src.postprocessing import Postprocessing
 from src.cropping import Cropping
 import pandas as pd
 import os
-
+import time
 
 def smear_pipeline(config, smear, loader):
     """
@@ -36,34 +36,42 @@ def smear_pipeline(config, smear, loader):
         whole_img_not_cleaned, final_image, num_bacilli, stats = postprocess.apply()
 
         # Cropping
+        cropped_images = "no images"
         if postprocessing_config['crop']:
             if stats.shape[0] > 1:
                 cropping_function = Cropping(img, final_image)
                 cropped_images = cropping_function.crop_and_pad()
             else:
                 num_bacilli = 0
+        if cropped_images != "no images":
+            for h in range(cropped_images.shape[0]):
 
-        # Save the results
-        labelling_dataset_config = config['labelling_dataset']
-        if labelling_dataset_config['create_dataset'] and postprocessing_config['crop']:
-            if stats.shape[0] > 1:
+                print("shape of cropped image: ", cropped_images[h].shape)
 
-                # dataset creation
-                dataframe = pd.DataFrame()
-                for l in range(0, cropped_images.shape[0]):
-                    d = {'image': [cropped_images[l]]}
-                    df2 = pd.DataFrame(d)
-                    dataframe = pd.concat([dataframe, df2], ignore_index=True)
+        if cropped_images == "no images":
+            print("No images, cannot label or save dataset or inference")
+        else:
+            # Save the results
+            labelling_dataset_config = config['labelling_dataset']
+            if labelling_dataset_config['create_dataset'] and postprocessing_config['crop']:
+                if stats.shape[0] > 1:
 
-                # save the images
-                save_config = config['saving']
-                if save_config['save']:
-                    # save dataframe with pandas library
-                    labelled_data_path = os.path.join('../labelled_data', loader.dataset_name + str(i) + '.pkl')
-                    dataframe.to_pickle(labelled_data_path)
+                    # dataset creation
+                    dataframe = pd.DataFrame()
+                    for l in range(0, cropped_images.shape[0]):
+                        d = {'image': [cropped_images[l]]}
+                        df2 = pd.DataFrame(d)
+                        dataframe = pd.concat([dataframe, df2], ignore_index=True)
 
-            else:
-                num_bacilli = 0
+                    # save the images
+                    save_config = config['saving']
+                    if save_config['save']:
+                        # save dataframe with pandas library
+                        labelled_data_path = os.path.join('D:/images', loader.dataset_name + str(i) + '.pkl')
+                        dataframe.to_pickle(labelled_data_path)
+
+                else:
+                    num_bacilli = 0
 
         total_number_bacilli += num_bacilli
     print("Total number of bacilli: ", total_number_bacilli)
