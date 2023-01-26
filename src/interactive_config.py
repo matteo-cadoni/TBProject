@@ -239,13 +239,14 @@ class InteractiveConfig:
 
         # get inference
         self.inference = self.inference.get()
-        if not self.crop and self.inference:
-            raise ValueError("Can't do inference without cropping")
+
 
         # get inference type
         self.inference_type = self.inference_type.get()
         if self.inference_type not in ["CNN", "SVM", "STATS"]:
             raise ValueError("Inference type is not CNN, SVM, or STATS")
+        if self.inference and (self.inference_type == "CNN") and (not self.crop):
+            raise ValueError("Can't do CNN inference without cropping")
 
         # get show images
         self.show_images = self.show_images.get()

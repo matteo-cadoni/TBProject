@@ -195,3 +195,29 @@ class ConvVAE(nn.Module):
         x = F.relu(self.dec3(x))
         reconstruction = torch.sigmoid(self.dec4(x))
         return reconstruction, mu, log_var
+
+    def generate_image(self, z):
+
+        z = self.fc2(z)
+        z = z.view(-1, 64, 1, 1)
+        x = F.relu(self.dec1(z))
+        x = F.relu(self.dec2(x))
+        x = F.relu(self.dec3(x))
+        reconstruction = torch.sigmoid(self.dec4(x))
+        return reconstruction
+
+    def generate_feature_vector(self,image):
+        x = F.relu(self.enc1(image))
+        x = F.relu(self.enc2(x))
+        x = F.relu(self.enc3(x))
+        x = F.relu(self.enc4(x))
+
+        batch, _, _, _ = x.shape
+        x = F.adaptive_avg_pool2d(x, 1).reshape(batch, -1)
+        hidden = self.fc1(x)
+        # get `mu` and `log_var`
+        mu = self.fc_mu(hidden)
+        log_var = self.fc_log_var(hidden)
+        # get the latent vector through reparameterization
+        z = self.reparameterize(mu, log_var)
+        return z

@@ -17,8 +17,8 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = ConvVAE().to(device)
 # set the learning parameters
 lr = 0.001
-epochs = 200
-batch_size = 8
+epochs = 500
+batch_size = 10
 optimizer = optim.Adam(model.parameters(), lr=lr)
 criterion = nn.BCELoss(reduction='sum')
 # a list to save all the reconstructed images in PyTorch grid format
@@ -35,18 +35,23 @@ for i in range(1, 1345):
     if os.path.isfile('D:/images/smear_2156_17_3' + str(i) + '.pkl'):
         my_df = my_df.append(pd.read_pickle('D:/images/smear_2156_17_3' + str(i) + '.pkl'))
 #print head
-print(my_df.shape)
+print(my_df.shape, "dd")
 # show one image
-#plt.imshow(my_df.iloc[2200]['image'], cmap='gray')
-#plt.show()
+# create new dataframe
+
+cdf = my_df.iloc[2200:2400:10]
+#for i in range(0, 10):
+   # plt.imshow(cdf.iloc[i], cmap='gray')
+  #  plt.show()
+
 #remove all the images but 2200
 
+print(cdf.shape)
 
-
-dataset = MyDataset(my_df)
-trainset, testset = train_test_split(dataset, test_size=0.2)
-trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-testloader = DataLoader(testset, batch_size=batch_size, shuffle=False)
+dataset = MyDataset(cdf)
+#trainset, testset = train_test_split(dataset, test_size=0.2)
+trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+testloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 """
 # training set and train data loader
 trainset = torchvision.datasets.MNIST(
@@ -70,10 +75,10 @@ valid_loss = []
 for epoch in range(epochs):
     print(f"Epoch {epoch+1} of {epochs}")
     train_epoch_loss = train(
-        model, trainloader, trainset, device, optimizer, criterion
+        model, trainloader, dataset, device, optimizer, criterion
     )
     valid_epoch_loss, recon_images = validate(
-        model, testloader, testset, device, criterion
+        model, testloader, dataset, device, criterion
     )
     train_loss.append(train_epoch_loss)
     valid_loss.append(valid_epoch_loss)
@@ -89,4 +94,6 @@ for epoch in range(epochs):
 image_to_vid(grid_images)
 # save the loss plots to disk
 save_loss_plot(train_loss, valid_loss)
+# save the model
+torch.save(model.state_dict(), 'vae_model.pth')
 print('TRAINING COMPLETE')

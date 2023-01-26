@@ -6,32 +6,33 @@ from geomloss import SamplesLoss
 import kmedoids
 
 class  active_learning():
-    def  __init__(self, vectors, k):
+    def  __init__(self, vectors, k, centers):
             self .vectors = vectors
             self .k = k
             self.number_of_outliers = int (len(vectors) * 0.05)
             print("number of outliers: " , self.number_of_outliers)
             self.mip_centers = None
+            self .centers = centers
 
     def greedy_k_center(self): #not two time same center dc
             print("greedy k center" )
-            centers = [self .vectors[np.random.randint(self .vectors.shape[0])]]
+
 
             vectors = self .vectors
-            vectors = np.delete(vectors, np.where(np.all(vectors == centers[0], axis=1)), axis=0)
+
 
             for i in range(self.k-1):
                 print(i)
-                dists = np.zeros((vectors.shape[0], len(centers)))
+                dists = np.zeros((vectors.shape[0], len(self.centers)))
                 for k in range(len(vectors)):
-                    for j in range(len(centers)):
-                        dists[k,j] = np.linalg.norm(vectors[k]-centers[j])
+                    for j in range(len(self.centers)):
+                        dists[k,j] = np.linalg.norm(vectors[k]-self.centers[j])
                 mindists = np.min(dists, axis=1)
                 next_center = vectors[np.argmax(mindists)]
-                centers.append(next_center)
+                self.centers.append(next_center)
                 vectors = np.delete(vectors, np.where(np.all(vectors == next_center, axis=1)), axis=0)
 
-            centers = np.array(centers)
+            centers = np.array(self.centers)
             return centers
 
     def robust_k_center(self):
