@@ -9,6 +9,7 @@ src/tbdetect/utils.py
 src/tbdetect.egg-info/PKG-INFO
 src/tbdetect.egg-info/SOURCES.txt
 src/tbdetect.egg-info/dependency_links.txt
+src/tbdetect.egg-info/requires.txt
 src/tbdetect.egg-info/top_level.txt
 src/tbdetect/func/__init__.py
 src/tbdetect/func/cropping.py

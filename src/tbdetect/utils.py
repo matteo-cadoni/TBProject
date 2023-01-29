@@ -1,6 +1,14 @@
 import pandas as pd
 import os
-import napari
+import warnings
+
+try:
+    import napari
+except ImportError:
+    warnings.warn("The package napari is not installed. Install napari to enable visualization features. Attention: installation of napari differs from machine to machine. Make sure to choose the right installation command for your machine.")
+    _has_napari = False
+else:
+    _has_napari = True
 
 
 from tbdetect.func.loader import Loader
@@ -150,26 +158,28 @@ def tile_pipeline(config, img, loader):
         inference = Inference(cropped_images, stats)
         red_boxes, green_boxes = inference.predict()
 
-        viewer = napari.Viewer()
-        viewer.add_image(img, name='Inferenced image')
-        viewer.add_shapes(red_boxes, shape_type='rectangle', edge_color='red',
+        if _has_napari:
+            viewer = napari.Viewer()
+            viewer.add_image(img, name='Inferenced image')
+            viewer.add_shapes(red_boxes, shape_type='rectangle', edge_color='red',
                             face_color='transparent', name='Not bacilli')
-        viewer.add_shapes(green_boxes, shape_type='rectangle', edge_color='green',
+            viewer.add_shapes(green_boxes, shape_type='rectangle', edge_color='green',
                             face_color='transparent', name='Bacilli')
-        napari.run()
+            napari.run()
     ######## END INFERENCE/VISUALIZATION ########
         
     ######## BEGIN VISUALIZATION ########
-    visualization_config = config['visualization']
-    show = visualization_config['show']
-    if show:
-        if preprocess_config['algorithm'] == 'rescale':
-            images = [img, whole_img_not_cleaned, final_image, image_boxes]
-            strings_names = ['original', 'binarized', 'cleaned binarized','original w/ boxes']
-        else:
-            images = [img, preprocessed_img, whole_img_not_cleaned, final_image, image_boxes]
-            algorithm = visualization_config['algorithm']
-            strings_names = ['original', f'{algorithm}ened', 'binarized', 'cleaned binarized','original w/ boxes']
-        visualize_all_list_napari(images, strings_names)
+    if _has_napari:
+        visualization_config = config['visualization']
+        show = visualization_config['show']
+        if show:
+            if preprocess_config['algorithm'] == 'rescale':
+                images = [img, whole_img_not_cleaned, final_image, image_boxes]
+                strings_names = ['original', 'binarized', 'cleaned binarized','original w/ boxes']
+            else:
+                images = [img, preprocessed_img, whole_img_not_cleaned, final_image, image_boxes]
+                algorithm = visualization_config['algorithm']
+                strings_names = ['original', f'{algorithm}ened', 'binarized', 'cleaned binarized','original w/ boxes']
+            visualize_all_list_napari(images, strings_names)
     # currently opening the napari visualizer stops the execution of the code
     ######## END VISUALIZATION ########

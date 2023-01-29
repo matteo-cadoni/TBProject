@@ -9,20 +9,8 @@ import os
 
 from tbdetect.utils import *
 
-"""
-def arguments_parser():
-    '''PARAMETERS'''
-    parser = argparse.ArgumentParser('Tubercolosis Detection')
-    parser.add_argument('config', type=str, default='tbdetect/configs/thresholding.yaml',
-                        help='configure file for thresholding experiments')
-    return parser
-    """
 
 def main():
-    """
-    parser = arguments_parser()
-    pars_arg = parser.parse_args()
-    """
     config_file = os.path.join(os.path.dirname(__file__), 'configs', 'thresholding.yaml')
 
     # read config from input.yaml
