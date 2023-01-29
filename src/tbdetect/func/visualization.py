@@ -1,6 +1,14 @@
-import napari
 import numpy as np
 import cv2 as cv
+import warnings
+
+try:
+    import napari
+except ImportError:
+    warnings.warn("The package napari is not installed. Install napari to enable visualization features. Attention: installation of napari differs from machine to machine. Make sure to choose the right installation command for your machine.")
+    _has_napari = False
+else:
+    _has_napari = True
 
 def visualize_all_list_napari(numpy_img_list: np.ndarray,names):
     """
