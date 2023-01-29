@@ -61,9 +61,19 @@ class Autoencoder_mlp(nn.Module):
         return x
 
 
+class ImageTensorDataset(Dataset):
+    def __init__(self, tensor):
+        self.tensor = tensor
+
+    def __getitem__(self, index):
+        return self.tensor[index]
+
+    def __len__(self):
+        return self.tensor.shape[0]
+        
+
 class Autoencoder_dataset(Dataset):
     def __init__(self, data):
-        
         
         self.data = data
 
@@ -75,3 +85,6 @@ class Autoencoder_dataset(Dataset):
         img = self.data.iloc[index]['image']
         label = self.data.iloc[index]['label']
         return torch.tensor(img, dtype=torch.float32), torch.tensor(label, dtype=torch.float32)
+    
+    def append(self, img):
+        self.data = torch.stack(self.data, img)

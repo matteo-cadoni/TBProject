@@ -1,5 +1,5 @@
 from model.neural_net import Net, ChatGPT, MyDataset, toy_model
-from model.autoencoder import Autoencoder_conv, Autoencoder_mlp, Autoencoder_dataset
+from model.autoencoder import Autoencoder_conv, Autoencoder_mlp, ImageTensorDataset, Autoencoder_dataset
 import pandas as pd
 from torch.utils.data import DataLoader
 import torch.nn as nn
@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 import argparse
 import yaml
 import time
+import torchvision.transforms as transforms
 
 def arguments_parser():
     '''PARAMETERS'''
@@ -19,6 +20,21 @@ def arguments_parser():
                         help='configure file for training')
     return parser
 
+def save_model(model):
+    # check if directory model_ckpt exists
+    if not os.path.exists('model_ckpt'):
+        os.makedirs('model_ckpt')
+    torch.save(model.state_dict(), 'model_ckpt/autoencoder.pth')
+    print("Model saved")
+    
+# take data in a dataframe and return a tensor
+def dataframe_to_tensor(data):
+    
+    tensor = torch.stack([torch.Tensor(i[0]) for i in data.values])
+    labels = [i[1] for i in data.values]
+    assert tensor.shape[0] == len(labels)
+    return tensor, labels
+    
 
 def main():
     parser = arguments_parser()
@@ -36,28 +52,44 @@ def main():
     data = []
     for i, path in enumerate(data_paths):
         data.append(pd.read_pickle(path))
-        print("Added data from path and shape: ", path, data[i].shape)
+        print("Added data from path: ", path)
+        print("Shape of data: ", data[i].shape)
     data = pd.concat(data)
     print('Data loaded, shape: ', data.shape)
+    data_tensor, labels_list = dataframe_to_tensor(data)
+
 
     train_config = config['train']
     batch_size = train_config['batch_size']
     epochs = train_config['epochs']
     type = train_config['type']
     
-    # take the first image in data and put it in a new dataframe
-    overfit = 0 
-    if overfit == 1:
-        data = data.iloc[50:51]
-        train_dataset = Autoencoder_dataset(data)
-        test_dataset = Autoencoder_dataset(data)
-    else:
-        print('Splitting data into train and test and preparing DataLoader')
-        train, test = train_test_split(data, test_size=0.2)
-        train_dataset = Autoencoder_dataset(train)
-        test_dataset = Autoencoder_dataset(test)
+    # # take the first image in data and put it in a new dataframe
+    # overfit = 0 
+    # if overfit == 1:
+    #     data = data.iloc[50:51]
+    #     train_dataset = Autoencoder_dataset(data)
+    #     test_dataset = Autoencoder_dataset(data)
+    # else:
+    #     print('Splitting data into train and test and preparing DataLoader')
+    #     train, test = train_test_split(data, test_size=0.2)
+    #     train_dataset = Autoencoder_dataset(train)
+    #     test_dataset = Autoencoder_dataset(test)
     
     
+    transformation = torch.nn.Compose(
+        transforms.hflip()
+    )
+    # Apply the transforms to the data
+    # duplicate the original training data
+    
+    
+    for data in data_tensor:
+        transformed_data = scripted_transformation(data)
+        breakpoint()
+        
+    transformed_data = data_transforms(train_dataset)
+    print("Transformed data shape: ", transformed_data.shape)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     print("Train data is ready, lenght: ", len(train_dataset))
@@ -76,16 +108,23 @@ def main():
     print(net)
     time.sleep(2)
 
-    print('Initialising weights')
-    def weights_init(m):
-        if isinstance(m, nn.Conv2d):
-            torch.nn.init.xavier_uniform_(m.weight)
-            m.bias.data.fill_(0.01)
-        elif isinstance(m, nn.Linear):
-            torch.nn.init.xavier_uniform_(m.weight)
-            m.bias.data.fill_(0.01)
+    # print('Initialising weights')
+    # def weights_init(m):
+    #     if isinstance(m, nn.Conv2d):
+    #         torch.nn.init.xavier_uniform_(m.weight)
+    #         m.bias.data.fill_(0.01)
+    #     elif isinstance(m, nn.Linear):
+    #         torch.nn.init.xavier_uniform_(m.weight)
+    #         m.bias.data.fill_(0.01)
     
-    net.apply(weights_init)
+    # net.apply(weights_init)
+    
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print("Device is: ", device)
+    
+    
+    net = net.to(torch.device("cuda"))
+    print('Model loaded on device')
     
     criterion = nn.MSELoss()
     optimizer = optim.Adam(net.parameters(), lr=0.001)
@@ -96,19 +135,26 @@ def main():
         train_loss = []
         for i, data in enumerate(train_loader):
             # get the inputs
+            
+            
+            
             inputs, _ = data
             #print("Shape of inputs and labels is: ", inputs.shape)
-            
+            inputs = inputs.to(torch.device("cuda"))
             #print("Shape of inputs and labels after unsqueezing is: ", inputs.shape)
             optimizer.zero_grad()
             
+            
             outputs = net(inputs)
+            outputs = torch.squeeze(outputs, 1)
+            #print("Shape of inputs and outputs is: ", inputs.shape, outputs.shape)
             loss = criterion(inputs, outputs)
             train_loss.append(loss.item())
-            
+
+
             loss.backward()
             optimizer.step()
-            if i % 10 == 0:
+            if i % 1000 == 999:
                 current_loss = loss / inputs.shape[0]
                 print(f"Epoch: {ep+1}, Batch: {i+1}/{len(train_loader)}, Loss: {current_loss}")
         current_loss = np.sum(train_loss) / len(train_dataset)
@@ -123,7 +169,7 @@ def main():
     print('Finished Training')
     #print finished training statistics
     print('Saving model')
-    torch.save(net.state_dict(), 'model_ckpt/model.pth')
+    save_model(net)
     
 
 
