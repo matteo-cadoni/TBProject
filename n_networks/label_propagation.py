@@ -31,7 +31,7 @@ class LabelPropagation:
                 if i != j:
                     bacilli_distance[i, j] = loss(torch.from_numpy(rescale(bacilli.iloc[i]['image'])),
                                               torch.from_numpy(rescale(self.unlabelled_dataset.iloc[j]['image'])))
-        breakpoint()
+
         non_bacilli_distance = np.zeros((non_bacilli.shape[0], self.unlabelled_dataset.shape[0]))
         for i in range(non_bacilli.shape[0]):
             for j in range(self.unlabelled_dataset.shape[0]):

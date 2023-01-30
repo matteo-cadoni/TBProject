@@ -4,17 +4,41 @@ import matplotlib.pyplot as plt
 import gurobipy as gp
 from geomloss import SamplesLoss
 import kmedoids
+import torch
 
 class  active_learning():
-    def  __init__(self, vectors, k, centers):
+    def  __init__(self, vectors, k, init_centers):
             self .vectors = vectors
+            self.vectors_full = vectors
             self .k = k
             self.number_of_outliers = int (len(vectors) * 0.05)
             print("number of outliers: " , self.number_of_outliers)
             self.mip_centers = None
-            self .centers = centers
+            # choose the initial centers
+            # if init_centers is a list of indexes, then the centers are the vectors with the given indexes
+            # if init_centers is a number, then the centers are chosen randomly
+            if  isinstance (init_centers, list):
+                center_list = init_centers
+                self .centers = np.array([vectors[i] for i in init_centers])
+                # remove the centers from the vectors using center_list
+                self.vectors = np.delete(vectors, center_list, axis=0)
+            elif  isinstance (init_centers, int ):
+                center_list = np.random.choice(vectors.shape[0], init_centers, replace=False)
+                self.centers = vectors[center_list]
+                # covert list to numpy array
+                self.centers = np.array(self.centers)
+                # remove the centers from the vectors using center_list
+                self.vectors = np.delete(vectors, center_list, axis=0)
+            else :
+                pass
 
-    def greedy_k_center(self): #not two time same center dc
+
+
+
+
+
+
+    def greedy_k_center(self):
             print("greedy k center" )
 
 
@@ -22,16 +46,21 @@ class  active_learning():
 
 
             for i in range(self.k-1):
-                print(i)
+
                 dists = np.zeros((vectors.shape[0], len(self.centers)))
                 for k in range(len(vectors)):
                     for j in range(len(self.centers)):
-                        dists[k,j] = np.linalg.norm(vectors[k]-self.centers[j])
+                        dists[k, j] = np.linalg.norm(vectors[k]-self.centers[j])
                 mindists = np.min(dists, axis=1)
                 next_center = vectors[np.argmax(mindists)]
-                self.centers.append(next_center)
+                # numpy append
+
+                self.center = np.vstack((self.centers, next_center))
+
+
                 vectors = np.delete(vectors, np.where(np.all(vectors == next_center, axis=1)), axis=0)
 
+            self.vectors = vectors
             centers = np.array(self.centers)
             return centers
 
@@ -43,13 +72,8 @@ class  active_learning():
         #centers_out = self.vectors[np.random.choice(self.vectors.shape[0], self.k, replace=False)]
 
         self.mip_centers = centers_out
-        vectors = self .vectors
-        #remove centers from vector
-        print("centers_out: " , centers_out.shape)
-        for i in range(centers_out.shape[0]):
-            print(np.where(np.all(self.vectors == centers_out[i], axis=1)))
-            vectors[ np.where(np.all(self.vectors == centers_out[i], axis=1))] = 0
-        vectors = vectors[vectors[:,0] != 0]
+        vectors = self.vectors
+
 
         # find maximal distance tthat a point has to its nearest center, do not consider the centers that are already selected
         dists = np.zeros((vectors.shape[0], centers_out.shape[0]))
@@ -97,7 +121,9 @@ class  active_learning():
             print("lb: " , lb)
 
         centers = self.vectors[self.mip_centers == 1]
-        return (lb + ub) / 2, centers
+        #indexes of the centers
+        centers_indexes = np.where(self.mip_centers == 1)
+        return (lb + ub) / 2, centers, centers_indexes
 
 
     def feasible(self, distance):
@@ -148,6 +174,9 @@ class  active_learning():
             return True
         else:
             return False
+
+
+
     def gurobi_feasible(self, distance):
         m = gp.Model("k-center")
         n, d = self.vectors.shape
@@ -193,13 +222,26 @@ class  active_learning():
         loss = SamplesLoss(loss="sinkhorn", p=2, blur=.05)
         # compute the distance matrix with sampleloss
         dists = np.zeros((self.vectors.shape[0], self.vectors.shape[0]))
+
         for i in range(self.vectors.shape[0]):
             for j in range(self.vectors.shape[0]):
+
                 if i < j:
-                    dists[i, j] = loss(self.vectors[i], self.vectors[j])
-                    dists[j, i] = dists[i, j]
-        fp = kmedoids.fasterpam(dists, 100)
-        return fp
+                    # if sum of the two torch vectors is 0 then the distance is 0
+                    if torch.sum(self.vectors[i]) == 0 and torch.sum(self.vectors[j]) == 0:
+                        dists[i, j] = 0
+                        dists[j, i] = 0
+                    else:
+                        dists[i, j] = loss(self.vectors[i], self.vectors[j])
+                        dists[j, i] = dists[i, j]
+
+
+
+
+        breakpoint()
+        fp = kmedoids.fasterpam(dists, self.k)
+
+        return fp[2]
 
 
 
@@ -210,11 +252,11 @@ class  active_learning():
 
 
 
-
+"""
 #create points randomly values between 0 and 50
 vectors = np.random.randint(150, size=(100, 32))
 
-a_l = active_learning(vectors, 5)
+a_l = active_learning(vectors, 5, 10)
 #centers = a_l.robust_k_center()
 #centers = a_l.greedy_k_center()
 #print(centers)
@@ -228,7 +270,7 @@ a_l = active_learning(vectors, 5)
 distance, centers2 = a_l.robust_k_center()
 print(centers2)
 #plot points
-"""
+
 plt.scatter(vectors[:,0], vectors[:,1])
 #plot centers
 plt.scatter(centers2[:,0], centers2[:,1], c='r')
@@ -239,6 +281,7 @@ for i in range(centers2.shape[0]):
 
 plt.show()
 """
+
 """
 #create 3 dimensional points
 vectors = np.random.randint(10, size=(100, 3))

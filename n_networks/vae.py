@@ -7,7 +7,7 @@ import numpy as np
 import cv2 as cv
 from PIL import Image
 
-class MyDataset(Dataset):
+class MyDatasetV(Dataset):
     def __init__(self, data):
         self.data = data
 
@@ -206,7 +206,7 @@ class ConvVAE(nn.Module):
         reconstruction = torch.sigmoid(self.dec4(x))
         return reconstruction
 
-    def generate_feature_vector(self,image):
+    def generate_feature_vector(self, image):
         x = F.relu(self.enc1(image))
         x = F.relu(self.enc2(x))
         x = F.relu(self.enc3(x))

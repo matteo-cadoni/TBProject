@@ -48,7 +48,7 @@ cdf = my_df.iloc[2200:2400:10]
 
 print(cdf.shape)
 
-dataset = MyDataset(cdf)
+dataset = MyDatasetV(cdf)
 #trainset, testset = train_test_split(dataset, test_size=0.2)
 trainloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 testloader = DataLoader(dataset, batch_size=batch_size, shuffle=False)

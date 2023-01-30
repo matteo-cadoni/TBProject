@@ -65,7 +65,7 @@ def clean_stats(stats):
             # append index
             indices.append(i)
 
-        if stats[i, 4] < 15:
+        if stats[i, 4] < 20:
             indices.append(i)
     # delete
     stats1 = np.delete(stats1, indices, axis=0)

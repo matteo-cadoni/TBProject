@@ -1,9 +1,12 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as f
-from torch.utils.data import Dataset
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
+from sklearn.model_selection import train_test_split
+import numpy as np
 
 
+# define model
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -27,8 +30,8 @@ class Net(nn.Module):
         x = self.pool(self.relu(self.conv4(x)))
 
         x = x.view(-1, 64 * 3 * 3)
-        x = f.relu(self.fc1(x))
-        x = f.relu(self.fc2(x))
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
         x = self.sigmoid(self.fc3(x))
 
         return x
@@ -77,34 +80,11 @@ class ChatGPT(nn.Module):
 
         return out
 
-    def get_feature_vector(self, x):
-        """
-        Returns the feature vector of the input image, in second last layer
-        """
-        # 1st convolutional layer
-        out = self.conv1(x)
-        out = self.relu1(out)
-        out = self.maxpool1(out)
 
-        # 2nd convolutional layer
-        out = self.conv2(out)
-        out = self.relu2(out)
-        out = self.maxpool2(out)
-
-        # Fully connected layers
-        out = out.view(-1, 64 * 12 * 12)
-
-        out = self.fc1(out)
-        out = self.relu3(out)
-        # out = self.dropout(out)
-
-        return out
-
-
-class ToyModel(nn.Module):
+class toy_model(nn.Module):
 
     def __init__(self):
-        super(ToyModel, self).__init__()
+        super(toy_model, self).__init__()
 
         self.convolution1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, stride=1, padding=1)
         self.fc1 = nn.Linear(in_features=32 * 50 * 50, out_features=512)
@@ -128,15 +108,47 @@ class ToyModel(nn.Module):
 # dataloaders for train and test
 class MyDataset(Dataset):
     def __init__(self, data):
+
         self.data = data
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, index):
+
         img = self.data.iloc[index]['image']
+        # img = self.change_contrast(img, 100)
+        img = np.array(img)
         # change image values to be in 0,1 range instead of 0, 16000
-        img = img / 16000
+        if img.max() > 0:
+            img = img / img.max()
 
         label = self.data.iloc[index]['label']
         return torch.tensor(img, dtype=torch.float32), torch.tensor(label, dtype=torch.float32)
+
+    def change_contrast(self, image, level):
+        """
+        Change the contrast of an image
+        param image: image to be changed
+              level: level of contrast change
+        return: image with changed contrast
+        """
+        # rescale image
+        image = np.uint8(self.rescale_image(image))
+        # create image object
+        image = Image.fromarray(image)
+        # define contrast level
+        factor = (259 * (level + 255)) / (255 * (259 - level))
+
+        # function that applies the contrast change
+        def contrast(c):
+            return 128 + factor * (c - 128)
+
+        return image.point(contrast)
+
+    def rescale_image(self, image):
+        if image.max() > 0:
+            image = image - np.min(image)
+            image = image / np.max(image)
+            image = image * 255
+        return image
