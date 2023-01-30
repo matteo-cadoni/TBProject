@@ -83,7 +83,7 @@ def tile_pipeline(config, img, loader):
             elif inference_config['prediction'] == 'CNN':
                 red_boxes, green_boxes = inference.network_prediction()
             elif inference_config['prediction'] == 'STATS':
-                red_boxes, green_boxes = inference.stats_prediction()
+                red_boxes, green_boxes = inference.ellipse_brute_prediction()
 
             viewer = napari.Viewer()
             viewer.add_image(img, name='Inferenced image')

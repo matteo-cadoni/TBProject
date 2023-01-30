@@ -1,4 +1,6 @@
+import math
 import cv2
+from matplotlib import pyplot as plt
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -93,6 +95,38 @@ class Inference:
                 predictions = np.append(predictions, 0)
             if self.stats[i][4] > 200:
                 predictions[i] = 0
+        return self.get_boxes(predictions)
+
+    def ellipse_brute_prediction(self):
+        """
+        Find the contours of the bacilli in the image.
+
+        :return: List of all bacilli contours
+        """
+        predictions = np.array([])
+        for i in range(1, self.stats.shape[0]):
+            fake_contours = np.zeros((5, 1, 2), dtype=np.int32)
+            contours, _ = cv2.findContours(self.final_image[self.stats[i][1]:self.stats[i][1]+self.stats[i][3],
+                            self.stats[i][0]:self.stats[i][0]+self.stats[i][2]], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            cnt = max(contours, key=cv2.contourArea)
+            if len(cnt) < 5: 
+                fake_contours[0:len(cnt),:,:] = cnt
+                cnt = fake_contours
+            ellipse = cv2.fitEllipse(cnt)
+            (x, y), (ma, MA), angle = ellipse
+            if MA -ma > 3: #  MA/ma > 2
+                predictions = np.append(predictions, 1)
+            else: # red boxes
+                """ 
+                if math.pi * MA * ma / 4 > 200: # bacilli, green boxes
+                    predictions = np.append(predictions, 1)
+                else:
+                """
+                predictions = np.append(predictions, 0)
+
+            if self.stats[i][4] > 200:
+                predictions[i] = 0     
+            
         return self.get_boxes(predictions)
 
     def svm_prediction(self):
