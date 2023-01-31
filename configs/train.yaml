@@ -1,5 +1,6 @@
 load: 
   data_path: ['labelled_data/tile_673_smear_2156_17_3.pkl', 'labelled_data/tile_674_smear_2156_17_3.pkl', labelled_data/tile_675_smear_2156_17_3.pkl]
+  sampling_percentage: 0.5
 
 train:
   batch_size: 10

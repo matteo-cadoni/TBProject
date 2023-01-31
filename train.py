@@ -16,6 +16,11 @@ import os
 from torch.utils.tensorboard import SummaryWriter
 
 
+# randomly sampled subset of input dataframe with sampling probability p
+def sample(df, p, random_state=42):
+    df_sampled = df.sample(frac=p, random_state=random_state)
+    return df_sampled
+
 def arguments_parser():
     '''PARAMETERS'''
     parser = argparse.ArgumentParser('Tubercolosis Detection')
@@ -28,7 +33,6 @@ def main():
     parser = arguments_parser()
     pars_arg = parser.parse_args()
     
-    writer = SummaryWriter()
     
     # set a seed for reproducibility
     torch.manual_seed(42)
@@ -39,6 +43,7 @@ def main():
 
     # load data from a .pkl file
     loading_config = config['load']
+    sampling_percentage = loading_config['sampling_percentage']
     print("--------------------------------------")
     print('Loading data from pkl file')
     data_paths = loading_config['data_path']
@@ -60,7 +65,12 @@ def main():
     np.random.seed(42)
     
     train, test = train_test_split(data, test_size=0.2, random_state=42)
-    dataAug = DataAug(train)
+    print('Train and test data splitted, train shape: ', train.shape, 'test shape: ', test.shape)
+    # sample a subset of train set
+    print('Sampling train data, with sampling percentage: ', sampling_percentage * 100, '%')
+    train_sampled = sample(train, p = sampling_percentage, random_state=42)
+    print('After sampling, new train dataset shape is ', train_sampled.shape)
+    dataAug = DataAug(train_sampled)
     train = dataAug.augment()
     print('Training data augmented, shape: ', train.shape)
     
@@ -95,6 +105,9 @@ def main():
     
     net = net.to(device)
     print("Model moved to device: ", device)
+    
+    # writer for tensorboard
+    writer = SummaryWriter()
     
     criterion = nn.BCELoss()
     optimizer = optim.Adam(net.parameters(), lr=0.001)
