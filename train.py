@@ -56,7 +56,7 @@ def main():
 
     loadr = loader(loading_config)
     data = loadr.load()
-    data = loadr.apply_filters(data)
+    #data = loadr.apply_filters(data)
     time.sleep(2)
     print("--------------------------------------")
     print("Applying filters to data")
@@ -64,7 +64,7 @@ def main():
     # if filter_config['remove_black_img']:
     #     print("Removing black images")
     #     data, n_removed_imgs = remove_black_img(data)
-    print("Removed ", n_removed_imgs, " black images")
+    # print("Removed ", n_removed_imgs, " black images")
     print("Data shape is now: ", data.shape)
     time.sleep(2)
     train_config = config['train']
@@ -131,7 +131,7 @@ def main():
         total_samples = []
         for i, data in enumerate(train_loader):
             #perform training step
-            training_step(net, data, device, optimizer, criterion, train_loss, total_samples)
+            training_step(data, net, device, optimizer, criterion, train_loss, total_samples)
         
         #compute average train loss for this epoch
         average_train_loss = np.mean(train_loss) * 1000
@@ -141,7 +141,7 @@ def main():
         print_statistics(ep, average_train_loss, total_test_loss, accuracy)        
         tr_loss.append(average_train_loss)
         tst_loss.append(total_test_loss)
-        acc.append
+        acc.append(accuracy)
         print("------------------")
             
         
