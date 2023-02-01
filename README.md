@@ -3,16 +3,12 @@
 
 ## Installation
 
-Create an empty environment specifying the python version as "python=3.8", activate it and run
-```
-pip install -r requirements.txt
-```
-in order to install all packages required for the package `tbdetect`. This might take a while - do not be concerned.
+Create an empty environment specifying the python version as "python=3.8" and activate it.
 
 
 ### Install the package `tbdetect`
 
-`tbdetect` can then be pip-installed by running
+`tbdetect`, including all required packages, can then be pip-installed by running
 ```
 pip install -e .
 ```
