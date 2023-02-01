@@ -63,15 +63,15 @@ TO DO's:
 - [ ] polish and finish all the implementations
 - [ ] integrate everything together
 - [ ] merge branchs
-- [ ] brief hands on presentation for the meeting next week
+- [ ] brief hands-on presentation for the meeting next week
 - [ ] write report
-- [ ] show the plot (*)
+- [ ] show the plot ( * )
 - [ ] we take our clean branch and we implement everything nice and correctly 
 - [ ] Meeting on Monday to practise 
 
 
  - [ ] Active learning capabilities 
-  - [ ] (expert will explain in the meeting)
+ 	- [ ] (expert will explain in the meeting)
 	- [ ] next tuesday 2pm
 	- [ ] play with his tool <- how is it performing in our data, one of us plays the profesional patholoigist role
 	- [ ] active learning platform
