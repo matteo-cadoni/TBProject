@@ -53,10 +53,11 @@ class ChatGPT(nn.Module):
         self.maxpool2 = nn.MaxPool2d(kernel_size=2)
         
         # Fully connected layers
-        self.fc1 = nn.Linear(in_features=64*12*12, out_features=512)
+        self.fc1 = nn.Linear(in_features=64*12*12, out_features=1028)
         self.relu3 = nn.ReLU()
         self.dropout = nn.Dropout(p=0.5)
-        self.fc2 = nn.Linear(in_features=512, out_features=1)
+        self.fc2 = nn.Linear(in_features=1028, out_features=256)
+        self.fc3 = nn.Linear(in_features=256, out_features=1)
         self.sigmoid = nn.Sigmoid()
         
     def forward(self, x):
@@ -77,6 +78,9 @@ class ChatGPT(nn.Module):
         out = self.relu3(out)
         #out = self.dropout(out)
         out = self.fc2(out)
+        out = self.relu3(out)
+        
+        out = self.fc3(out)
         out = self.sigmoid(out)
         
         return out
