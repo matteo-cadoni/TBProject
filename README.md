@@ -46,10 +46,10 @@ TO DO's:
 - [ ] Virtual Machine -> mounting the extended storage 
 
 - [ ] ELLIPSE: 
-  - [ ] Is this brute force approach worth it?  Answer this question by plotting: 
+	- [ ] Is this brute force approach worth it?  Answer this question by plotting: 
 	- [ ] create a scatter plot for the MA and ma for all of the objects (diagonal are the circular objects)
 	- [ ] then with the predictions of the neural net paint the dots, and observe if we arrrive to the ideal case of having the two clusters.
-  - [ ] check whether the nn give us more insights than the plain computer vision ellipse approach
+	- [ ] check whether the nn give us more insights than the plain computer vision ellipse approach
   
 - [ ] k fold cross validation idea:
   - [ ] Plot graphics to assess classification accuracy, with different percentages of training dataset.
