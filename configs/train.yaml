@@ -1,6 +1,7 @@
 load: 
   all_data_path: 'labelled_data/data.pkl'
   data_path_list: ['labelled_data/tile_673_smear_2156_17_3.pkl', 'labelled_data/tile_674_smear_2156_17_3.pkl', 'labelled_data/tile_675_smear_2156_17_3.pkl', 'labelled_data/tile_676_smear_2156_17_3.pkl', 'labelled_data/tile_677_smear_2156_17_3.pkl', 'labelled_data/tile_777_smear_2156_17_3.pkl', 'labelled_data/tile_991_smear_2156_17_3.pkl', 'labelled_data/tile_671_smear_2156_17_3.pkl', 'labelled_data/tile_500_smear_2156_17_3.pkl', labelled_data/all.pkl]
+  #data_path_list: ['labelled_data/tile_673_smear_2156_17_3.pkl']
   sampling_percentage: 1
   remove_black_img: True
 
@@ -8,7 +9,7 @@ filter:
   remove_black_img: True
 
 train:
-  batch_size: 500
+  batch_size: 100
   epochs: 30
 
 random_state: 42  #seed for reproducible results
