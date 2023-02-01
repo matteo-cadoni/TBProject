@@ -45,7 +45,7 @@ TB_sample/
 TO DO's:
 - [ ] Virtual Machine -> mounting the extended storage 
 
-- [ ] ELLIPSE brute approach: 
+- [ ] ELLIPSE: 
   - [ ] Is this brute force approach worth it?  Answer this question by plotting: 
 	- [ ] create a scatter plot for the MA and ma for all of the objects (diagonal are the circular objects)
 	- [ ] then with the predictions of the neural net paint the dots, and observe if we arrrive to the ideal case of having the two clusters.
