@@ -1,4 +1,3 @@
-
 from aicsimageio.readers import CziReader
 import h5py
 import time
@@ -6,14 +5,40 @@ import os
 
 
 class Loader:
-    """
-    Given a single sputum smear image made up of multiple tiles, load and transform it to numpy array
+    """Class that given a single sputum smear image made up of multiple tiles,
+     loads and transform it to numpy array.
+
+    attributes
+    ----------
+    czi_path
+        path to the czi file
+    tile
+        tile to be loaded or None
+    dataset_name
+        name of the dataset when saved
+    data_array
+        numpy array containing the image
+
+    methods
+    -------
+    read_array_from_h5(h5_path)
+        read the array from h5 file
+    save_array_to_h5(h5_path)
+        save the array to h5 file
+    read_array_from_czi()
+        read the array from czi file
+    load()
+        load the array from h5 file if it exists, otherwise read from czi file
     """
 
     def __init__(self, czi_path, tile):
         """
-        param czi_path: path to the czi file
-                 tile: tile to be loaded or None
+        parameters
+        ----------
+        czi_path
+            path to the czi file
+        tile
+            number of tile to be loaded or None
         """
         self.czi_path = czi_path
         self.tile = tile
@@ -27,28 +52,32 @@ class Loader:
             self.dataset_name = f'tile_{tile}_smear_{smear_number[0]}_{smear_number[1]}_{smear_number[2]}'
         
     def read_array_from_h5(self, h5_path):
-        """
-        read the array from h5 file
+        """read the array from h5 file
 
-        param h5_path: path to the h5 file
+        parameters
+        ----------
+        h5_path
+            path to the h5 file
         """
         print(f"Reading array from {h5_path}...")
         h5file = h5py.File(h5_path, 'r')
         self.data_array = h5file[self.dataset_name][:]
         
     def save_array_to_h5(self, h5_path):
-        """
-        save the array to h5 file
+        """" save the array to h5 file
 
-        param h5_path: path to the h5 file
+        parameters
+        ----------
+        h5_path:
+            path to the h5 file
         """
         print(f"Saving array to {h5_path}...")
         h5file = h5py.File(h5_path, 'w')
         h5file.create_dataset(self.dataset_name, data=self.data_array)
                   
     def read_array_from_czi(self):
-        """
-        read the array from czi file
+        """ read the array from czi file
+
         """
         print(f"Reading array from {self.czi_path}...")
         reader = CziReader(self.czi_path)
@@ -58,8 +87,8 @@ class Loader:
             self.data_array = reader.get_image_data("YX", M=self.tile, C=0)
 
     def load(self):
-        """
-        load the array from h5 file if it exists, otherwise read from czi file
+        """ load the array from h5 file if it exists, otherwise read from czi file
+        
         """
         print(f"Loading {self.dataset_name}...")
         # check if h5_file exists, otherwise create it

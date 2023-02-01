@@ -1,3 +1,21 @@
+""" Automated Detection of Tuberculosis Bacilli in Whole-Slide Images
+
+This script allows to process whole-slide images of sputum smear samples
+and detect the number of bacilli in each image.
+
+The script processes whole-slide images of the format ".czi". Software
+requirements are listed in the requirements.txt file.
+
+Different results can be obtained by changing the configuration file.
+Refer to this file for more information.
+
+The script can be run from the command line as follows:
+   python project.py configs/thresholding.yaml.
+To run the script after module installation, use:
+   project.run()
+"""
+
+
 import argparse
 import yaml
 from src.smear_function import *
@@ -24,7 +42,7 @@ def main():
     with open(pars_arg.config, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    # Interactive config
+    # Start Interactive configuration
     if config['load']['interactive_config']:
         config = interactive_config(config)
         

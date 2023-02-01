@@ -1,6 +1,4 @@
-import math
 import cv2
-from matplotlib import pyplot as plt
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
@@ -11,17 +9,44 @@ from src.utils import clean_stats
 
 
 class Inference:
-    """
-    Predict the class of the images, bacilli or not, can use either:
-    - network_prediction
-    - stats_prediction
-    - svm_prediction
+    """ Class to predict the class of the bacilli in the image.
+
+    Attributes:
+    ----------
+    cropped_images: list
+        list of the cropped bacilli images
+    stats: list
+        list of the stats of the bacilli
+    final_image: numpy array
+        masked image
+
+    Methods:
+    -------
+    get_dataset()
+        Get the dataset to do inference with the CNN.
+    get_boxes(predictions)
+        Get the boxes to draw in napari, green for bacilli, red for non-bacilli.
+    network_prediction()
+        Predict the class of the images, using pretrained neural network.
+    stats_prediction()
+        Predict the class of the images, using the stats.
+    ellipse_brute_prediction()
+        Predict the class of the images, using the contours and finding enclosing ellipse.
+    svm_prediction()
+        Predict the class of the images, using a on the stats pretrained SVM.
+    get_hu_moments()
+        Get elongation Hu-moment for every object in the image.
     """
     def __init__(self, cropped_images, stats, final_image):
         """
-        :param: cropped_images: images to be classified
-        :param stats: stats of the images
-        :param final_image: masked image
+        parameters:
+        ----------
+        cropped_images: list
+            list of the cropped bacilli images
+        stats: list
+            list of the stats of the bacilli
+        final_image: numpy array
+            masked image
         """
         self.final_image = final_image
         self.cropped_images = cropped_images
@@ -40,11 +65,15 @@ class Inference:
         self.inference_dataset_loader = DataLoader(inference_dataset, batch_size=1, shuffle=False)
 
     def network_prediction(self):
-        """
-        Predict the class of the images, using the neural network,
-        return arrays needed to draw the boxes in napari
+        """ Predict the class of the images, using the neural network,
+        return arrays needed to draw the boxes in napari.
 
-        :return: red_boxes, green_boxes
+        returns
+        -------
+        red_boxes: list
+            list of the boxes to draw in napari, red for non-bacilli
+        green_boxes: list
+            list of the boxes to draw in napari, green for bacilli
         """
         # initialize prediction array
         predictions = np.array([])
@@ -65,10 +94,12 @@ class Inference:
         return self.get_boxes(predictions)
 
     def get_hu_moments(self):
-        """
-        Get elongation Hu-moment for every object in the image.
+        """ Get elongation Hu-moment for every object in the image.
 
-        :return: List of all elongation Hu-moments
+        returns
+        -------
+        hu_moments: numpy array
+            array of elongation Hu-moments
         """
         hu_moments = np.array([])
         for i in range(1, self.stats.shape[0]):
@@ -78,11 +109,15 @@ class Inference:
         return hu_moments
 
     def stats_prediction(self):
-        """
-        Predict the class of the images, using the stats,
+        """ Predict the class of the images, using the stats,
         using the elongation Hu moment and the area of the object.
 
-        :return: red_boxes, green_boxes
+        returns
+        -------
+        red_boxes: list
+            list of the boxes to draw in napari, red for non-bacilli
+        green_boxes: list
+            list of the boxes to draw in napari, green for bacilli
         """
         predictions = np.array([])
         # get elongation Hu-moments
@@ -98,10 +133,16 @@ class Inference:
         return self.get_boxes(predictions)
 
     def ellipse_brute_prediction(self):
-        """
-        Find the contours of the bacilli in the image.
+        """ Find the contours of the bacilli in the image.
+        And find the enclosing ellipse for every bacilli.
 
-        :return: List of all bacilli contours
+        returns
+        -------
+        red_boxes: list
+            list of the boxes to draw in napari, red for non-bacilli
+        green_boxes: list
+            list of the boxes to draw in napari, green for bacilli
+
         """
         predictions = np.array([])
         for i in range(1, self.stats.shape[0]):
@@ -130,10 +171,14 @@ class Inference:
         return self.get_boxes(predictions)
 
     def svm_prediction(self):
-        """
-        Predict the class of the images, using a svm that was trained on the stats.
+        """ Predict the class of the images, using a svm that was trained on the stats.
 
-        :return: red_boxes, green_boxes
+        returns
+        -------
+        red_boxes: list
+            list of the boxes to draw in napari, red for non-bacilli
+        green_boxes: list
+            list of the boxes to draw in napari, green for bacilli
         """
         # drop coordinates from stats
         self.stats = self.stats[:, 2:]
@@ -146,11 +191,19 @@ class Inference:
         return self.get_boxes(predictions)
 
     def get_boxes(self, predictions):
-        """
-        Get the boxes to draw in napari, based on the predictions.
+        """ Get the boxes to draw in napari, based on the predictions.
 
-        :param: predictions: array of predictions
-        :return: red_boxes, green_boxes
+        parameters
+        ----------
+        predictions: numpy array
+            array of predictions
+
+        returns
+        -------
+        red_boxes: list
+            list of the boxes to draw in napari, red for non-bacilli
+        green_boxes: list
+            list of the boxes to draw in napari, green for bacilli
         """
 
         red_boxes = np.array([[0, 0], [0, 0]])
@@ -176,8 +229,12 @@ class Inference:
         return red_boxes, green_boxes
 
     def get_dataset(self):
-        """
-        Create a dataset from the cropped images, to be used in the neural network.
+        """Create a dataset from the cropped images, to be used in the neural network.
+
+        returns
+        -------
+        dataframe: pandas dataframe
+            dataframe with the cropped images
         """
         dataframe = pd.DataFrame()
         for i in range(0, self.cropped_images.shape[0]):
@@ -188,8 +245,17 @@ class Inference:
 
 
 class MyDataset(Dataset):
-    """
-    Dataset class for the neural network.
+    """ Dataset class for the neural network.
+
+    parameters
+    ----------
+    data: pandas dataframe
+        dataframe with the cropped images
+
+    returns
+    -------
+    torch tensor:
+        tensor with the cropped images
     """
     def __init__(self, data):
         self.data = data

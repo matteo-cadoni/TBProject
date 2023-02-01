@@ -17,7 +17,7 @@ def train_randomly(dataset, iteration):
         print('Training model on training set')
         # set as batch size 40 % of the dataset size
         batch_size = int(dataset.shape[0] * 0.4)
-        epochs = 10
+        epochs = 100
         train, test = train_test_split(dataset, test_size=0.2, random_state=42)
         dataAug = DataAug(train)
         train = dataAug.augment()
@@ -100,7 +100,7 @@ def train_randomly(dataset, iteration):
     else:
         # resume training
         batch_size = int(dataset.shape[0] * 0.4)
-        epochs = 10
+        epochs = 100
         train, test = train_test_split(dataset, test_size=0.2, random_state=42)
         dataAug = DataAug(train)
         train = dataAug.augment()

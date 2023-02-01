@@ -3,12 +3,23 @@ import cv2 as cv
 
 
 def clean_connected_components(whole_tile):
-    """
-    Clean image with 2 approaches: delete connected components that have are up to 2 pixels
-                                connect bacilli that are separated by just one black pixel
+    """ Clean image with 2 approaches:
+    -delete connected components that have up to 2 pixels
+    -connect bacilli that are separated by just one black pixel
 
-    :param whole_tile: image to be cleaned
-    :return:    cleaned image
+    parameters
+    ----------
+    whole_tile:
+        image to be cleaned
+
+    returns
+    -------
+    whole_tile:
+        cleaned image
+    num_labels:
+        number of connected components
+    stats:
+        stats of the connected components
     """
     # find connected components
     num_labels, labels_im, stats, centroids = cv.connectedComponentsWithStats(np.uint8(whole_tile), connectivity=8)
@@ -43,14 +54,44 @@ def clean_connected_components(whole_tile):
 
 
 class Postprocessing:
-    """
-    Clean the connected components of the image
+    """Class that cleans imprecisions after thresholding.
+    Different thresholding algorithms have different cleaning methods.
+    Split otsu thresholding is the only one that needs to split the image into tiles.
+    The adaptive methods only need morphological operations.
+
+     attributes
+     ----------
+    img:
+        image to be cleaned
+    config:
+        dictionary with the parameters
+    tiles:
+        list with the different small tiles
+
+    methods
+    -------
+    split_into_tiles(tile_size=16):
+        split image into tiles of shape tile_size * tile_size
+    cleaning_tiles():
+        Clean the small tiles of the image
+    check_image(img: np.ndarray):
+        For every sub-image we check if there is a bacilli or not
+    reconstruct_image():
+        Reconstruct the image from the clean sub-tiles
+    remove_noise():
+        Remove noise from the image
+    apply():
+        Apply the postprocessing to the image
     """
 
     def __init__(self, img, config):
         """
-        :param img: image to be cleaned
-            config: dictionary with the parameters
+        parameters
+        ----------
+        img:
+            image to be cleaned
+        config:
+            dictionary with the parameters
         """
         self.img = img
         self.config = config
@@ -61,11 +102,17 @@ class Postprocessing:
     # -----------------------------------CLEANING FOR OTSU THRESHOLDING-----------------------------------
 
     def split_into_tiles(self, tile_size=16):
-        """
-        split image into tiles of shape tile_size * tile_size
+        """ split image into tiles of shape tile_size * tile_size
 
-        :param tile_size: dimensions of single tiles
-        :return: tiles: list with the different tiles
+        parameters
+        ----------
+        tile_size:
+            dimensions of single tiles
+
+        returns
+        -------
+        tiles:
+            list with all the tiles
         """
         print("Splitting image into tiles...")
         tiles = []
@@ -76,8 +123,12 @@ class Postprocessing:
         return tiles
 
     def cleaning_tiles(self):
-        """
-        Clean the tiles of the image, our method is based on the number of black pixels in the image
+        """ Clean the tiles of the image, based on the number of black pixels in the tile
+
+        returns
+        -------
+        cleaned_tiles:
+            list with the cleaned tiles
         """
         print("Cleaning tiles...")
         cleaned_tiles = []
@@ -93,12 +144,20 @@ class Postprocessing:
         return cleaned_tiles
 
     def check_image(self, img: np.ndarray):
-        """
-        For every sub-image we check if its worth keeping or not
-        number_of_black_pixels
+        """ For every sub-image we check if its worth keeping or not
+        based on the number_of_black_pixels
 
-        :param img: image to be checked
-        :return: bool
+        parameters
+        ----------
+        img:
+            image to be checked
+
+        returns
+        -------
+        True:
+            if the image is background
+        False:
+            if the image is a bacilli
         """
         number_of_black_pixels = self.config['number_of_black_pixels']
         # we have a bacilli
@@ -109,9 +168,17 @@ class Postprocessing:
             return True
 
     def reconstruct_image(self, tiles: list):
-        """
-        :param  tiles:    list with the different single tiles
-        :return whole_image:         numpy array, reconstructed image
+        """ Reconstruct the image from the clean sub-tiles
+
+        parameters
+        ----------
+        tiles:
+            list with the cleaned tiles
+
+        returns
+        -------
+        whole_image:
+            reconstructed image
         """
         x_tiles = self.config['x_tiles']
         y_tiles = self.config['y_tiles']
@@ -126,10 +193,12 @@ class Postprocessing:
 
     # remove noise
     def remove_noise(self):
-        """
-        Perform morphological opening and closing to remove noise
+        """ Perform morphological opening and closing to remove noise
 
-        :return:    cleaned image
+        returns
+        -------
+        closing:
+            cleaned imag
         """
 
         # define kernel for opening
@@ -144,6 +213,17 @@ class Postprocessing:
         return closing
 
     def apply(self):
+        """ Apply the postprocessing to the image
+
+        returns
+        -------
+        whole_img_not_cleaned:
+            image before cleaning
+        whole_img_cleaned:
+            image after cleaning
+        num_bacilli:
+            number of bacilli in the image
+        """
         print("Applying postprocessing...")
 
         if self.config['algorithm'] == 'otsu':

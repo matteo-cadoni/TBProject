@@ -2,9 +2,11 @@ from src.utils import *
 from src.thresholding import Thresholding
 from src.postprocessing import Postprocessing
 from src.cropping import Cropping
+from src.interactivelabelling import InteractiveLabeling
 import pandas as pd
 import os
 import time
+
 
 def smear_pipeline(config, smear, loader):
     """
@@ -52,12 +54,14 @@ def smear_pipeline(config, smear, loader):
             # Save the results
             labelling_dataset_config = config['labelling_dataset']
             if labelling_dataset_config['create_dataset'] and postprocessing_config['crop']:
-                if stats.shape[0] > 1:
+                if stats.shape[0] > 1 and i >228:
+                    i_l = InteractiveLabeling(cropped_images)
+                    labels = i_l.run()
 
                     # dataset creation
                     dataframe = pd.DataFrame()
                     for l in range(0, cropped_images.shape[0]):
-                        d = {'image': [cropped_images[l]]}
+                        d = {'image': [cropped_images[l]], 'label': [labels[l]]}
                         df2 = pd.DataFrame(d)
                         dataframe = pd.concat([dataframe, df2], ignore_index=True)
 
@@ -65,7 +69,7 @@ def smear_pipeline(config, smear, loader):
 
                     if save_config['save']:
                         # save dataframe with pandas library
-                        labelled_data_path = os.path.join('D:/images', loader.dataset_name + str(i) + '.pkl')
+                        labelled_data_path = os.path.join('D:/dataframe', loader.dataset_name + str(i) + '.pkl')
                         dataframe.to_pickle(labelled_data_path)
 
                 else:

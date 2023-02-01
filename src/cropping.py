@@ -1,12 +1,20 @@
 import cv2 as cv
 import numpy as np
 from src.utils import clean_stats
-import time
 
 
 def pad_images(image):
-    """
-    This function will pad the images to be 50x50
+    """ This function will pad the images to be 50x50
+
+    parameters
+    ----------
+    image: numpy array
+        image to be padded
+
+    returns
+    -------
+    padded_image: numpy array
+        padded image
     """
     padded_image = np.zeros((50, 50))
     if image.shape[0] < 50 or image.shape[1] < 50:
@@ -18,10 +26,18 @@ def pad_images(image):
         return image
 
 
-
 def pad_images2(image):
-    """
-    pad image using np.pad
+    """pad image using np.pad, only get centered bacilli.
+
+    parameters
+    ----------
+    image: numpy array
+        image to be padded
+
+    returns
+    -------
+    padded_image: numpy array
+        padded image
     """
     padx1 = np.floor((50 - image.shape[0])/2).astype(int)
     padx2 = np.ceil((50 - image.shape[0])/2).astype(int)
@@ -36,27 +52,54 @@ def pad_images2(image):
 
 class Cropping:
     """
-    Takes a tile and returns a list of cropped 50x50 images
-    corresponding to the connected components in the tile
+    A class that can be used to crop 50x50 images from an image,
+    where at the center of each image is a connected component,
+    i.e. a suspected bacillus.
+
+    attributes
+    ----------
+    original_tile: numpy array
+        original tile image
+    thresholded_img: numpy array
+        thresholded tile image
+
+    methods
+    -------
+    find_center_of_mass()
+        Given the statistics of the connected components,
+        find the center of mass of each component.
+    crop_images(center_of_mass)
+        Given the center of mass of each connected component,
+        crop the original image and return a list of cropped images.
+    crop_and_pad()
+        Create a numpy array of cropped and padded images,
+        given the center of mass of each connected component,
+        pad the images if necessary.
     """
 
     def __init__(self, original_tile, thresholded_img):
-        """
-        Initialize stats given a thresholded image
+        """ Initialize stats given a thresholded image.
 
-        :param: original_tile: original tile image
-               thresholded_img: masked tile image
+        parameters
+        ----------
+        original_tile: numpy array
+            original tile image
+        thresholded_img: numpy array
+            thresholded tile image
         """
         self.original_tile = original_tile
+        # initialize stats
         num_labels, labels_im, self.stats, centroids = cv.connectedComponentsWithStats(
             np.uint8(thresholded_img), connectivity=8)
 
     def find_center_of_mass(self):
-        """
-        Given the statistics of the connected components,
+        """Given the statistics of the connected components,
         find the center of mass of each component.
 
-        :return: list of center of mass coordinates
+        returns
+        -------
+        center_of_mass: list
+            list of center of mass coordinates
         """
         center_of_mass = []
         # clean stats before finding center of mass
@@ -73,12 +116,18 @@ class Cropping:
         return center_of_mass
 
     def crop_images(self, center_of_mass):
-        """
-        Given the center of mass of each connected component,
+        """Given the center of mass of each connected component,
         crop the original image and return a list of cropped images
 
-        :param: center_of_mass: list of center of mass coordinates
-        :return: list of cropped images
+        parameters
+        ----------
+        center_of_mass: list
+            list of center of mass coordinates
+
+        returns
+        -------
+        cropped_images: list
+            list of cropped images
         """
         cropped_images = []
         for i in range(len(center_of_mass)):
@@ -95,9 +144,15 @@ class Cropping:
         return cropped_images
 
     def crop_and_pad(self):
-        """
-        Create a numpy array of cropped and padded images,
+        """Create a numpy array of cropped and padded images,
         given the center of mass of each connected component
+
+        returns
+        -------
+        cropped_numpy: numpy array
+             array of cropped and padded images
+        h : str
+            "no images" if no images are found
         """
         print("cropping...")
         center_of_mass = self.find_center_of_mass()
@@ -105,7 +160,6 @@ class Cropping:
 
         # initialize numpy array
         if len(cropped_images) > 1:
-
 
             a = np.array(cropped_images[0])
             # a = pad_images(a)

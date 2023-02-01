@@ -3,10 +3,19 @@ from tkinter import messagebox
 
 
 class InteractiveConfig:
-    """
-    Execute an interactive configuration window
+    """Class that executes an interactive configuration window
+
+    methods
+    -------
+    run()
+        Run the interactive configuration window
+    get_values()
+        Get the values of the configuration window
+    finish()
+        Close the configuration window
     """
     def __init__(self):
+
         self.error = True
         self.window = Tk()
         # path of the smear
@@ -58,8 +67,12 @@ class InteractiveConfig:
         self.show_images.set(False)
 
     def run(self):
-        """
-        Run the interactive configuration window
+        """ Run the interactive configuration window
+
+        returns
+        -------
+        list
+            list of the input values of the configuration window
         """
         self.window.title("Interactive Config")
         self.window.geometry('700x600')
@@ -159,8 +172,8 @@ class InteractiveConfig:
                 self.inference, self.inference_type, self.show_images]
 
     def get_values(self):
-        """
-        Get the values of the input fields
+        """ Get the values of the input fields
+
         """
         # get path
         self.path = self.path.get()
@@ -257,8 +270,8 @@ class InteractiveConfig:
         self.error = False
 
     def finish(self):
-        """
-        Finish the input
+        """ Finish button function
+
         """
         try:
             self.get_values()
@@ -270,12 +283,19 @@ class InteractiveConfig:
 
 
 def change_yaml(config_values, config):
-    """
-    Function that changes the yaml file with the values from the interface
+    """ Function that changes the yaml file with the values from the interface
 
-    param config_values: list of values from the interface
-           config: yaml file to be changes
-    return: Config: yaml file with the new values
+    parameters
+    ----------
+    config_values:
+        list of values from the interface
+    config:
+        yaml file to be changed
+
+    returns
+    -------
+    config:
+        yaml file with the new values
     """
     config['load']['czi_path'] = config_values[0]
     config['load']['tile'] = config_values[1]

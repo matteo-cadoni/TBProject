@@ -6,6 +6,18 @@ from PIL import Image
 
 
 def rescale_image(image):
+    """ Rescale image to range 0-255
+
+    parameters
+    ----------
+    image:
+        image to be rescaled
+
+    returns
+    -------
+    image:
+        rescaled image
+    """
     image = image - np.min(image)
     image = image / np.max(image)
     image = image * 255
@@ -13,12 +25,19 @@ def rescale_image(image):
 
 
 def change_contrast(image, level):
-    """
-    Change the contrast of an image
+    """ Change the contrast of an image.
 
-    param image: image to be changed
-          level: level of contrast change
-    return: image with changed contrast
+    parameters
+    ----------
+    image:
+        image to be changed
+    level:
+        level of contrast change
+
+    returns
+    -------
+    image:
+        image with changed contrast
     """
     # rescale image
     image = np.uint8(rescale_image(image))
@@ -35,12 +54,34 @@ def change_contrast(image, level):
 
 
 class InteractiveLabeling:
-    """
-    Execute window for interactive labeling
+    """ Class that executes window for interactive labeling
+
+    attributes
+    ----------
+    images
+        list of images to be labeled
+    labels
+        list of labels, 1 for bacilli, 0 for not bacilli
+    window
+        tkinter window
+
+    methods
+    -------
+    run()
+        run the interactive labeling window
+    bacilli_clicked()
+        action for when the bacilli button is clicked
+    not_bacilli_clicked()
+        action for when the not bacilli button is clicked
+    plot_next_image(i)
+        plot the next image in the list
     """
     def __init__(self, images):
         """
-        param images: list of images to be labeled
+        parameters
+        ----------
+        images
+            list of images to be labeled
         """
         # initialize parameters
         self.images = images
@@ -49,10 +90,12 @@ class InteractiveLabeling:
         self.max_images = images.shape[0]
 
     def run(self):
-        """
-        Run the interactive labeling window
+        """ Run the interactive labeling window
 
-        return: labels, numpy array of labels, 1 for bacilli, 0 for not bacilli
+        returns
+        -------
+        labels
+            list of labels, 1 for bacilli, 0 for not bacilli
         """
         # create window
         self.window.title("Interactive Labeling")
@@ -77,8 +120,8 @@ class InteractiveLabeling:
         return self.labels
 
     def bacilli_clicked(self):
-        """
-        Action for when the bacilli button is clicked
+        """ Action for when the bacilli button is clicked
+
         """
         # append label 1
         self.labels = np.append(self.labels, 1)
@@ -92,8 +135,8 @@ class InteractiveLabeling:
         self.plot_next_image(self.labels.shape[0])
 
     def not_bacilli_clicked(self):
-        """
-        Action for when the not bacilli button is clicked
+        """ Action for when the not bacilli button is clicked
+
         """
         # append label 0
         self.labels = np.append(self.labels, 0)
@@ -104,10 +147,11 @@ class InteractiveLabeling:
         self.plot_next_image(self.labels.shape[0])
 
     def plot_next_image(self, i):
-        """
-        plot the next image in the list
+        """Plot the next image in the list
 
-        param i: index of image to be plotted
+        parameters
+        ----------
+        i: index of image to be plotted
         """
         # initialize figure and axes
         self.fig, (ax1, ax2) = plt.subplots(2, 2, figsize=(13, 10))

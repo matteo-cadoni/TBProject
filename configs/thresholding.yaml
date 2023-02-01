@@ -1,41 +1,80 @@
+"""
+This file contains the configuration for the thresholding algorithm.
+
+It is possible to use an interactive configuration tool to set the parameters.
+If you want to use the interactive configuration tool, set INTERACTIVE_CONFIG to True.
+
+It is possible to specify the path to the czi file and decide weather to perform 
+the computations on the whole smear or on a single tile, CZI_PATH. If you want to perform
+the computations on a single tile, set TILE to the number of the tile you want to
+use. If you want to perform the computations on the whole smear, set tile to None.
+
+You may decide how to preprocess the image, by setting PREPROCESSING[ALGORITHM].
+The options are:
+- rescale: rescale the image to a range of 0-255
+- sharp: sharpen the image
+
+You may decide how to perform the thresholding, by setting  THRESHOLDING[ALGORITHM].
+The options are:
+- otsu: use Otsu's method to perform the thresholding
+- hard: use a hard thresholding
+- adaptive_gaussian: use an adaptive thresholding with a Gaussian filter
+- adaptive_mean: use an adaptive thresholding with a mean filter
+- set split to true to use adaptive otsu thresholding.
+
+If you want to label the dataset, set CREATE_DATASET to True. 
+This will open an interactive window where you can label the dataset. 
+Remember to CROP the images of suspected bacilli before labelling them.
+Also remember to set SAVE to True if you want to save the labelled dataset.
+
+If you want to perform inference, set DO_INFERENCE to True.
+The options for the inference are:
+- CNN: use a CNN classifier
+- STATS: use the statistics of the labelled dataset
+- SVM: use a SVM classifier trained on the statistics of the labelled dataset
+For the last two options, you need to set SAVE_STATS to True. Inference will be 
+visualized on Napari. 
+
+If you want to visualize the original image, set SHOW to True.
+"""
 load:
-  czi_path: TB_sample/extern_Synlab_2156_17_3_MTB.czi # insert path to file
-  tile: 673 # None if whole smear, otherwise number of tile
-  blurry_deselection: True # whether to remove blurry tiles or not
-  interactive_config: True # whether to use interactive config or not
+  czi_path: TB_sample/extern_Synlab_2156_17_3_MTB.czi         # insert path to file
+  tile: 673                         # None if whole smear, otherwise number of tile
+  blurry_deselection: True          # whether to remove blurry tiles or not
+  interactive_config: True          # whether to use interactive config or not
 
 preprocessing:
-  algorithm: rescale # sharp for Otsu and hard thresholding, rescale for adaptive thresholding
+  algorithm: rescale                # sharp for Otsu and hard thresholding, rescale for adaptive thresholding
 
 thresholding:
-  algorithm: adaptive_gaussian # otsu, hard, adaptive_gaussian, adaptive_mean
-  hard_threshold_param: 5000 # only used for hard thresholding
-  block_size: 25 # only used for adaptive thresholding (defines the size of the neighborhood)
-  c: -7 # only used for adaptive thresholding (defines constant to be substracted from the (Gaussian) mean)
-  split: True    # whether to split the image into tiles or not 
-  # before applying thresholding algorithm 
-  tile_size: 16 # size of single tiles if split is True
+  algorithm: adaptive_gaussian      # otsu, hard, adaptive_gaussian, adaptive_mean
+  hard_threshold_param: 5000        # only used for hard thresholding
+  block_size: 25                    # only used for adaptive thresholding (defines the size of the neighborhood)
+  c: -7                             # only used for adaptive thresholding (defines constant to be substracted from the (Gaussian) mean)
+  split: True                       # whether to use adaptive otsu thresholding or not
+
+  tile_size: 16                     # size of single tiles if split is True
   x_tiles: 128
   y_tiles: 94
 
 postprocessing:
-  algorithm: adaptive_gaussian # otsu, hard, adaptive_gaussian, adaptive_mean
-  number_of_black_pixels: 215 # number of black pixels to decide whether a tile is classified as background or not
+  algorithm: adaptive_gaussian      # otsu, hard, adaptive_gaussian, adaptive_mean
+  number_of_black_pixels: 215       # number of black pixels to decide whether a tile is classified as background or not
   x_tiles: 128
   y_tiles: 94
-  tile_size: 16 # size of single tiles if split is True
-  crop: True # whether to crop the image or not (needed for inference)
+  tile_size: 16
+  crop: True                        # whether to crop the image or not (needed for inference)
 
 labelling_dataset: 
-  create_dataset: True # let's you label the cropped images in an interactive window
+  create_dataset: True              # lets you label the cropped images in an interactive window
 
 saving: 
-  save: True # whether to save the dataset labelled by hand or not
-  save_stats: True # whether to save the statistics of the labelled dataset or not
+  save: True                        # whether to save the dataset labelled by hand or not
+  save_stats: True                  # whether to save the statistics of the labelled dataset or not
 
 inference:
-  do_inference: True # whether to do inference or not
-  prediction: SVM # SVM, CNN, STATS
+  do_inference: True                # whether to do inference or not
+  prediction: SVM                   # SVM, CNN, STATS
 
 visualization:
-  show: False # whether to show the image or not
+  show: False                       # whether to show the image or not

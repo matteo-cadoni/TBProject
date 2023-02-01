@@ -1,3 +1,5 @@
+import time
+
 from n_networks.neural_net import Net, ChatGPT, MyDataset, toy_model
 from n_networks.data_augmentation import DataAug
 import pandas as pd
@@ -6,7 +8,7 @@ import torch.nn as nn
 
 import torch.optim as optim
 import torch
-
+import os
 from sklearn.model_selection import train_test_split
 
 
@@ -17,7 +19,7 @@ def train_pu_cnn(dataset, iteration):
         print('Training model on training set')
         # set as batch size 40 % of the dataset size
         batch_size = int(dataset.shape[0] * 0.4)
-        epochs = 10
+        epochs = 100
         train, test = train_test_split(dataset, test_size=0.2, random_state=42)
         dataAug = DataAug(train)
         train = dataAug.augment()
@@ -62,8 +64,11 @@ def train_pu_cnn(dataset, iteration):
 
                 loss.backward()
                 optimizer.step()
-
-        torch.save(net.state_dict(), 'models/full_pu_CNN.pth')
+        with open('models/full_pu_CNN.pth', 'wb') as f:
+            torch.save(net.state_dict(), f)
+            f.flush()
+            os.fsync(f.fileno())
+        time.sleep(5)
         # test model
         # print('Testing model on validation set')
         correct = 0
@@ -100,7 +105,7 @@ def train_pu_cnn(dataset, iteration):
     else:
         # resume training
         batch_size = int(dataset.shape[0] * 0.4)
-        epochs = 10
+        epochs = 100
         train, test = train_test_split(dataset, test_size=0.2, random_state=42)
         dataAug = DataAug(train)
         train = dataAug.augment()
@@ -137,7 +142,10 @@ def train_pu_cnn(dataset, iteration):
                 loss.backward()
                 optimizer.step()
 
+
         torch.save(net.state_dict(), 'models/full_pu_CNN.pth')
+
+
         # test model
         # print('Testing model on validation set')
         correct = 0
