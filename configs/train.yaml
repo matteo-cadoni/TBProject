@@ -6,10 +6,11 @@ load:
   remove_black_img: True
 
 filter:
-  remove_black_img: True
+  remove_black_img: False
 
 train:
-  batch_size: 100
-  epochs: 30
+  batch_size: 500
+  epochs: 5
+  n_splits: 5
 
 random_state: 42  #seed for reproducible results

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-def training_step(data, net, device, optimizer, criterion, train_loss, total_samples):
+def training_step(data, net, device, optimizer, criterion, train_loss):
     # get the inputs
     inputs, labels = data
 
@@ -18,7 +18,6 @@ def training_step(data, net, device, optimizer, criterion, train_loss, total_sam
 
     loss = criterion(outputs, labels)
     train_loss.append(loss.item())
-    total_samples.append(outputs.shape[0])
     loss.backward()
     optimizer.step()
     
