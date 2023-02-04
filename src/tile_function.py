@@ -1,6 +1,8 @@
 import pandas as pd
 import os
 import napari
+import matplotlib.pyplot as plt
+
 from src.utils import *
 from src.thresholding import Thresholding
 from src.postprocessing import Postprocessing
@@ -81,9 +83,23 @@ def tile_pipeline(config, img, loader):
             if inference_config['prediction'] == 'SVM':
                 red_boxes, green_boxes = inference.svm_prediction()
             elif inference_config['prediction'] == 'CNN':
-                red_boxes, green_boxes = inference.network_prediction()
+                red_boxes, green_boxes, coordinates, predictions = inference.network_prediction()
+                for i, pred in enumerate(predictions):
+                    if pred:
+                        plt.scatter(coordinates[i,0], coordinates[i,1], color='green')
+                    else:
+                        plt.scatter(coordinates[i,0], coordinates[i,1], color='red')
+                plt.plot(np.arange(0,np.max(coordinates[:,0]),0.1), (1/1.5)*np.arange(0,np.max(coordinates[:,0]),0.1), color='blue')
+                plt.plot(np.arange(0,np.max(coordinates[:,0]),0.1), np.arange(0,np.max(coordinates[:,0]),0.1), color='red')
+                plt.show()
+
             elif inference_config['prediction'] == 'STATS':
-                red_boxes, green_boxes = inference.ellipse_brute_prediction()
+                red_boxes, green_boxes, coordinates = inference.ellipse_brute_prediction()
+                plt.scatter(coordinates[:,0], coordinates[:,1])
+                plt.plot(np.arange(0,np.max(coordinates[:,0]),0.1), (1/1.5)*np.arange(0,np.max(coordinates[:,0]),0.1), color='red')
+                plt.xlabel('major axis')
+                plt.ylabel('minor axis')
+                plt.show()
 
             viewer = napari.Viewer()
             viewer.add_image(img, name='Inferenced image')

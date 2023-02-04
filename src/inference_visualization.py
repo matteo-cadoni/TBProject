@@ -77,6 +77,10 @@ class Inference:
         """
         # initialize prediction array
         predictions = np.array([])
+
+        # 
+        _, _, coordinates = self.ellipse_brute_prediction()
+
         # iterate over the dataset and predict the class
         self.model.eval()
         with torch.no_grad():
@@ -91,7 +95,8 @@ class Inference:
                 else:
                     predictions = np.append(predictions, 0)
         # use get_boxes to get the boxes
-        return self.get_boxes(predictions)
+        red_boxes, green_boxes = self.get_boxes(predictions)
+        return  red_boxes, green_boxes, coordinates, predictions
 
     def get_hu_moments(self):
         """ Get elongation Hu-moment for every object in the image.
@@ -145,6 +150,7 @@ class Inference:
 
         """
         predictions = np.array([])
+        axes_coordinates = np.empty((0, 2))
         for i in range(1, self.stats.shape[0]):
             fake_contours = np.zeros((5, 1, 2), dtype=np.int32)
             contours, _ = cv2.findContours(self.final_image[self.stats[i][1]:self.stats[i][1]+self.stats[i][3],
@@ -155,7 +161,8 @@ class Inference:
                 cnt = fake_contours
             ellipse = cv2.fitEllipse(cnt)
             (x, y), (ma, MA), angle = ellipse
-            if MA -ma > 3: #  MA/ma > 2
+            axes_coordinates = np.append(axes_coordinates, [[MA, ma]], axis=0)
+            if MA/ma > 1.5: #  MA/ma > 2
                 predictions = np.append(predictions, 1)
             else: # red boxes
                 """ 
@@ -166,9 +173,10 @@ class Inference:
                 predictions = np.append(predictions, 0)
 
             if self.stats[i][4] > 200:
-                predictions[i] = 0     
-            
-        return self.get_boxes(predictions)
+                predictions[i] = 0   
+
+            red_boxes, green_boxes = self.get_boxes(predictions)
+        return red_boxes, green_boxes, axes_coordinates
 
     def svm_prediction(self):
         """ Predict the class of the images, using a svm that was trained on the stats.
