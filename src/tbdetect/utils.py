@@ -111,12 +111,12 @@ def smear_pipeline(config, smear, loader):
 
         save_config = config['saving']
         if isinstance(cropped_images, str):
-            print("No images, cannot label or save dataset or inference")
+            print("No images, cannot label or save dataset or do inference")
         else:
             # Save the results
             labelling_dataset_config = config['labelling_dataset']
             if labelling_dataset_config['create_dataset'] and postprocessing_config['crop']:
-                if stats.shape[0] > 1 and i >228:
+                if stats.shape[0] > 1 and i > 228:
                     i_l = InteractiveLabeling(cropped_images)
                     labels = i_l.run()
 
@@ -209,7 +209,7 @@ def tile_pipeline(config, img, loader):
     ######## BEGIN INFERENCE/VISUALIZATION ########
     inference_config = config['inference']
     if inference_config['do_inference']:
-        print("Doing Inference...")
+        print("Doing inference...")
 
         # do one of the possible inference
         # stats = clean_stats(stats) # delete connected components that are too small, and too large, they are not bacilli for sure
