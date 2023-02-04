@@ -3,10 +3,9 @@ import numpy as np
 
 class Cropping:
 
-    def __init__(self, original_tile, thresholded_img):
+    def __init__(self, original_tile, stats):
         self.original_tile = original_tile
-        num_labels, labels_im, self.stats, centroids = cv.connectedComponentsWithStats(
-            np.uint8(thresholded_img), connectivity=8)
+        self.stats = stats
 
     def find_center_of_mass(self):
         center_of_mass = []

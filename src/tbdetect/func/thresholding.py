@@ -8,8 +8,9 @@ class Thresholding:
         print("Thresholding...")
         
     def check_algorithm(self):
-        if self.config['algorithm'] == 'otsu' and not self.config['split']:
-            return self.otsu_thresholding()
+        if self.config['algorithm'] == 'otsu' and self.config['split'] == False:
+            print("Applying Otsu's thresholding without splitting...")
+            return self.otsu_thresholding(self.img)
         
         if self.config['algorithm'] == 'otsu' and self.config['split']:
             tiles = self.split_into_tiles(tile_size = self.config['tile_size'])
@@ -34,7 +35,6 @@ class Thresholding:
         :return: ret: the computed threshold value
                 th: binary image (image with the threshold applied, pixels above threshold are white = 255, pixels below threshold are black= 0)
         """
-        print("Applying Otsu's thresholding...")
         ret, thresholded_image = cv.threshold(img, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
         return thresholded_image
 

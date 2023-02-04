@@ -23,6 +23,7 @@ class Preprocessing:
         :param image: to  be rescaled
         :return: rescaled image
         """
+        print("Rescaling image for adaptive thresholding...")
         rescaled_image = (self.img - np.min(self.img)) / (np.max(self.img) - np.min(self.img)) * 255
         # rescaled_image = np.round(rescaled_image).astype(np.uint16)
         rescaled_image = np.round(rescaled_image).astype('uint8')
