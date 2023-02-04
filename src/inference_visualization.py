@@ -175,7 +175,7 @@ class Inference:
             if self.stats[i][4] > 200:
                 predictions[i] = 0   
 
-            red_boxes, green_boxes = self.get_boxes(predictions)
+        red_boxes, green_boxes = self.get_boxes(predictions)
         return red_boxes, green_boxes, axes_coordinates
 
     def svm_prediction(self):
