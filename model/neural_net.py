@@ -38,9 +38,9 @@ class Net(nn.Module):
         
         return x
 
-class ChatGPT(nn.Module):
+class BacilliNet(nn.Module):
     def __init__(self):
-        super(ChatGPT, self).__init__()
+        super(BacilliNet, self).__init__()
         
         # 1st convolutional layer
         self.conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, stride=1, padding=1)
@@ -126,8 +126,11 @@ class MyDataset(Dataset):
         #img = self.change_contrast(img, 100)
         img = np.array(img)
         # change image values to be in 0,1 range instead of 0, 16000
-        if img.max() > 0:
-            img = img / img.max()
+        # if img.max() > 0:
+        #     img = img / img.max()
+        # convert to uint4
+        if (np.max(img) - np.min(img) != 0):
+            img = (img - np.min(img)) / (np.max(img) - np.min(img)) - 0.5
         
         label = self.data.iloc[index]['label']
         return torch.tensor(img, dtype=torch.float32), torch.tensor(label, dtype=torch.float32)

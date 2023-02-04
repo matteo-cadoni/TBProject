@@ -1,4 +1,4 @@
-from model.neural_net import Net, ChatGPT, MyDataset, toy_model
+from model.neural_net import Net, BacilliNet, MyDataset, toy_model
 #from model.autoencoder import Autoencoder_conv, Autoencoder_mlp
 from data_augmentation import DataAug
 import pandas as pd
@@ -8,13 +8,15 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch
 import numpy as np
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 import argparse
 import yaml
 import time
 import os
+import json
 #from torch.utils.tensorboard import Summary#writer
 from matplotlib import pyplot as plt
+from datetime import datetime
 
 from train_utils.load import *
 from train_utils.filters import *
@@ -45,8 +47,6 @@ def main():
 
     # seed for reproducibility
     random_state = config['random_state']
-
-    # set a seed for reproducibility
     torch.manual_seed(random_state)
     np.random.seed(random_state)
 
@@ -59,93 +59,135 @@ def main():
     #data = loadr.apply_filters(data)
     time.sleep(2)
     print("--------------------------------------")
-    print("Applying filters to data")
     filter_config = config['filter']
-    # if filter_config['remove_black_img']:
-    #     print("Removing black images")
-    #     data, n_removed_imgs = remove_black_img(data)
-    # print("Removed ", n_removed_imgs, " black images")
+    if filter_config['remove_black_img']:
+        print("Applying filters to data")
+        data, n_removed_imgs = remove_black_img(data)
+        print("Removed ", n_removed_imgs, " black images")
     print("Data shape is now: ", data.shape)
     time.sleep(2)
     train_config = config['train']
     batch_size = train_config['batch_size']
     epochs = train_config['epochs']
+    n_splits = train_config['n_splits']
 
-    
-    print('Splitting data into train and test and preparing DataLoader')
 
-    
     train, test = train_test_split(data, test_size=0.2, random_state=random_state)
     print('Train and test data splitted, train shape: ', train.shape, 'test shape: ', test.shape)
+    test_dataset = MyDataset(test)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+    print("Test dataloader is ready")
+    
     # sample a subset of train set
     print('Sampling train data, with sampling percentage: ', sampling_percentage * 100, '%')
     train_sampled = sample(train, p = sampling_percentage, random_state=random_state)
     print('After sampling, new train dataset shape is ', train_sampled.shape)
-    dataAug = DataAug(train_sampled)
-    train = dataAug.augment()
-    print('Training data augmented, shape: ', train.shape)
-    
-    train_dataset = MyDataset(train)
-    test_dataset = MyDataset(test)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    print("Train data is ready, lenght: ", len(train_dataset))
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
-    print("Test data is ready, lenght: ", len(test_dataset))
-    print("--------------------------------------")
-    time.sleep(2)
-    net = ChatGPT()
-    print("Model loaded")
-    print(net)
-    time.sleep(2)
 
-    print('Initialising weights')
-    net.apply(weights_init)
-    
+    # check if CUDA is available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if torch.backends.mps.is_available():
-        mps_device = torch.device("mps")
-        device = mps_device
+        device = torch.device("mps")
     print("Device is: ", device)
-    
-    net = net.to(device)
-    print("Model moved to device: ", device)
+
     
     # #writer for tensorboard
     #writer = Summary#writer()
     
-    
-    
     criterion = nn.BCELoss()
-    optimizer = optim.Adam(net.parameters(), lr=0.001)
     
     
-    net.train()
-    tr_loss =[]
-    tst_loss = []
-    acc = []
-    print("--------------------------------------")
-    print("Training started")
-    print("--------------------------------------")
-    for ep in range(epochs):  # loop over the dataset multiple times
-        train_loss = []
-        total_samples = []
-        for i, data in enumerate(train_loader):
-            #perform training step
-            training_step(data, net, device, optimizer, criterion, train_loss, total_samples)
-        
-        #compute average train loss for this epoch
-        average_train_loss = np.mean(train_loss) * 1000
-        
-        total_test_loss, accuracy = evaluation_step(net, test_loader, device, criterion)
+    print("Starting cross-validation\n")
+    # cross-validation
+    fold = 0
+    
+    kfold = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    training_losses =[]
+    val_losses = []
+    val_acc = []
+    test_acc = []
+    models = {}
+    
+    for train_index, val_index in kfold.split(train_sampled):
 
-        print_statistics(ep, average_train_loss, total_test_loss, accuracy)        
-        tr_loss.append(average_train_loss)
-        tst_loss.append(total_test_loss)
-        acc.append(accuracy)
-        print("------------------")
-            
+        time.sleep(1)
         
-    print('Finished Training')
+        # restart model and optimizer at each fold
+        net = BacilliNet()
+        if fold == 0:
+            print("Model loaded")
+            print(net)
+            time.sleep(2)
+            
+        net.apply(weights_init)
+        net = net.to(device)
+        optimizer = optim.Adam(net.parameters(), lr=0.001)
+
+        train, val = train_sampled.iloc[train_index], train_sampled.iloc[val_index]
+        print('Train and validation data splitted, train shape: ', train.shape, 'validation shape: ', val.shape)       
+        
+        dataAug = DataAug(train)
+        train = dataAug.augment()
+        print('Training data augmented, shape: ', train.shape)
+    
+        train_dataset = MyDataset(train)
+        val_dataset = MyDataset(val)
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+        print("Train dataloader is ready")
+        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
+        print("Validation dataloader is ready")
+        
+        print("--------------------------------------")
+        time.sleep(2)
+    
+        net.train()
+
+        train_loss_fold = []
+        val_loss_fold = []
+        acc_fold = []
+        
+        print(f"Starting Training of model {fold+1}")
+        print("--------------------------------------")
+        for ep in range(epochs):  # loop over the dataset multiple times
+            train_loss_epoch = []
+            for data in train_loader:
+                training_step(data, net, device, optimizer, criterion, train_loss_epoch)
+            
+            average_train_loss = np.mean(train_loss_epoch)
+            
+            average_val_loss, accuracy = evaluation_step(net, val_loader, criterion)
+
+            print_training_statistics(ep, average_train_loss, average_val_loss, accuracy) 
+                   
+            train_loss_fold.append(average_train_loss)
+            val_loss_fold.append(average_val_loss)
+            acc_fold.append(accuracy)
+
+        print(f'Finished Training of model {fold+1}\n')
+        
+        print("Computing accuracy of the model on the test set")
+        accuracy = compute_accuracy(net, test_loader)
+        print("Accuracy of model {} on test set: {:f}".format(fold+1, accuracy))
+        
+        
+        # appending losses and accuracies of current training to a list
+        training_losses.append(train_loss_fold)
+        val_losses.append(val_loss_fold)
+        val_acc.append(acc_fold)
+        test_acc.append(accuracy)
+        
+        fold += 1
+        
+        time.sleep(0.5)
+        models[fold] = net
+        
+        print("--------------------------------------")
+    
+    print('Finished cross-validation\n')
+
+    print('Average of accuracies of all models on test set: {:f}'.format(np.mean(test_acc)))
+    print("Standard deviation of accuracies of all models on test set: {:f}".format(np.std(test_acc)))
+    
+    
     
     print('Saving model')
     if not os.path.exists('model_ckpt'):
@@ -155,28 +197,47 @@ def main():
     #writer.flush()
     #writer.close()
 
-    evaluation_step(net, test_loader, device, criterion)
     
-    print("Best accuracy is: ", max(acc))
     # plot train and test loss over all epochs
     
-    plt.plot(tr_loss)
-    plt.plot(tst_loss)
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend(['Train Loss', 'Test Loss'])
-    plt.title('Loss over all epochs')
-    plt.show()
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    experiment_data = f"{sampling_percentage*100}%_{batch_size}_{current_time}"    
+    # create a folder named experiment_data in plot
+    if not os.path.exists(f'plots/{experiment_data}'):    
+        os.mkdir(f'plots/{experiment_data}')
+    save_path = f'plots/{experiment_data}'
     
-    # plot test loss and accuracy over all epochs
-    plt.plot(acc)
+    fig1 = plt.gcf()
+    for i in range(n_splits):
+        plt.plot(training_losses[i], label=f"Train loss model {i+1}")
+        plt.plot(val_losses[i], label=f"Val loss model {i+1}")
+    
+    plt.xlabel('Epochs')
+    plt.ylabel('BCE Loss')
+    #plt.legend(['Train Loss', 'Test Loss'])
+    plt.title('Losses')
+    plt.show()
+    plt.draw()
+    # save plot to file
+    
+    fig1.savefig(f'plots/{experiment_data}/losses.png')
+    
+    # plot accuracies
+    fig2 = plt.gcf()
+    for i in range(n_splits):
+        acc = val_acc[i]
+        plt.plot(acc, label=f"Model {i+1}")
     plt.xlabel('Epochs')
     plt.ylabel('Accuracy')
-    plt.title('Accuracy over all epochs')
+    plt.title('Accuracy on validation set')
     plt.show()
-        
-        
+
+    fig2.savefig(f'plots/{experiment_data}/accuracy.png')
     
+    # save the config variable to a json file in the experiment_data folder
+    with open(f'plots/{experiment_data}/config.json', 'w') as fp:
+        json.dump(config, fp)
 
 
 if __name__ == '__main__':

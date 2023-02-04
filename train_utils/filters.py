@@ -37,5 +37,5 @@ def remove_black_img(data):
             continue
         filtered_data = pd.concat([filtered_data, data.iloc[i]], axis=1)
         
-        print("Removed {} black images".format(n_removed_img))
+        #print("Removed {} black images".format(n_removed_img))
     return filtered_data.transpose(), n_removed_img
