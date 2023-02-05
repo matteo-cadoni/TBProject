@@ -1,18 +1,20 @@
 load: 
-  all_data_path: 'labelled_data/data.pkl'
-  data_path_list: ['labelled_data/tile_673_smear_2156_17_3.pkl', 'labelled_data/tile_674_smear_2156_17_3.pkl', 'labelled_data/tile_675_smear_2156_17_3.pkl', 'labelled_data/tile_676_smear_2156_17_3.pkl', 'labelled_data/tile_677_smear_2156_17_3.pkl', 'labelled_data/tile_777_smear_2156_17_3.pkl', 'labelled_data/tile_991_smear_2156_17_3.pkl', 'labelled_data/tile_671_smear_2156_17_3.pkl', 'labelled_data/tile_500_smear_2156_17_3.pkl', labelled_data/all.pkl]
+  all_data_path: 'labelled_data/data_with_stats.pkl'
+  data_path_list: ['labelled_data/tile_673_smear_2156_17_3_with_stats.pkl', 'labelled_data/tile_777_smear_2156_17_3_with_stats.pkl', 'labelled_data/tile_991_smear_2156_17_3_with_stats.pkl', 'labelled_data/tile_500_smear_2156_17_3_with_stats.pkl', labelled_data/all2_with_stats.pkl]
   #data_path_list: ['labelled_data/tile_673_smear_2156_17_3.pkl']
-  sampling_percentage: 0.3
+  sampling_percentage: 1
   remove_black_img: True
   remove_white_img: False # currently removes all images, TODO: fix
 
 train:
   batch_size: 2500
-  epochs: 3
+  epochs: 50
   n_splits: 5
 
 results:
-  save_models: False # save models after training
+  save_models: True # save models after training
 
 
 random_state: 34  #seed for reproducible results
+
+#missing tiles 674, 675, 676, 677

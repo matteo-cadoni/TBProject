@@ -58,6 +58,8 @@ def main():
 
     loadr = loader(loading_config)
     data = loadr.load()
+    
+    
     print("--------------------------------------")
     data = loadr.apply_filters(data)
     
@@ -71,6 +73,16 @@ def main():
     batch_size = train_config['batch_size']
     epochs = train_config['epochs']
     n_splits = train_config['n_splits']
+    
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    # get current date
+    today = datetime.today()
+    day = today.strftime("%b-%d-%Y")
+    
+    save_folder_name = f"{current_time}_{day}_sampling-{sampling_percentage*100}%_batchsize-{batch_size}"    
+    
+    
 
 
     train, test = train_test_split(data, test_size=0.2, random_state=random_state)
