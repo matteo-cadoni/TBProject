@@ -9,6 +9,7 @@ class loader():
         self.data_path_list = config['data_path_list']
         self.sampling_percentage = config['sampling_percentage']
         self.remove_black_img = config['remove_black_img']
+        self.remove_white_img = config['remove_white_img']
 
     def load(self):
         '''
@@ -47,8 +48,8 @@ class loader():
         return pd.read_pickle(self.all_data_path)
     
     def apply_filters(self, data):
-        print("Applying filters")
-        f = filter(self.remove_black_img)
+        print("\nApplying filters: ")
+        f = filter(self.remove_black_img, self.remove_white_img)
         
         #check if data is already saved as data_filtered.pth
         if os.path.exists("labelled_data/data_filtered.pkl") is False:
