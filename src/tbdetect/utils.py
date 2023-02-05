@@ -139,7 +139,7 @@ def smear_pipeline(config, smear, loader):
         if save_config['save_stats']:
             # create dataframe with stats for each sample then save it as a .pkl file
             stats_dataframe = pd.DataFrame(stats)
-            stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + str(i) + '.pkl')
+            stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + "_" + str(i) + '.pkl')
             stats_dataframe.to_pickle(stats_dataframe_path)
             print("Stats saved in: " + stats_dataframe_path)
         total_number_bacilli += num_bacilli
