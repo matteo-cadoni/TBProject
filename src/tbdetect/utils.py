@@ -191,20 +191,20 @@ def tile_pipeline(config, img, loader):
             dataframe = pd.concat([dataframe, df2], ignore_index=True)
         ######## END DATASET CREATION ########
 
-        ######## BEGIN SAVING ########
-        save_config = config['saving']
-        if save_config['save']:
-            # save dataframe with pandas library
-            labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
-            dataframe.to_pickle(labelled_data_path)
-            print("Dataset saved in: " + labelled_data_path)
-        if save_config['save_stats']:
-            # create dataframe with stats for each sample then save it as a .pkl file
-            stats_dataframe = pd.DataFrame(stats)
-            stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + '.pkl')
-            stats_dataframe.to_pickle(stats_dataframe_path)
-            print("Stats saved in: " + stats_dataframe_path)
-        ######## END SAVING ########
+    ######## BEGIN SAVING ########
+    save_config = config['saving']
+    if save_config['save']:
+        # save dataframe with pandas library
+        labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
+        dataframe.to_pickle(labelled_data_path)
+        print("Dataset saved in: " + labelled_data_path)
+    if save_config['save_stats']:
+        # create dataframe with stats for each sample then save it as a .pkl file
+        stats_dataframe = pd.DataFrame(stats)
+        stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + '.pkl')
+        stats_dataframe.to_pickle(stats_dataframe_path)
+        print("Stats saved in: " + stats_dataframe_path)
+    ######## END SAVING ########
 
     ######## BEGIN INFERENCE/VISUALIZATION ########
     inference_config = config['inference']
