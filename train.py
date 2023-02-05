@@ -8,7 +8,8 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch
 import numpy as np
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import train_test_split, StratifiedKFold, KFold
+from sklearn.metrics import roc_auc_score, roc_curve, auc, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
 import argparse
 import yaml
 import time
@@ -22,6 +23,7 @@ from train_utils.load import *
 from train_utils.filters import *
 from train_utils.evaluation import *
 from train_utils.train import *
+from train_utils.plot import *
 
 
 # randomly sampled subset of input dataframe with sampling probability p
@@ -56,16 +58,15 @@ def main():
 
     loadr = loader(loading_config)
     data = loadr.load()
-    #data = loadr.apply_filters(data)
-    time.sleep(2)
     print("--------------------------------------")
-    filter_config = config['filter']
-    if filter_config['remove_black_img']:
-        print("Applying filters to data")
-        data, n_removed_imgs = remove_black_img(data)
-        print("Removed ", n_removed_imgs, " black images")
+    data = loadr.apply_filters(data)
+    
+    time.sleep(0.5)
+    print("--------------------------------------")
+    
+
     print("Data shape is now: ", data.shape)
-    time.sleep(2)
+    time.sleep(0.5)
     train_config = config['train']
     batch_size = train_config['batch_size']
     epochs = train_config['epochs']
@@ -75,7 +76,8 @@ def main():
     train, test = train_test_split(data, test_size=0.2, random_state=random_state)
     print('Train and test data splitted, train shape: ', train.shape, 'test shape: ', test.shape)
     test_dataset = MyDataset(test)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+    labels_test_set = test_dataset.data["label"].values
+    test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
     print("Test dataloader is ready")
     
     # sample a subset of train set
@@ -95,16 +97,22 @@ def main():
     
     criterion = nn.BCELoss()
     
-    
+    print("--------------------------------------")
     print("Starting cross-validation\n")
+    print("Splitting train data into ", n_splits, " folds")
     # cross-validation
     fold = 0
     
-    kfold = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    kfold = KFold(n_splits=n_splits, shuffle=True, random_state=random_state, )
     training_losses =[]
     val_losses = []
     val_acc = []
     test_acc = []
+    test_recall = []
+    test_precision = []
+    test_f1 = []
+    all_predictions = []
+    all_predictions_binarized = []
     models = {}
     
     for train_index, val_index in kfold.split(train_sampled):
@@ -147,6 +155,7 @@ def main():
         
         print(f"Starting Training of model {fold+1}")
         print("--------------------------------------")
+        
         for ep in range(epochs):  # loop over the dataset multiple times
             train_loss_epoch = []
             for data in train_loader:
@@ -154,39 +163,49 @@ def main():
             
             average_train_loss = np.mean(train_loss_epoch)
             
-            average_val_loss, accuracy = evaluation_step(net, val_loader, criterion)
+            average_val_loss, val_accuracy = evaluation_step(net, val_loader, criterion)
 
-            print_training_statistics(ep, average_train_loss, average_val_loss, accuracy) 
+            print_training_statistics(ep, average_train_loss, average_val_loss, val_accuracy) 
                    
             train_loss_fold.append(average_train_loss)
             val_loss_fold.append(average_val_loss)
-            acc_fold.append(accuracy)
+            acc_fold.append(val_accuracy)
+
 
         print(f'Finished Training of model {fold+1}\n')
         
-        print("Computing accuracy of the model on the test set")
-        accuracy = compute_accuracy(net, test_loader)
-        print("Accuracy of model {} on test set: {:f}".format(fold+1, accuracy))
+        # get model predictions on test set
+        predictions, predictions_binarized = get_model_predictions(net, test_loader)
+        
+        accuracy, recall, precision, f1 = get_model_metrics(predictions_binarized, labels_test_set)
         
         
-        # appending losses and accuracies of current training to a list
+        # appending information of current training to a list
         training_losses.append(train_loss_fold)
         val_losses.append(val_loss_fold)
         val_acc.append(acc_fold)
+        all_predictions.append(predictions)
+        all_predictions_binarized.append(predictions_binarized)
         test_acc.append(accuracy)
+        test_recall.append(recall)
+        test_precision.append(precision)
+        test_f1.append(f1)
         
         fold += 1
         
-        time.sleep(0.5)
         models[fold] = net
         
         print("--------------------------------------")
+        time.sleep(0.5)
     
     print('Finished cross-validation\n')
 
-    print('Average of accuracies of all models on test set: {:f}'.format(np.mean(test_acc)))
-    print("Standard deviation of accuracies of all models on test set: {:f}".format(np.std(test_acc)))
+    metrics_on_test = print_test_metrics(test_acc, test_recall, test_precision, test_f1)
     
+    prediction_matrix_binarized = get_prediction_matrix(all_predictions_binarized)
+    prediction_matrix = get_prediction_matrix(all_predictions)
+    averaged_predictions, averaged_predictions_binarized = model_averaged_predictions(prediction_matrix)
+    assert len(averaged_predictions) == len(labels_test_set), "Average predictions and labels have different length"
     
     
     print('Saving model')
@@ -198,46 +217,106 @@ def main():
     #writer.close()
 
     
-    # plot train and test loss over all epochs
+    # PLOT AND SAVE ----------------------------------------------------------------------------------------------
+    
+    results_config = config['results']
+    
     
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
-    experiment_data = f"{sampling_percentage*100}%_{batch_size}_{current_time}"    
-    # create a folder named experiment_data in plot
-    if not os.path.exists(f'plots/{experiment_data}'):    
-        os.mkdir(f'plots/{experiment_data}')
-    save_path = f'plots/{experiment_data}'
+    # get current date
+    today = datetime.today()
+    day = today.strftime("%b-%d-%Y")
     
-    fig1 = plt.gcf()
+    save_folder_name = f"{current_time}_{day}_sampling-{sampling_percentage*100}%_batchsize-{batch_size}"    
+    # create a folder named save_folder_name in plot
+    if not os.path.exists(f'plots/{save_folder_name}'): 
+        os.makedirs(f'plots/{save_folder_name}/accuracies')
+        os.makedirs(f'plots/{save_folder_name}/losses')
+        os.makedirs(f'plots/{save_folder_name}/confusion_matrices')
+        os.makedirs(f'plots/{save_folder_name}/models')
+        os.makedirs(f'plots/{save_folder_name}/results')
+    save_path = f'plots/{save_folder_name}'
+    print("Created folder for plots named ", save_path)
+    
+    
+    # save models
+    if results_config['save_models']:
+        for i in range(n_splits):
+            torch.save(models[i+1].state_dict(), f'plots/{save_folder_name}/models/model_{i+1}.pth')
+            print("Saved model", i+1, "in plots folder")
+        
+    # plot losses
     for i in range(n_splits):
+        fig = plt.gcf()
         plt.plot(training_losses[i], label=f"Train loss model {i+1}")
-        plt.plot(val_losses[i], label=f"Val loss model {i+1}")
-    
-    plt.xlabel('Epochs')
-    plt.ylabel('BCE Loss')
-    #plt.legend(['Train Loss', 'Test Loss'])
-    plt.title('Losses')
-    plt.show()
-    plt.draw()
-    # save plot to file
-    
-    fig1.savefig(f'plots/{experiment_data}/losses.png')
+        plt.plot(val_losses[i], label=f"Val loss model {i+1}")    
+        plt.xlabel('Epochs')
+        plt.ylabel('BCE Loss')
+        plt.legend(['Train Loss', 'Test Loss'])
+        plt.title('Losses')
+        plt.show()
+        plt.draw()
+        # save plot to file
+        fig.savefig(f'plots/{save_folder_name}/losses/loss_model_{i+1}.png')
+        # close figure
+        plt.close(fig)
+    print('Loss plots saved in plots folder')
     
     # plot accuracies
-    fig2 = plt.gcf()
     for i in range(n_splits):
+        fig = plt.gcf()
         acc = val_acc[i]
         plt.plot(acc, label=f"Model {i+1}")
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.title('Accuracy on validation set')
-    plt.show()
-
-    fig2.savefig(f'plots/{experiment_data}/accuracy.png')
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.title('Accuracy on validation set')
+        plt.show()
+        fig.savefig(f'plots/{save_folder_name}/accuracies/accuracy_model_{i+1}.png')
+        plt.close(fig)
+    print('Accuracy plots saved in plots folder')
     
-    # save the config variable to a json file in the experiment_data folder
-    with open(f'plots/{experiment_data}/config.json', 'w') as fp:
+    # compute and plot confusion matrix of averaged predictions
+    cm = confusion_matrix(labels_test_set, averaged_predictions_binarized)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['Bacilli', 'Not Bacilli'])
+    disp.plot()
+    plt.show()
+    plt.draw()
+    fig = plt.gcf()
+    fig.savefig(f'plots/{save_folder_name}/confusion_matrix.png')
+    print('Confusion matrix with predictions averaged from all models saved in plots folder')
+    
+    # compute and plot confusion matrix of each model
+    for i in range(n_splits):
+        cm = confusion_matrix(labels_test_set, all_predictions_binarized[i])
+        disp.plot()
+        plt.show()
+        plt.draw()
+        fig = plt.gcf()
+        fig.savefig(f'plots/{save_folder_name}/confusion_matrices/confusion_matrix_model_{i+1}.png')
+    print('Confusion matrices for each model saved in plots folder')    
+    
+    # unified plot of accuracies and losses
+    plot_validation_accuracies(val_acc, save_folder_name)    
+    print('Plot of validation accuracies of different models saved in plots folder')
+    plot_training_and_validation_losses(training_losses, val_losses, save_folder_name)
+    print("Plot of training and validation losses of different models saved in plots folder")
+    
+    #save results
+    # save results of each model in a csv file, including losses, accuracy and metrics
+    for i in range(n_splits):
+        results = pd.DataFrame({'loss': val_losses[i], 'accuracy': val_acc[i]})
+        results.to_csv(f'plots/{save_folder_name}/results/results_model_{i+1}.csv', index=False)
+        
+    # save metrics_on_test dictionary as csv
+    metrics_on_test_df = pd.DataFrame(metrics_on_test)
+    metrics_on_test_df.to_csv(f'plots/{save_folder_name}/metrics_on_test.csv', index=False)
+
+    
+    # save the config variable to a json file in the save_folder_name folder
+    with open(f'plots/{save_folder_name}/config.json', 'w') as fp:
         json.dump(config, fp)
+    print('Config file saved as json')
 
 
 if __name__ == '__main__':
