@@ -104,7 +104,7 @@ class Inference:
         """
         predictions = np.array([])
         axes_coordinates = np.empty((0, 2))
-        for i in range(1, self.stats.shape[0]):
+        for i in range(0, self.stats.shape[0]-1):
             fake_contours = np.zeros((5, 1, 2), dtype=np.int32)
             contours, _ = cv2.findContours(self.final_image[self.stats[i][1]:self.stats[i][1]+self.stats[i][3],
                             self.stats[i][0]:self.stats[i][0]+self.stats[i][2]], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
