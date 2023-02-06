@@ -111,12 +111,12 @@ def smear_pipeline(config, smear, loader):
 
         save_config = config['saving']
         if isinstance(cropped_images, str):
-            print("No images, cannot label or save dataset or inference")
+            print("No images, cannot label or save dataset or do inference")
         else:
             # Save the results
             labelling_dataset_config = config['labelling_dataset']
             if labelling_dataset_config['create_dataset'] and postprocessing_config['crop']:
-                if stats.shape[0] > 1 and i >228:
+                if stats.shape[0] > 1 and i > 228:
                     i_l = InteractiveLabeling(cropped_images)
                     labels = i_l.run()
 
@@ -139,7 +139,7 @@ def smear_pipeline(config, smear, loader):
         if save_config['save_stats']:
             # create dataframe with stats for each sample then save it as a .pkl file
             stats_dataframe = pd.DataFrame(stats)
-            stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + str(i) + '.pkl')
+            stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + "_" + str(i) + '.pkl')
             stats_dataframe.to_pickle(stats_dataframe_path)
             print("Stats saved in: " + stats_dataframe_path)
         total_number_bacilli += num_bacilli
@@ -191,25 +191,25 @@ def tile_pipeline(config, img, loader):
             dataframe = pd.concat([dataframe, df2], ignore_index=True)
         ######## END DATASET CREATION ########
 
-        ######## BEGIN SAVING ########
-        save_config = config['saving']
-        if save_config['save']:
-            # save dataframe with pandas library
-            labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
-            dataframe.to_pickle(labelled_data_path)
-            print("Dataset saved in: " + labelled_data_path)
-        if save_config['save_stats']:
-            # create dataframe with stats for each sample then save it as a .pkl file
-            stats_dataframe = pd.DataFrame(stats)
-            stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + '.pkl')
-            stats_dataframe.to_pickle(stats_dataframe_path)
-            print("Stats saved in: " + stats_dataframe_path)
-        ######## END SAVING ########
+    ######## BEGIN SAVING ########
+    save_config = config['saving']
+    if save_config['save']:
+        # save dataframe with pandas library
+        labelled_data_path = os.path.join('labelled_data', loader.dataset_name + '.pkl')
+        dataframe.to_pickle(labelled_data_path)
+        print("Dataset saved in: " + labelled_data_path)
+    if save_config['save_stats']:
+        # create dataframe with stats for each sample then save it as a .pkl file
+        stats_dataframe = pd.DataFrame(stats)
+        stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + '.pkl')
+        stats_dataframe.to_pickle(stats_dataframe_path)
+        print("Stats saved in: " + stats_dataframe_path)
+    ######## END SAVING ########
 
     ######## BEGIN INFERENCE/VISUALIZATION ########
     inference_config = config['inference']
     if inference_config['do_inference']:
-        print("Doing Inference...")
+        print("Doing inference...")
 
         # do one of the possible inference
         # stats = clean_stats(stats) # delete connected components that are too small, and too large, they are not bacilli for sure
