@@ -173,7 +173,7 @@ class Inference:
                 predictions = np.append(predictions, 0)
 
             if self.stats[i][4] > 200:
-                predictions[i] = 0   
+                predictions[i-1] = 0
 
         red_boxes, green_boxes = self.get_boxes(predictions)
         return red_boxes, green_boxes, axes_coordinates

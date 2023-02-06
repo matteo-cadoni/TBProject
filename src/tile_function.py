@@ -10,7 +10,7 @@ from src.cropping import Cropping
 from src.interactivelabelling import InteractiveLabeling
 from src.inference_visualization import Inference
 from src.visualization import visualize_all_list_napari, add_bounding_boxes
-
+from matplotlib.lines import Line2D
 
 def tile_pipeline(config, img, loader):
     """
@@ -75,6 +75,7 @@ def tile_pipeline(config, img, loader):
 
         # Inference visualization
         inference_config = config['inference']
+        # load pandas dataframe with labelled data for tile 650
 
         if inference_config['do_inference']:
             print("Inference...")
@@ -91,6 +92,17 @@ def tile_pipeline(config, img, loader):
                         plt.scatter(coordinates[i,0], coordinates[i,1], color='red')
                 plt.plot(np.arange(0,np.max(coordinates[:,0]),0.1), (1/1.5)*np.arange(0,np.max(coordinates[:,0]),0.1), color='blue')
                 plt.plot(np.arange(0,np.max(coordinates[:,0]),0.1), np.arange(0,np.max(coordinates[:,0]),0.1), color='red')
+                plt.xlabel('major axis')
+                plt.ylabel('minor axis')
+                # we want to produce a legend that specifies that green is bacilli, red is non-bacilli, blue is the line MA/ma = 1.5, and red is the line MA/ma = 1
+                legend_elements = [Line2D([0], [0], marker='o', color='w', label='Bacilli', markerfacecolor='green',
+                                          markersize=10),
+                                   Line2D([0], [0], marker='o', color='w', label='Bacilli',
+                                          markerfacecolor='red', markersize=10),
+                                   Line2D([0], [0], color='blue', lw=4, label='MA/ma = 1.5'),
+                                   Line2D([0], [0], color='red', lw=4, label='MA/ma = 1')]
+                plt.legend(handles=legend_elements)
+                plt.show()
                 plt.show()
 
             elif inference_config['prediction'] == 'STATS':
