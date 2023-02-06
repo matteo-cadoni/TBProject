@@ -169,11 +169,15 @@ def tile_pipeline(config, img, loader):
     image_boxes = add_bounding_boxes(img, stats)
     ######## END BOUNDING BOXES ########
 
-    if postprocessing_config['crop']:
-        ######## BEGIN CROPPING ########
+    labelling_dataset_config = config['labelling_dataset']
+    save_config = config['saving']
+    inference_config = config['inference']
+
+    ######## BEGIN CROPPING ########
+    if labelling_dataset_config['create_dataset'] or save_config['save'] or inference_config['prediction'] == "CNN" or inference_config['prediction'] == "STATS":
         cropping_function = Cropping(img, stats)
         cropped_images = cropping_function.crop_and_pad()
-        ######## END CROPPING ########
+    ######## END CROPPING ########
 
     labelling_dataset_config = config['labelling_dataset']
     if labelling_dataset_config['create_dataset']:
