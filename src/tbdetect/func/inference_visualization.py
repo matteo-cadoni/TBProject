@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
-from tbdetect.neural_net import ChatGPT
+from tbdetect.neural_net import BacilliNet
 import pandas as pd
 import joblib
 
@@ -52,9 +52,16 @@ class Inference:
         # load the model
         self.PATH = os.path.join(os.path.dirname(__file__), 'n_networks', 'model.pth')
         # initialize the model
-        self.model = ChatGPT()
+        self.model = BacilliNet()
         # set parameters
-        self.model.load_state_dict(torch.load(self.PATH))
+        #self.model.load_state_dict(torch.load(self.PATH))
+        self.models = []
+        for i in range(1, 6):
+            path = os.path.join(os.path.dirname(__file__), 'n_networks', 'model_' + str(i) + '.pth')
+            model_i = BacilliNet()
+            model_i.load_state_dict(torch.load(path))
+            self.models.append(model_i)
+        
         # get the dataset, with dataset loader
         dataset = self.get_dataset()
         inference_dataset = MyDataset(dataset)
@@ -82,7 +89,12 @@ class Inference:
                 image = data
                 image = image.to(torch.float32)
                 image = image.view(1, 1, 50, 50)
-                output = self.model(image)
+                #output = self.model(image)
+                outputs = []
+                for i in range(5):
+                    outputs.append(self.models[i](image))
+    
+                output = torch.mean(torch.stack(outputs), dim=0)
                 output = output.squeeze(1)
                 if output > 0.5:
                     predictions = np.append(predictions, 1)
