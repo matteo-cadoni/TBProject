@@ -52,9 +52,9 @@ def main():
 
     # Execute functions
     if load_config['tile'] == 'None':
-        smear_pipeline(config, img, loader)
+        _ = smear_pipeline(config, img, loader)
     else:
-        tile_pipeline(config, img, loader)  
+        tile_pipeline(config, img, loader)
 
 
 if __name__ == "__main__":
