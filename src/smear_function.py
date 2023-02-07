@@ -6,7 +6,7 @@ from src.interactivelabelling import InteractiveLabeling
 import pandas as pd
 import os
 import time
-
+from src.inference_visualization import Inference
 
 def smear_pipeline(config, smear, loader):
     """
@@ -20,6 +20,7 @@ def smear_pipeline(config, smear, loader):
     total_number_bacilli = 0
     counter_of_blurry_images = 0
     # go through all the images in the smear
+    number_of_predicted_bacilli = 0
     for i, img in enumerate(smear):  
         print("Tile: ", i)
 
@@ -38,6 +39,7 @@ def smear_pipeline(config, smear, loader):
         whole_img_not_cleaned, final_image, num_bacilli, stats = postprocess.apply()
         # clean stats
         stats = clean_stats(stats)
+        total_number_bacilli += stats.shape[0]
         # Cropping
         cropped_images = "no images"
         if postprocessing_config['crop']:
@@ -54,7 +56,7 @@ def smear_pipeline(config, smear, loader):
             # Save the results
             labelling_dataset_config = config['labelling_dataset']
             if labelling_dataset_config['create_dataset'] and postprocessing_config['crop']:
-                if stats.shape[0] > 1 and i >228:
+                if stats.shape[0] > 1:
                     i_l = InteractiveLabeling(cropped_images)
                     labels = i_l.run()
 
@@ -80,9 +82,28 @@ def smear_pipeline(config, smear, loader):
             stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + str(i) + '.pkl')
             stats_dataframe.to_pickle(stats_dataframe_path)
             print("Stats saved in: " + stats_dataframe_path)
-        total_number_bacilli += num_bacilli
+        if isinstance(cropped_images, str):
+            print("No images, cannot label or save dataset or inference")
+        else:
+            inference_config = config['inference']
+            if inference_config['do_inference']:
+                print("Inference...")
+                # do one of the possible inference
+                inference = Inference(cropped_images, stats, final_image)
+                if inference_config['prediction'] == 'SVM':
+                    red_boxes, green_boxes = inference.svm_prediction()
+                elif inference_config['prediction'] == 'CNN':
+                    red_boxes, green_boxes, coordinates, predictions = inference.network_prediction()
+                    number_of_predicted_bacilli += green_boxes.shape[0]
+
+
+                elif inference_config['prediction'] == 'STATS':
+                    red_boxes, green_boxes, coordinates = inference.ellipse_brute_prediction()
+
+
     print("Total number of bacilli: ", total_number_bacilli)
     print("Blurry images that were not considered: ", counter_of_blurry_images)
+    return number_of_predicted_bacilli
 
     
     

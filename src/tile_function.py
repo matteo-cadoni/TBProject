@@ -97,7 +97,7 @@ def tile_pipeline(config, img, loader):
                 # we want to produce a legend that specifies that green is bacilli, red is non-bacilli, blue is the line MA/ma = 1.5, and red is the line MA/ma = 1
                 legend_elements = [Line2D([0], [0], marker='o', color='w', label='Bacilli', markerfacecolor='green',
                                           markersize=10),
-                                   Line2D([0], [0], marker='o', color='w', label='Bacilli',
+                                   Line2D([0], [0], marker='o', color='w', label='Not-Bacilli',
                                           markerfacecolor='red', markersize=10),
                                    Line2D([0], [0], color='blue', lw=4, label='MA/ma = 1.5'),
                                    Line2D([0], [0], color='red', lw=4, label='MA/ma = 1')]
