@@ -1,13 +1,7 @@
-import torch
 import torch.optim as optim
-import matplotlib
 from torch.utils.data import DataLoader
-from torchvision.utils import make_grid
-import pandas as pd
-from n_networks.vae import *
+from active_learning.base_models.vae import *
 from sklearn.model_selection import train_test_split
-import os
-import time
 
 
 def train_vae(df):

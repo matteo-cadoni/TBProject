@@ -2,10 +2,11 @@ import cv2
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset
-from n_networks.neural_net import ChatGPT
+from n_networks.neural_net import ChatGPT, BacilliNet
 import pandas as pd
 import joblib
 from src.utils import clean_stats
+import os
 
 
 class Inference:
@@ -54,12 +55,17 @@ class Inference:
         # clean stats
         self.stats = clean_stats(self.stats)
         # load the model
-        self.PATH = 'n_networks/model.pth'
+        self.PATH = os.path.join(os.path.dirname(__file__), 'saved_models', 'model.pth')
         # initialize the model
         self.model = ChatGPT()
         # set parameters
         self.model.load_state_dict(torch.load(self.PATH))
-        # get the dataset, with dataset loader
+        self.models = []
+        for i in range(1, 6):
+            path = os.path.join(os.path.dirname(__file__), 'saved_models', 'model_' + str(i) + '.pth')
+            model_i = BacilliNet()
+            model_i.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
+            self.models.append(model_i)        # get the dataset, with dataset loader
         dataset = self.get_dataset()
         inference_dataset = MyDataset(dataset)
         self.inference_dataset_loader = DataLoader(inference_dataset, batch_size=1, shuffle=False)
@@ -88,7 +94,10 @@ class Inference:
                 image = data
                 image = image.to(torch.float32)
                 image = image.view(1, 1, 50, 50)
-                output = self.model(image)
+                outputs = []
+                for i in range(0, 5):
+                    outputs.append(self.models[i](image))
+                output = torch.mean(torch.stack(outputs), dim=0)
                 output = output.squeeze(1)
                 if output > 0.5:
                     predictions = np.append(predictions, 1)
@@ -96,46 +105,7 @@ class Inference:
                     predictions = np.append(predictions, 0)
         # use get_boxes to get the boxes
         red_boxes, green_boxes = self.get_boxes(predictions)
-        return  red_boxes, green_boxes, coordinates, predictions
-
-    def get_hu_moments(self):
-        """ Get elongation Hu-moment for every object in the image.
-
-        returns
-        -------
-        hu_moments: numpy array
-            array of elongation Hu-moments
-        """
-        hu_moments = np.array([])
-        for i in range(1, self.stats.shape[0]):
-            hu_moments = np.append(hu_moments, cv2.HuMoments(
-                cv2.moments(self.final_image[self.stats[i][1]:self.stats[i][1]+self.stats[i][3],
-                            self.stats[i][0]:self.stats[i][0]+self.stats[i][2]]))[2])
-        return hu_moments
-
-    def stats_prediction(self):
-        """ Predict the class of the images, using the stats,
-        using the elongation Hu moment and the area of the object.
-
-        returns
-        -------
-        red_boxes: list
-            list of the boxes to draw in napari, red for non-bacilli
-        green_boxes: list
-            list of the boxes to draw in napari, green for bacilli
-        """
-        predictions = np.array([])
-        # get elongation Hu-moments
-        list_hu = self.get_hu_moments()
-        # predict the class
-        for i in range(0, list_hu.shape[0]):
-            if list_hu[i] >= 5e-12:
-                predictions = np.append(predictions, 1)
-            else:
-                predictions = np.append(predictions, 0)
-            if self.stats[i][4] > 200:
-                predictions[i] = 0
-        return self.get_boxes(predictions)
+        return red_boxes, green_boxes, coordinates, predictions
 
     def ellipse_brute_prediction(self):
         """ Find the contours of the bacilli in the image.
@@ -157,19 +127,14 @@ class Inference:
                             self.stats[i][0]:self.stats[i][0]+self.stats[i][2]], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             cnt = max(contours, key=cv2.contourArea)
             if len(cnt) < 5: 
-                fake_contours[0:len(cnt),:,:] = cnt
+                fake_contours[0:len(cnt), :, :] = cnt
                 cnt = fake_contours
             ellipse = cv2.fitEllipse(cnt)
             (x, y), (ma, MA), angle = ellipse
             axes_coordinates = np.append(axes_coordinates, [[MA, ma]], axis=0)
-            if MA/ma > 1.5: #  MA/ma > 2
+            if MA/ma > 1.5:
                 predictions = np.append(predictions, 1)
-            else: # red boxes
-                """ 
-                if math.pi * MA * ma / 4 > 200: # bacilli, green boxes
-                    predictions = np.append(predictions, 1)
-                else:
-                """
+            else:
                 predictions = np.append(predictions, 0)
 
             if self.stats[i][4] > 200:
@@ -274,6 +239,7 @@ class MyDataset(Dataset):
     def __getitem__(self, index):
         img = self.data.iloc[index]['image']
         # change image values to be in 0,1 range instead of 0, 16000
-        img = img / 16000
-
+        if np.max(img) - np.min(img) != 0:
+            img = (img - np.min(img)) / (np.max(img) - np.min(img)) - 0.5
+            # img = img / 16000
         return torch.tensor(img, dtype=torch.float32)

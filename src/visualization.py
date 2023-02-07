@@ -3,10 +3,15 @@ import cv2 as cv
 
 
 def visualize_all_list_napari(numpy_img_list, names):
-    """
-    :param numpy_img_list: list containing different images to be visualized
-    :param names: list containing names of the images
-    """
+    """ Visualize all images in list using napari
+
+    parameters
+    ----------
+    numpy_img_list: list
+        list of numpy images
+    names: list
+        list of names for each image
+        """
     with napari.gui_qt():
         viewer = napari.Viewer()
         for i, img in enumerate(numpy_img_list):
@@ -14,11 +19,14 @@ def visualize_all_list_napari(numpy_img_list, names):
 
 
 def add_bounding_boxes(original_img, stats):
-    """
-    Add white rectangles around bacilli, based on conected components
+    """Add white rectangles around bacilli, based on conected components
 
-    :param original_img: original image
-    :param stats: stats from connected components
+    parameters
+    ----------
+    original_img: numpy array
+        original image
+    stats: list
+        list of stats from cv.connectedComponentsWithStats
     """
     img_copy = original_img.copy()
     for i in range(1, len(stats)):

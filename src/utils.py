@@ -5,11 +5,12 @@ import numpy as np
 
 
 def interactive_config(config):
-    """
-    Interactive config for the user to change the config file.
+    """Interactive config for the user to change the config file.
     Initialization function for the InteractiveConfig class.
 
-    :param config: config file
+    parameters:
+    ----------
+    config: config file
     """
     while True:
         i_c = InteractiveConfig()
@@ -22,11 +23,12 @@ def interactive_config(config):
 
 
 def load(load_config):
-    """
-    Load the data from the config file.
+    """Load the data from the config file.
     Initialization function for the Loader class.
 
-    :param load_config: config file
+    parameters:
+    ----------
+    load_config: config file
     """
     loader = Loader(load_config['czi_path'], load_config['tile'])
     loader.load()
@@ -39,9 +41,17 @@ def load(load_config):
 
 
 def preprocess(preprocess_config, tile):
-    """
-    Preprocess the data from the config file.
+    """Preprocess the data from the config file.
     Initialization function for the Preprocessing class.
+
+    parameters:
+    ----------
+    preprocess_config: config file
+    tile: tile to preprocess
+
+    returns:
+    -------
+    preprocessed tile
     """
     preprocessing = Preprocessing(tile)
     if preprocess_config['algorithm'] == "sharp":
@@ -51,9 +61,16 @@ def preprocess(preprocess_config, tile):
 
 
 def clean_stats(stats):
-    """
-    Delete connected components that are too small, and
+    """Delete connected components that are too small, and
     connected components that are too large.
+
+    parameters:
+    ----------
+    stats: stats from connected components
+
+    returns:
+    -------
+    stats1: cleaned stats
     """
     # make a copy of stats
     stats1 = stats.copy()

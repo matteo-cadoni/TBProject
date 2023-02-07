@@ -1,13 +1,12 @@
 import pandas as pd
 import numpy as np
 import torch
-from n_networks.data_augmentation import DataAug
-from n_networks.vae import ConvVAE
+from active_learning.base_models.vae import ConvVAE
 import matplotlib.pyplot as plt
 from coreset_pu_train import train_coreset_pu_cnn
 from coreset_pu_train_vae import train_vae
 from n_networks.neural_net import MyDataset
-from n_networks.vae import MyDatasetV
+from active_learning.base_models.vae import MyDatasetV
 from torch.utils.data import DataLoader
 from n_networks.neural_net import ChatGPT
 from active_learning.coreset_functions import active_learning

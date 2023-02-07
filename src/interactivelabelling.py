@@ -99,6 +99,7 @@ class InteractiveLabeling:
         """
         # create window
         self.window.title("Interactive Labeling")
+        self.window.iconbitmap('src/icon3.ico')
         self.window.geometry('1200x1000')
         self.window.configure(background='white')
         # create buttons
