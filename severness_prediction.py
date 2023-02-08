@@ -3,6 +3,7 @@ import argparse
 import yaml
 from src.loader import Loader
 import os
+import sys
 
 # need to rename files to be able to run the code, do not see other options here,
 # names are too random to define a pattern, follow order of files in excel sheet
@@ -37,6 +38,10 @@ num_bacilli_2 = []
 order_2 = []
 num_bacilli_3 = []
 order_3 = []
+original_stdout = sys.stdout
+
+sys.stdout = open(os.devnull, 'w')
+
 for period in periods:
     for number in range(1, 177):
         for wdh in repeat:
@@ -65,8 +70,10 @@ for period in periods:
                         if i == 3:
                             num_bacilli_3.append(smear_pipeline(config, img, ld))
                             order_3.append(period + '_' + str(number) + wdh + '_' + str(i) + t)
+                        #delete h5 file
+                        os.remove('h5_data/smear_' + period + '_' + str(number) + wdh + '_' + str(i) +'.h5')
 
-
+sys.stdout = original_stdout
 import matplotlib.pyplot as plt
 import numpy as np
 
