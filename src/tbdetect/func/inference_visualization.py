@@ -116,7 +116,7 @@ class Inference:
         """
         predictions = np.array([])
         axes_coordinates = np.empty((0, 2))
-        for i in range(0, self.stats.shape[0]-1):
+        for i in range(0, self.stats.shape[0]):
             fake_contours = np.zeros((5, 1, 2), dtype=np.int32)
             contours, _ = cv2.findContours(self.final_image[self.stats[i][1]:self.stats[i][1]+self.stats[i][3],
                             self.stats[i][0]:self.stats[i][0]+self.stats[i][2]], cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -136,7 +136,7 @@ class Inference:
                 predictions[i] = 0   
 
         red_boxes, green_boxes = self.get_boxes(predictions)
-        return red_boxes, green_boxes, axes_coordinates
+        return red_boxes, green_boxes, axes_coordinates, predictions
 
     def svm_prediction(self):
         """ Predict the class of the images, using a svm that was trained on the stats.
@@ -206,6 +206,7 @@ class Inference:
             df2 = pd.DataFrame(d)
             dataframe = pd.concat([dataframe, df2], ignore_index=True)
         return dataframe
+    
 class MyDataset(Dataset):
     """ Dataset class for the neural network.
     parameters

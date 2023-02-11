@@ -81,6 +81,7 @@ def smear_pipeline(config, smear, loader):
     """
     # initialize the variables
     total_number_bacilli = 0
+    number_of_predicted_bacilli = 0
     # go through all the images in the smear
     for i, img in enumerate(smear):  
         print("Tile: ", i)
@@ -104,26 +105,31 @@ def smear_pipeline(config, smear, loader):
         cropped_images = "no images"
         if postprocessing_config['crop']:
             if stats.shape[0] > 1:
-                cropping_function = Cropping(img, final_image)
+                cropping_function = Cropping(img, stats)
                 cropped_images = cropping_function.crop_and_pad()
             else:
                 num_bacilli = 0
 
+        # Save the results
         save_config = config['saving']
         if isinstance(cropped_images, str):
             print("No images, cannot label or save dataset or do inference")
         else:
+            # Define the object for inference
+            inference = Inference(cropped_images, stats, final_image)
+
             # Save the results
             labelling_dataset_config = config['labelling_dataset']
             if labelling_dataset_config['create_dataset'] and postprocessing_config['crop']:
-                if stats.shape[0] > 1 and i > 228:
+                if stats.shape[0] > 1:
+                    _, _, _, predictions_ellipse = inference.ellipse_brute_prediction()
                     i_l = InteractiveLabeling(cropped_images)
                     labels = i_l.run()
 
                     # dataset creation
                     dataframe = pd.DataFrame()
-                    for l in range(0, cropped_images.shape[0]):
-                        d = {'image': [cropped_images[l]], 'label': [labels[l]]}
+                    for l in range(0, len(labels)):
+                        d = {'image': [cropped_images[l]], 'label': [labels[l]], 'stats': [stats[l]], 'predictions_ellipse': [predictions_ellipse[l]]}
                         df2 = pd.DataFrame(d)
                         dataframe = pd.concat([dataframe, df2], ignore_index=True)
 
@@ -131,19 +137,38 @@ def smear_pipeline(config, smear, loader):
 
                     if save_config['save']:
                         # save dataframe with pandas library
-                        labelled_data_path = os.path.join('D:/dataframe', loader.dataset_name + str(i) + '.pkl')
+                        labelled_data_path = os.path.join('dataframe/', loader.dataset_name + "_" + str(i) + "_marina" + '.pkl')
                         dataframe.to_pickle(labelled_data_path)
+                    
+                    if save_config['save_stats']:
+                        # create dataframe with stats for each sample then save it as a .pkl file
+                        stats_dataframe = pd.DataFrame(stats)
+                        stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + "_" + str(i) + '.pkl')
+                        stats_dataframe.to_pickle(stats_dataframe_path)
+                        print("Stats saved in: " + stats_dataframe_path)
 
                 else:
                     num_bacilli = 0
-        if save_config['save_stats']:
-            # create dataframe with stats for each sample then save it as a .pkl file
-            stats_dataframe = pd.DataFrame(stats)
-            stats_dataframe_path = os.path.join('labelled_data', 'stats_' + loader.dataset_name + "_" + str(i) + '.pkl')
-            stats_dataframe.to_pickle(stats_dataframe_path)
-            print("Stats saved in: " + stats_dataframe_path)
+
+            # Continue with inference:
+            inference_config = config['inference']
+            if inference_config['do_inference']:
+                print("Inference...")
+                # do one of the possible inference
+                if inference_config['prediction'] == 'SVM':
+                    _, green_boxes = inference.svm_prediction()
+                elif inference_config['prediction'] == 'CNN':
+                    _, green_boxes, _, _ = inference.network_prediction()
+                    number_of_predicted_bacilli += green_boxes.shape[0]
+                elif inference_config['prediction'] == 'STATS':
+                    _, green_boxes, _, predictions_ellipse = inference.ellipse_brute_prediction()
+
         total_number_bacilli += num_bacilli
-    print("Total number of bacilli: ", total_number_bacilli)
+
+    # RETURN: print total numbers at the end outside the for loop
+    print("Total number of objects: ", total_number_bacilli)
+    if inference_config['prediction'] == 'CNN':
+        print("Total number of predicted bacilli: ", number_of_predicted_bacilli)
     
     
 def tile_pipeline(config, img, loader):

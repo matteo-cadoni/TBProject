@@ -9,7 +9,7 @@ class Cropping:
 
     def find_center_of_mass(self):
         center_of_mass = []
-        for i in range(1, self.stats.shape[0]):
+        for i in range(0, self.stats.shape[0]):
             # find center of mass
             x = self.stats[i, 0]
             y = self.stats[i, 1]
@@ -40,19 +40,29 @@ class Cropping:
 
     def crop_and_pad(self):
         print("Cropping...")
+
         center_of_mass = self.find_center_of_mass()
         cropped_images = self.crop_images(center_of_mass)
-        a = np.array(cropped_images[0])
-        a = self.padd_images(a)
-        b = np.array(cropped_images[1])
-        b = self.padd_images(b)
-        cropped_numpy = np.stack((a, b), axis=0)
 
-        for i, img in enumerate(cropped_images):
-            if i > 1:
-                c = np.array(cropped_images[i])
-                c = self.padd_images(c)
-                cropped_numpy = np.concatenate((cropped_numpy, [c]), axis=0)
-        return cropped_numpy
+        if len(cropped_images) > 1:
+            a = np.array(cropped_images[0])
+            a = self.padd_images(a)
+            b = np.array(cropped_images[1])
+            b = self.padd_images(b)
+            cropped_numpy = np.stack((a, b), axis=0)
 
+            for i, img in enumerate(cropped_images):
+                if i > 1:
+                    c = np.array(cropped_images[i])
+                    c = self.padd_images(c)
+                    cropped_numpy = np.concatenate((cropped_numpy, [c]), axis=0)
+            return cropped_numpy
+        elif len(cropped_images) == 1:
+            a = np.array(cropped_images[0])
+            a = self.padd_images(a)
+            cropped_numpy = np.expand_dims(a, axis=0)
+            return cropped_numpy
+        else:
+            h = "no images"
+            return h
 

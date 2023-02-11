@@ -44,7 +44,7 @@ class  InteractiveConfig:
     def run(self):
         self.window.title("Interactive Configuration")
         self.window.iconbitmap('src/tbdetect/func/icon3.ico')
-        self.window.geometry('500x550')
+        self.window.geometry('600x650')
         self.window.configure(background='white')
 
         # path input
