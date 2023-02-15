@@ -29,7 +29,7 @@ class Thresholding:
     def __init__(self, img, config):
         self.img = img
         self.config = config
-        print("Thresholding...")
+        #print("Thresholding...")
 
     def check_algorithm(self):
         if self.config['algorithm'] == 'otsu' and not self.config['split']:
@@ -111,7 +111,7 @@ class Thresholding:
         :param c: parameter for adaptive thresholding
         :return: th: binary image
         """
-        print("Applying adaptive gaussian thresholding...")
+        #print("Applying adaptive gaussian thresholding...")
         # The threshold value is a gaussian-weighted sum of the neighbourhood (here of size 25)
         # values minus the constant C (which is set to -7)
         thresholded_image = cv.adaptiveThreshold(self.img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY,

@@ -28,7 +28,7 @@ class Preprocessing:
 
         """
         self.img = img
-        print("Preprocessing image...")
+        #print("Preprocessing image...")
 
     def sharpen(self):
         """ sharpen image using high-pass filter

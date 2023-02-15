@@ -21,6 +21,9 @@ from src.interactivelabelling import InteractiveLabeling
 import pandas as pd
 import os
 from src.inference_visualization import Inference
+from n_networks.neural_net import BacilliNet
+import torch
+import time
 
 def smear_pipeline(config, smear, loader):
     """This function is the main pipeline for the applying the
@@ -42,27 +45,45 @@ def smear_pipeline(config, smear, loader):
     number_of_predicted_bacilli: int
         total number of bacilli predicted by the model
     """
+    models = []
+    for i in range(1, 6):
+        path = os.path.join('src', 'saved_models', "cnn_results", 'model_' + str(i) + '.pth')
+        model_i = BacilliNet()
+        model_i.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
+        models.append(model_i)        # get the dataset, with dataset loader
+    
+    
     total_number_bacilli = 0
     number_of_predicted_bacilli = 0
+    tiles_bacilli = {}
     for i, img in enumerate(smear):  
-        print("Tile: ", i)
+        print("Tile", i,"/", smear.shape[0])
 
         # Preprocess
+        start_time_preprocess = time.time()
         preprocess_config = config['preprocessing']
         preprocessed_img = preprocess(preprocess_config, img)
+        end_time_preprocess = time.time()
+        time_preprocess = end_time_preprocess - start_time_preprocess
 
         # Threshold
+        start_time_threshold = time.time()
         threshold_config = config['thresholding']
         threshold = Thresholding(preprocessed_img, threshold_config)
         thresholded_img = threshold.apply()
+        end_time_threshold = time.time()
+        time_threshold = end_time_threshold - start_time_threshold
 
         # Postprocess
+        start_time_postprocess = time.time()
         postprocessing_config = config['postprocessing']
         postprocess = Postprocessing(thresholded_img, postprocessing_config)
         whole_img_not_cleaned, final_image, num_bacilli, stats = postprocess.apply()
         # clean stats
         stats = clean_stats(stats)
         total_number_bacilli += stats.shape[0]
+        end_time_postprocess = time.time()
+        time_postprocess = end_time_postprocess - start_time_postprocess
 
         # Defining the configs for the different steps
         labelling_dataset_config = config['labelling_dataset']
@@ -72,6 +93,7 @@ def smear_pipeline(config, smear, loader):
 
 
         # Cropping
+        start_time_cropping = time.time()
         cropped_images = "no images"
         if labelling_dataset_config['create_dataset'] or save_config['save'] or inference_config[
             'prediction'] == "CNN" or inference_config['prediction'] == "STATS":
@@ -80,10 +102,13 @@ def smear_pipeline(config, smear, loader):
                 cropped_images = cropping_function.crop_and_pad()
             else:
                 num_bacilli = 0
-
+        end_time_cropping = time.time()
+        time_cropping = end_time_cropping - start_time_cropping
 
         if isinstance(cropped_images, str):
-            print("No images, cannot label or save dataset or inference")
+            print("No images, cannot label or save dataset or inference. \n")
+            tiles_bacilli[i] = 0
+            
         else:
             # Save the results
             labelling_dataset_config = config['labelling_dataset']
@@ -117,22 +142,37 @@ def smear_pipeline(config, smear, loader):
                 else:
                     num_bacilli = 0
 
-
+            start_time_inference = time.time()
             if inference_config['do_inference']:
-                print("Inference...")
+                #print("Inference...")
                 # do one of the possible inference
                 inference = Inference(cropped_images, stats, final_image)
                 if inference_config['prediction'] == 'SVM':
                     red_boxes, green_boxes = inference.svm_prediction()
                 elif inference_config['prediction'] == 'CNN':
-                    red_boxes, green_boxes, coordinates, predictions = inference.network_prediction()
+                    red_boxes, green_boxes, predictions = inference.network_prediction(models)
+                    new_bacilli = green_boxes.shape[0]
+                    assert new_bacilli == np.sum(predictions), "The number of bacilli predicted by the model is different from the number of bacilli predicted by the postprocessing"
+                    print("Number of bacilli predicted by the model for this tile: ", new_bacilli)
+                    tiles_bacilli[i] = new_bacilli
                     number_of_predicted_bacilli += green_boxes.shape[0]
+                    print("New total number of bacilli in the whole smear: ", number_of_predicted_bacilli, "\n")
                 elif inference_config['prediction'] == 'STATS':
                     red_boxes, green_boxes, coordinates = inference.ellipse_brute_prediction()
+            end_time_inference = time.time()
+            time_inference = end_time_inference - start_time_inference
 
 
-    print("Total number of supposed bacilli: ", total_number_bacilli)
-    return number_of_predicted_bacilli
+    
+        print("Time of preprocessing: ", time_preprocess)
+        print("Time of thresholding: ", time_threshold)
+        print("Time of postprocessing: ", time_postprocess)
+        print("Time of cropping: ", time_cropping)
+        if isinstance(cropped_images, str) == False:
+            print("Time of inference: ", time_inference)
+    print("Total number of supposed bacilli: ", total_number_bacilli)    
+    
+    return number_of_predicted_bacilli, tiles_bacilli, total_number_bacilli
 
     
     

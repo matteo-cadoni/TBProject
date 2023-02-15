@@ -55,14 +55,14 @@ class Inference:
         # clean stats
         self.stats = clean_stats(self.stats)
         # load the model
-        self.PATH = os.path.join(os.path.dirname(__file__), 'saved_models', 'model.pth')
+        self.PATH = os.path.join(os.path.dirname(__file__), 'saved_models', "cnn_results", 'model.pth')
         # initialize the model
-        self.model = ChatGPT()
+        #self.model = ChatGPT()
         # set parameters
-        self.model.load_state_dict(torch.load(self.PATH))
+        #self.model.load_state_dict(torch.load(self.PATH))
         self.models = []
         for i in range(1, 6):
-            path = os.path.join(os.path.dirname(__file__), 'saved_models', 'model_' + str(i) + '.pth')
+            path = os.path.join(os.path.dirname(__file__), 'saved_models', "cnn_results", 'model_' + str(i) + '.pth')
             model_i = BacilliNet()
             model_i.load_state_dict(torch.load(path, map_location=torch.device('cpu')))
             self.models.append(model_i)        # get the dataset, with dataset loader
@@ -70,7 +70,7 @@ class Inference:
         inference_dataset = MyDataset(dataset)
         self.inference_dataset_loader = DataLoader(inference_dataset, batch_size=1, shuffle=False)
 
-    def network_prediction(self):
+    def network_prediction(self, models):
         """ Predict the class of the images, using the neural network,
         return arrays needed to draw the boxes in napari.
 
@@ -83,17 +83,17 @@ class Inference:
         """
         # initialize prediction array
         predictions = np.array([])
-
+        self.models = models
         # 
-        _, _, coordinates = self.ellipse_brute_prediction()
+        #_, _, coordinates = self.ellipse_brute_prediction()
 
         # iterate over the dataset and predict the class
-        self.model.eval()
+        
         with torch.no_grad():
             for i, data in enumerate(self.inference_dataset_loader):
                 image = data
                 image = image.to(torch.float32)
-                image = image.view(1, 1, 50, 50)
+                image = image.view(-1, 1, 50, 50)
                 outputs = []
                 for i in range(0, 5):
                     outputs.append(self.models[i](image))
@@ -105,7 +105,7 @@ class Inference:
                     predictions = np.append(predictions, 0)
         # use get_boxes to get the boxes
         red_boxes, green_boxes = self.get_boxes(predictions)
-        return red_boxes, green_boxes, coordinates, predictions
+        return red_boxes, green_boxes, predictions
 
     def ellipse_brute_prediction(self):
         """ Find the contours of the bacilli in the image.

@@ -112,4 +112,4 @@ class Loader:
             self.read_array_from_czi()
             end_time = time.time()
             print("Time to read czi file: ", end_time - start_time)
-            self.save_array_to_h5(h5_path)
+            #self.save_array_to_h5(h5_path)

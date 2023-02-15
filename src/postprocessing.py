@@ -224,7 +224,7 @@ class Postprocessing:
         num_bacilli:
             number of bacilli in the image
         """
-        print("Applying postprocessing...")
+        #print("Applying postprocessing...")
 
         if self.config['algorithm'] == 'otsu':
             cleaned_tiles = self.cleaning_tiles()

@@ -154,7 +154,7 @@ class Cropping:
         h : str
             "no images" if no images are found
         """
-        print("cropping...")
+        #print("cropping...")
         center_of_mass = self.find_center_of_mass()
         cropped_images = self.crop_images(center_of_mass)
 
