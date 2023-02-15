@@ -4,9 +4,8 @@ import yaml
 from src.loader import Loader
 import os
 import sys
-
-# need to rename files to be able to run the code, do not see other options here,
-# names are too random to define a pattern, follow order of files in excel sheet
+import json
+import time
 
 def arguments_parser():
     """
@@ -25,79 +24,60 @@ pars_arg = parser.parse_args()
 with open(pars_arg.config, 'r') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
+files = os.listdir('/mnt/storage/TBProject/TB_sample/2022-06-29')
 
-periods = ['2141', '2142', '2143', '2144', '2145', '2151','2152', '2153','2154','2156', '2162', '2163', '2164', '2165', '2166']
-type = ['_MTB', '_M.kansasii', '_M.intracellulare', '_M.chelonae', '_M.carpae', '_M.malmoense', '']
-repeat =['_wdh','']
+print("The files in the directory are as follows:", files)
 
-num_bacilli_0 = []
-order_0 = []
-num_bacilli_1 = []
-order_1 = []
-num_bacilli_2 = []
-order_2 = []
-num_bacilli_3 = []
-order_3 = []
-original_stdout = sys.stdout
+# create a smears.json file with all the smears avaiable in the folder and their severity
 
-sys.stdout = open(os.devnull, 'w')
+smear_to_severity = {}
+for i in range(5):
+    smear_to_severity[str(i)] = []
 
-for period in periods:
-    for number in range(1, 177):
-        for wdh in repeat:
-            for i in range(0,4):
-                for t in type:
-                    path = 'C:/Users/matteo/Downloads/extern_Synlab_' + period + '_' + str(number) + wdh + '_' + str(i) + t + '.czi'
-                    #check if file exists
+data = {}
 
-                    if os.path.isfile(path):
+for i, word in enumerate(files):
+    severity = word.split('_')[-2]
+    data[word] = {}
+   
+    
+    if severity == "MTB" or  (" " in severity) or int(severity) > 5:
+        print("This smear doesn't have a severity rating")
+        print("The smear is:", word)
+        data[word]['severity'] = "None"
+        continue
+    data[word]['name'] = word
+    data[word]['severity'] = severity
+    
+    data[word]['path'] = "/mnt/storage/TBProject/TB_sample/2022-06-29/" + word
+    smear_to_severity[severity].append(word)
 
 
+with open("smears.json", "w") as f:
+    json.dump(data, f)
+print("Smears.json file created")
 
-                        ld = Loader(path, 'None')
-                        ld.load()
-                        img = ld.data_array
-                        if i == 0:
-                            num_bacilli_0.append(smear_pipeline(config, img, ld))
-                            order_0.append(period + '_' + str(number) + wdh + '_' + str(i) + t)
-                        if i == 1:
-                            num_bacilli_1.append(smear_pipeline(config, img, ld))
-                            order_1.append(period + '_' + str(number) + wdh + '_' + str(i) + t)
+if os.path.exists("smears_json") == False:
+    os.mkdir("smears_json")
 
-                        if i == 2:
-                            num_bacilli_2.append(smear_pipeline(config, img, ld))
-                            order_2.append(period + '_' + str(number) + wdh + '_' + str(i) + t)
-                        if i == 3:
-                            num_bacilli_3.append(smear_pipeline(config, img, ld))
-                            order_3.append(period + '_' + str(number) + wdh + '_' + str(i) + t)
-                        #delete h5 file
-                        os.remove('h5_data/smear_' + period + '_' + str(number) + wdh + '_' + str(i) +'.h5')
-
-sys.stdout = original_stdout
-import matplotlib.pyplot as plt
-import numpy as np
-
-# plot 4  boxplots
-plt.figure(figsize=(10, 10))
-plt.boxplot([num_bacilli_0, num_bacilli_1, num_bacilli_2, num_bacilli_3], labels=['0', '1', '2', '3'])
-# add a line for the mean
-plt.axhline(y=np.mean(num_bacilli_0), color='b', linestyle='-')
-plt.axhline(y=np.mean(num_bacilli_1), color='r', linestyle='-')
-plt.axhline(y=np.mean(num_bacilli_2), color='g', linestyle='-')
-plt.axhline(y=np.mean(num_bacilli_3), color='y', linestyle='-')
-#add the scattered data points for each boxplot
-plt.scatter([1+ np.random.normal(0,0.1,len(num_bacilli_0)) ], num_bacilli_0, color='b')
-plt.scatter([2+ np.random.normal(0,0.1,len(num_bacilli_0))], num_bacilli_1, color='r')
-plt.scatter([3+ np.random.normal(0,0.1,len(num_bacilli_0))], num_bacilli_2, color='g')
-plt.scatter([4+ np.random.normal(0,0.1,len(num_bacilli_0))], num_bacilli_3, color='y')
-
-plt.title('Number of bacilli per smear')
-plt.xlabel('Severness grade')
-plt.ylabel('Number of bacilli')
-plt.show()
-plt.savefig('/boxplot.png')
-
-# save the data in a csv file
-import pandas as pd
-df = pd.DataFrame({'order_0': order_0, 'num_bacilli_0': num_bacilli_0, 'order_1': order_1, 'num_bacilli_1': num_bacilli_1, 'order_2': order_2, 'num_bacilli_2': num_bacilli_2, 'order_3': order_3, 'num_bacilli_3': num_bacilli_3})
-df.to_csv('C:/Users/matteo/Downloads/boxplot.csv')
+for i, name in enumerate(data.keys()):
+    if os.path.exists("smears_json/" + name + ".json") == True:
+        print("Smear", name, "already processed\n")
+        continue
+    print("Starting to count bacilli in smear", i+1, "of", len(data.keys())+1 , "...")
+    path = data[name]["path"]
+    ld = Loader(path, 'None')
+    ld.load()
+    img = ld.data_array
+    start_time = time.time()
+    num_bacilli, tiles_bacilli, total_objects = smear_pipeline(config, img, ld)
+    end_time = time.time()
+    data[name]["tot_num_of_bacilli"] = num_bacilli
+    data[name]["tot_num_of_objects"] = total_objects
+    data[name]["time_to_process_in_seconds"] = end_time - start_time
+    data[name]["time_to_process_in_minutes"] = (end_time - start_time) / 60
+    data[name]["bacilli_per_single_tile"] = tiles_bacilli
+    
+    with open("smears_json/" + name + ".json", "w") as f:
+        json.dump(data[name], f)
+    print("Smear", name, "processed\n")
