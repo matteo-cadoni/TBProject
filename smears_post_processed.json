@@ -1,1 +1,458 @@
-{"smears": {"extern_Synlab_2163_85_3_MTB.czi.json": ["3", 70280], "extern_Synlab_2142_48_1_MTB.czi.json": ["1", 638], "extern_Synlab_2154_10_1_MTBok.czi.json": ["1", 365], "extern_Synlab_2153_40wdh_1_MTB.czi.json": ["1", 285], "extern_Synlab_2166_4_1_Mmalmoense.czi.json": ["1", 606], "extern_Synlab_2154_52_1_MTB.czi.json": ["1", 1662], "extern_Synlab_2166_18_1_Mmalmoense.czi.json": ["1", 498], "extern_Synlab_2151_104_1_MTB.czi.json": ["1", 1147], "extern_Synlab_2142_59_1_MTB.czi.json": ["1", 1844], "extern_Synlab_2152_98_1_MTB.czi.json": ["1", 2349], "extern_Synlab_2156_17_3_MTB.czi.json": ["3", 15682], "extern_Synlab_2153_124_2_MTB.czi.json": ["2", 731], "extern_Synlab_2143_82_9_.czi.json": ["None", 743], "extern_Synlab_2141_87_1_MTB ok.czi.json": ["1", 709], "extern_Synlab_2163_88_4_MTB.czi.json": ["4", 97927], "extern_Synlab_2163_89_4_MTB.czi.json": ["4", 135843], "extern_Synlab_2164_53_4_MTB.czi.json": ["4", 97715], "extern_Synlab_2151_24wdh_0_.czi.json": ["0", 2315], "extern_Synlab_2151_62_0_MTB.czi.json": ["0", 972], "extern_Synlab_2152_36_2_MTB-1.czi.json": ["2", 637], "extern_Synlab_2163_64_3_MTB.czi.json": ["3", 4068], "extern_Synlab_2162_84_3_MTB.czi.json": ["3", 5548], "extern_Synlab_2143_85_1_MTB.czi.json": ["1", 930], "extern_Synlab_2153_40_1_MTB.czi.json": ["1", 557], "extern_Synlab_2141_73_1_MTB.czi.json": ["1", 2033], "extern_Synlab_2162_131_1_MTB-OT-gebrochen.czi.json": ["1", 19], "extern-Synlab_2144_64_1_MTB.czi.json": ["1", 87], "extern_Synlab_2154_4_0.czi.json": ["0", 91], "extern_Synlab_2153_15wdh_1_MTB.czi.json": ["1", 239], "extern_Synlab_2154_42_1_MTB.czi.json": ["1", 757], "extern_Synlab_2153_48wdh_1_MTB.czi.json": ["1", 465], "extern_Synlab_2163_90_1_MTB.czi.json": ["1", 2958], "extern_Synlab_2163_105_1_MTB.czi.json": ["1", 1060], "extern_Synlab_2153_48_1_MTB.czi.json": ["1", 866], "extern_Synlab_2154_110_2_MTB.czi.json": ["2", 789], "extern_Synlab_2153_29wdh_1_MTB.czi.json": ["1", 478], "extern_Synlab_2153_29_1_MTB.czi.json": ["1", 21023], "extern_Synlab_2162_82_1_MTB.czi.json": ["1", 23778], "extern_Synlab_2143_84_1_MTB.czi.json": ["1", 454], "extern_Synlab_2156_52_4_MTB.czi.json": ["4", 38824], "extern_Synlab_2162_83_1_MTB.czi.json": ["1", 918], "extern_Synlab_2151_175_2_MTB.czi.json": ["2", 1982], "extern_Synlab_2153_113_0_.czi.json": ["0", 2905], "extern_Synlab_2152_99_1_MTB.czi.json": ["1", 832], "extern_Synlab_2145_50wdh_3_MTB.czi.json": ["3", 3563], "extern_Synlab_2165_148_2_M. caprae.czi.json": ["2", 8865], "extern_Synlab_2151_176_2_MTTB.czi.json": ["2", 1127], "extern_Synlab_2142_58_2_MTB.czi.json": ["2", 3163], "extern_Synlab_2143_83_1_MTB.czi.json": ["1", 2776], "extern_Synlab_2152_97_1_MTB.czi.json": ["1", 2052], "extern_Synlab_2151_37_1_MTB.czi.json": ["1", 953], "extern_Synlab_2153 oder 2152_78_1_MTB.czi.json": ["1", 11277], "extern_Synlab_2141_79_1_MTB-1.czi.json": ["1", 2206], "extern_Synlab_2145_50_3_MTB.czi.json": ["3", 61710], "extern_Synlab_2153_15_1_MTB.czi.json": ["1", 669], "extern_Synlab_2151_24_0_MTB.czi.json": ["0", 8143], "extern_Synlab_2151_155_2_MTB.czi.json": ["2", 9224], "extern_Synlab_2142_95_1_MTB.czi.json": ["1", 409], "extern_Synlab_2153_74_1_MTB.czi.json": ["1", 928], "extern_Synlab_2151_18wdh_0_.czi.json": ["0", 890], "extern_Synlab_2162_6_1_MTB.czi.json": ["1", 203], "extern_Synlab_2144_61_0_MTB.czi.json": ["0", 1717], "extern_Synlab_2163_72_3_MTB.czi.json": ["3", 64438], "extern_Synlab_2166_6_2_M. malmoense.czi.json": ["2", 2199], "extern_Synlab_2145_120_2_MTB.czi.json": ["2", 2364], "extern_Synlab_2151_26_3_MTB.czi.json": ["3", 22029], "extern_Synlab_2163_69_3_MTB.czi.json": ["3", 60070], "extern_Synlab_2163_68_2_MTB1.czi.json": ["2", 2042], "extern_Synlab_2163_59wdh_1_M. chelonae.czi.json": ["1", 406], "extern_Synlab_2163_59_1_M. chelonae.czi.json": ["1", 1117], "extern_Synlab_2145_107_2_MTB.czi.json": ["2", 1692], "extern_Synlab_2163_84_4_MTB.czi.json": ["4", 81181], "extern_Synlab_2153_101_1_MTB.czi.json": ["1", 407], "extern_Synlab_2165_89_3_MTB.czi.json": ["3", 6007], "extern_Synlab_2164_69_2_MTB.czi.json": ["2", 2802], "extern_Synlab_2151_64_1_MTB.czi.json": ["1", 4029], "extern_Synlab_2152_42_1_MTB.czi.json": ["1", 2461], "extern_Synlab_2145_124_1_MTB.czi.json": ["1", 2770], "extern_Synlab_2151_17_3_MTB.czi.json": ["3", 47604], "extern_Synlab_2151_18_0_.czi.json": ["0", 2116], "extern_Synlab_2164_41_0_.czi.json": ["0", 866], "extern_Synlab_2143_80_1_MTB.czi.json": ["1", 268], "extern_Synlab_2154_55_1_MTB.czi.json": ["1", 646], "extern_Synlab_2142_94_1_MTB.czi.json": ["1", 678], "extern_Synlab_2166_14_2_MTB.czi.json": ["2", 1802], "extern_Synlab_2164_26_4_MTB.czi.json": ["4", 209798], "extern_Synlab_2163_10_2_MTB.czi.json": ["2", 2779]}, "0": [2315, 972, 91, 2905, 8143, 890, 1717, 2116, 866], "1": [638, 365, 285, 606, 1662, 498, 1147, 1844, 2349, 709, 930, 557, 2033, 19, 87, 239, 757, 465, 2958, 1060, 866, 478, 21023, 23778, 454, 918, 832, 2776, 2052, 953, 11277, 2206, 669, 409, 928, 203, 406, 1117, 407, 4029, 2461, 2770, 268, 646, 678], "2": [731, 637, 789, 1982, 8865, 1127, 3163, 9224, 2199, 2364, 2042, 1692, 2802, 1802, 2779], "3": [70280, 15682, 4068, 5548, 3563, 61710, 64438, 22029, 60070, 6007, 47604], "4": [97927, 135843, 97715, 38824, 81181, 209798], "average_0": 2223.8888888888887, "average_1": 2262.488888888889, "average_2": 2813.2, "average_3": 32818.09090909091, "average_4": 110214.66666666667, "standard_deviation_0": 2248.8572132156587, "standard_deviation_1": 4688.9252008072635, "standard_deviation_2": 2556.072956705266, "standard_deviation_3": 26550.49386787559, "standard_deviation_4": 52947.23986091144}
+{
+    "smears": {
+        "extern_Synlab_2163_85_3_MTB.czi.json": [
+            "3",
+            70280
+        ],
+        "extern_Synlab_2142_48_1_MTB.czi.json": [
+            "1",
+            638
+        ],
+        "extern_Synlab_2154_10_1_MTBok.czi.json": [
+            "1",
+            365
+        ],
+        "extern_Synlab_2153_40wdh_1_MTB.czi.json": [
+            "1",
+            285
+        ],
+        "extern_Synlab_2166_4_1_Mmalmoense.czi.json": [
+            "1",
+            606
+        ],
+        "extern_Synlab_2154_52_1_MTB.czi.json": [
+            "1",
+            1662
+        ],
+        "extern_Synlab_2166_18_1_Mmalmoense.czi.json": [
+            "1",
+            498
+        ],
+        "extern_Synlab_2151_104_1_MTB.czi.json": [
+            "1",
+            1147
+        ],
+        "extern_Synlab_2142_59_1_MTB.czi.json": [
+            "1",
+            1844
+        ],
+        "extern_Synlab_2152_98_1_MTB.czi.json": [
+            "1",
+            2349
+        ],
+        "extern_Synlab_2156_17_3_MTB.czi.json": [
+            "3",
+            15682
+        ],
+        "extern_Synlab_2153_124_2_MTB.czi.json": [
+            "2",
+            731
+        ],
+        "extern_Synlab_2143_82_9_.czi.json": [
+            "None",
+            743
+        ],
+        "extern_Synlab_2141_87_1_MTB ok.czi.json": [
+            "1",
+            709
+        ],
+        "extern_Synlab_2163_88_4_MTB.czi.json": [
+            "4",
+            97927
+        ],
+        "extern_Synlab_2163_89_4_MTB.czi.json": [
+            "4",
+            135843
+        ],
+        "extern_Synlab_2164_53_4_MTB.czi.json": [
+            "4",
+            97715
+        ],
+        "extern_Synlab_2151_24wdh_0_.czi.json": [
+            "0",
+            2315
+        ],
+        "extern_Synlab_2151_62_0_MTB.czi.json": [
+            "0",
+            972
+        ],
+        "extern_Synlab_2152_36_2_MTB-1.czi.json": [
+            "2",
+            637
+        ],
+        "extern_Synlab_2163_64_3_MTB.czi.json": [
+            "3",
+            4068
+        ],
+        "extern_Synlab_2162_84_3_MTB.czi.json": [
+            "3",
+            5548
+        ],
+        "extern_Synlab_2143_85_1_MTB.czi.json": [
+            "1",
+            930
+        ],
+        "extern_Synlab_2153_40_1_MTB.czi.json": [
+            "1",
+            557
+        ],
+        "extern_Synlab_2141_73_1_MTB.czi.json": [
+            "1",
+            2033
+        ],
+        "extern_Synlab_2162_131_1_MTB-OT-gebrochen.czi.json": [
+            "1",
+            19
+        ],
+        "extern-Synlab_2144_64_1_MTB.czi.json": [
+            "1",
+            87
+        ],
+        "extern_Synlab_2154_4_0.czi.json": [
+            "0",
+            91
+        ],
+        "extern_Synlab_2153_15wdh_1_MTB.czi.json": [
+            "1",
+            239
+        ],
+        "extern_Synlab_2154_42_1_MTB.czi.json": [
+            "1",
+            757
+        ],
+        "extern_Synlab_2153_48wdh_1_MTB.czi.json": [
+            "1",
+            465
+        ],
+        "extern_Synlab_2163_90_1_MTB.czi.json": [
+            "1",
+            2958
+        ],
+        "extern_Synlab_2163_105_1_MTB.czi.json": [
+            "1",
+            1060
+        ],
+        "extern_Synlab_2153_48_1_MTB.czi.json": [
+            "1",
+            866
+        ],
+        "extern_Synlab_2154_110_2_MTB.czi.json": [
+            "2",
+            789
+        ],
+        "extern_Synlab_2153_29wdh_1_MTB.czi.json": [
+            "1",
+            478
+        ],
+        "extern_Synlab_2153_29_1_MTB.czi.json": [
+            "1",
+            21023
+        ],
+        "extern_Synlab_2162_82_1_MTB.czi.json": [
+            "1",
+            23778
+        ],
+        "extern_Synlab_2143_84_1_MTB.czi.json": [
+            "1",
+            454
+        ],
+        "extern_Synlab_2156_52_4_MTB.czi.json": [
+            "4",
+            38824
+        ],
+        "extern_Synlab_2162_83_1_MTB.czi.json": [
+            "1",
+            918
+        ],
+        "extern_Synlab_2151_175_2_MTB.czi.json": [
+            "2",
+            1982
+        ],
+        "extern_Synlab_2153_113_0_.czi.json": [
+            "0",
+            2905
+        ],
+        "extern_Synlab_2152_99_1_MTB.czi.json": [
+            "1",
+            832
+        ],
+        "extern_Synlab_2145_50wdh_3_MTB.czi.json": [
+            "3",
+            3563
+        ],
+        "extern_Synlab_2165_148_2_M. caprae.czi.json": [
+            "2",
+            8865
+        ],
+        "extern_Synlab_2151_176_2_MTTB.czi.json": [
+            "2",
+            1127
+        ],
+        "extern_Synlab_2142_58_2_MTB.czi.json": [
+            "2",
+            3163
+        ],
+        "extern_Synlab_2143_83_1_MTB.czi.json": [
+            "1",
+            2776
+        ],
+        "extern_Synlab_2152_97_1_MTB.czi.json": [
+            "1",
+            2052
+        ],
+        "extern_Synlab_2151_37_1_MTB.czi.json": [
+            "1",
+            953
+        ],
+        "extern_Synlab_2153 oder 2152_78_1_MTB.czi.json": [
+            "1",
+            11277
+        ],
+        "extern_Synlab_2141_79_1_MTB-1.czi.json": [
+            "1",
+            2206
+        ],
+        "extern_Synlab_2145_50_3_MTB.czi.json": [
+            "3",
+            61710
+        ],
+        "extern_Synlab_2153_15_1_MTB.czi.json": [
+            "1",
+            669
+        ],
+        "extern_Synlab_2151_24_0_MTB.czi.json": [
+            "0",
+            8143
+        ],
+        "extern_Synlab_2151_155_2_MTB.czi.json": [
+            "2",
+            9224
+        ],
+        "extern_Synlab_2142_95_1_MTB.czi.json": [
+            "1",
+            409
+        ],
+        "extern_Synlab_2153_74_1_MTB.czi.json": [
+            "1",
+            928
+        ],
+        "extern_Synlab_2151_18wdh_0_.czi.json": [
+            "0",
+            890
+        ],
+        "extern_Synlab_2162_6_1_MTB.czi.json": [
+            "1",
+            203
+        ],
+        "extern_Synlab_2144_61_0_MTB.czi.json": [
+            "0",
+            1717
+        ],
+        "extern_Synlab_2163_72_3_MTB.czi.json": [
+            "3",
+            64438
+        ],
+        "extern_Synlab_2166_6_2_M. malmoense.czi.json": [
+            "2",
+            2199
+        ],
+        "extern_Synlab_2145_120_2_MTB.czi.json": [
+            "2",
+            2364
+        ],
+        "extern_Synlab_2151_26_3_MTB.czi.json": [
+            "3",
+            22029
+        ],
+        "extern_Synlab_2163_69_3_MTB.czi.json": [
+            "3",
+            60070
+        ],
+        "extern_Synlab_2163_68_2_MTB1.czi.json": [
+            "2",
+            2042
+        ],
+        "extern_Synlab_2163_59wdh_1_M. chelonae.czi.json": [
+            "1",
+            406
+        ],
+        "extern_Synlab_2163_59_1_M. chelonae.czi.json": [
+            "1",
+            1117
+        ],
+        "extern_Synlab_2145_107_2_MTB.czi.json": [
+            "2",
+            1692
+        ],
+        "extern_Synlab_2163_84_4_MTB.czi.json": [
+            "4",
+            81181
+        ],
+        "extern_Synlab_2153_101_1_MTB.czi.json": [
+            "1",
+            407
+        ],
+        "extern_Synlab_2165_89_3_MTB.czi.json": [
+            "3",
+            6007
+        ],
+        "extern_Synlab_2164_69_2_MTB.czi.json": [
+            "2",
+            2802
+        ],
+        "extern_Synlab_2151_64_1_MTB.czi.json": [
+            "1",
+            4029
+        ],
+        "extern_Synlab_2152_42_1_MTB.czi.json": [
+            "1",
+            2461
+        ],
+        "extern_Synlab_2145_124_1_MTB.czi.json": [
+            "1",
+            2770
+        ],
+        "extern_Synlab_2151_17_3_MTB.czi.json": [
+            "3",
+            47604
+        ],
+        "extern_Synlab_2151_18_0_.czi.json": [
+            "0",
+            2116
+        ],
+        "extern_Synlab_2164_41_0_.czi.json": [
+            "0",
+            866
+        ],
+        "extern_Synlab_2143_80_1_MTB.czi.json": [
+            "1",
+            268
+        ],
+        "extern_Synlab_2154_55_1_MTB.czi.json": [
+            "1",
+            646
+        ],
+        "extern_Synlab_2142_94_1_MTB.czi.json": [
+            "1",
+            678
+        ],
+        "extern_Synlab_2166_14_2_MTB.czi.json": [
+            "2",
+            1802
+        ],
+        "extern_Synlab_2164_26_4_MTB.czi.json": [
+            "4",
+            209798
+        ],
+        "extern_Synlab_2163_10_2_MTB.czi.json": [
+            "2",
+            2779
+        ]
+    },
+    "0": [
+        2315,
+        972,
+        91,
+        2905,
+        8143,
+        890,
+        1717,
+        2116,
+        866
+    ],
+    "1": [
+        638,
+        365,
+        285,
+        606,
+        1662,
+        498,
+        1147,
+        1844,
+        2349,
+        709,
+        930,
+        557,
+        2033,
+        19,
+        87,
+        239,
+        757,
+        465,
+        2958,
+        1060,
+        866,
+        478,
+        21023,
+        23778,
+        454,
+        918,
+        832,
+        2776,
+        2052,
+        953,
+        11277,
+        2206,
+        669,
+        409,
+        928,
+        203,
+        406,
+        1117,
+        407,
+        4029,
+        2461,
+        2770,
+        268,
+        646,
+        678
+    ],
+    "2": [
+        731,
+        637,
+        789,
+        1982,
+        8865,
+        1127,
+        3163,
+        9224,
+        2199,
+        2364,
+        2042,
+        1692,
+        2802,
+        1802,
+        2779
+    ],
+    "3": [
+        70280,
+        15682,
+        4068,
+        5548,
+        3563,
+        61710,
+        64438,
+        22029,
+        60070,
+        6007,
+        47604
+    ],
+    "4": [
+        97927,
+        135843,
+        97715,
+        38824,
+        81181,
+        209798
+    ],
+    "average_0": 2223.8888888888887,
+    "average_1": 2262.488888888889,
+    "average_2": 2813.2,
+    "average_3": 32818.09090909091,
+    "average_4": 110214.66666666667,
+    "standard_deviation_0": 2248.8572132156587,
+    "standard_deviation_1": 4688.9252008072635,
+    "standard_deviation_2": 2556.072956705266,
+    "standard_deviation_3": 26550.49386787559,
+    "standard_deviation_4": 52947.23986091144
+}
