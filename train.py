@@ -9,7 +9,7 @@ import torch.optim as optim
 import torch
 import numpy as np
 from sklearn.model_selection import train_test_split, StratifiedKFold, KFold
-from sklearn.metrics import roc_auc_score, roc_curve, auc, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
+from sklearn.metrics import roc_auc_score, roc_curve, auc, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 import argparse
 import yaml
 import time
@@ -23,7 +23,63 @@ from train_utils.load import *
 from train_utils.filters import *
 from train_utils.evaluation import *
 from train_utils.train import *
-from train_utils.plot import *
+from train_utils.plot_new import *
+
+from matplotlib.ticker import PercentFormatter
+import seaborn as sns
+
+
+def cm_analysis(y_true, y_pred, filename, labels, classes, ymap=None, figsize=(17,17)):
+    """
+    Generate matrix plot of confusion matrix with pretty annotations.
+    The plot image is saved to disk.
+    args: 
+      y_true:    true label of the data, with shape (nsamples,)
+      y_pred:    prediction of the data, with shape (nsamples,)
+      filename:  filename of figure file to save
+      labels:    string array, name the order of class labels in the confusion matrix.
+                 use `clf.classes_` if using scikit-learn models.
+                 with shape (nclass,).
+      classes:   aliases for the labels. String array to be shown in the cm plot.
+      ymap:      dict: any -> string, length == nclass.
+                 if not None, map the labels & ys to more understandable strings.
+                 Caution: original y_true, y_pred and labels must align.
+      figsize:   the size of the figure plotted.
+    """
+    sns.set(font_scale=2.8)
+
+    if ymap is not None:
+        y_pred = [ymap[yi] for yi in y_pred]
+        y_true = [ymap[yi] for yi in y_true]
+        labels = [ymap[yi] for yi in labels]
+    cm = confusion_matrix(y_true, y_pred, labels=labels)
+    cm_sum = np.sum(cm, axis=1, keepdims=True)
+    cm_perc = cm / cm_sum.astype(float) * 100
+    annot = np.empty_like(cm).astype(str)
+    nrows, ncols = cm.shape
+    for i in range(nrows):
+        for j in range(ncols):
+            c = cm[i, j]
+            p = cm_perc[i, j]
+            #if i == j:
+            s = cm_sum[i]
+            annot[i, j] = '%.2f%%\n%d/%d' % (p, c, s)
+            #elif c == 0:
+            #    annot[i, j] = ''
+            #else:
+            #    annot[i, j] = '%.2f%%\n%d' % (p, c)
+    cm = confusion_matrix(y_true, y_pred, labels=labels, normalize='true')
+    cm = pd.DataFrame(cm, index=labels, columns=labels)
+    cm = cm * 100
+    cm.index.name = 'True Label'
+    cm.columns.name = 'Predicted Label'
+    fig, ax = plt.subplots(figsize=figsize)
+    plt.yticks(va='center')
+
+    sns.heatmap(cm, annot=annot, fmt='', ax=ax, xticklabels=classes, cbar=True, cbar_kws={'format':PercentFormatter()}, yticklabels=classes, cmap="Reds")
+    plt.savefig(filename,  bbox_inches='tight')
+    # close figure 
+    plt.close(fig)
 
 
 # randomly sampled subset of input dataframe with sampling probability p
@@ -220,10 +276,10 @@ def main():
     assert len(averaged_predictions) == len(labels_test_set), "Average predictions and labels have different length"
     
     
-    print('Saving model')
-    if not os.path.exists('model_ckpt'):
-        os.makedirs('model_ckpt')
-    torch.save(net.state_dict(), 'model_ckpt/model.pth')
+    #print('Saving model')
+    #if not os.path.exists('model_ckpt'):
+     #   os.makedirs('model_ckpt')
+    #torch.save(net.state_dict(), 'model_ckpt/model.pth')
     
     #writer.flush()
     #writer.close()
@@ -250,6 +306,9 @@ def main():
         os.makedirs(f'plots/{save_folder_name}/results')
     save_path = f'plots/{save_folder_name}'
     print("Created folder for plots named ", save_path)
+    
+    # reset rcParams
+    #plt.rcParams.update(plt.rcParamsDefault)
     
     
     # save models
@@ -289,23 +348,25 @@ def main():
     print('Accuracy plots saved in plots folder')
     
     # compute and plot confusion matrix of averaged predictions
-    cm = confusion_matrix(labels_test_set, averaged_predictions_binarized)
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['Bacilli', 'Not Bacilli'])
-    disp.plot()
-    plt.show()
-    plt.draw()
-    fig = plt.gcf()
-    fig.savefig(f'plots/{save_folder_name}/confusion_matrix.png')
-    print('Confusion matrix with predictions averaged from all models saved in plots folder')
+    # count the number of bacilli in the test set
+    bacilli_in_test = 0
+    for i in range(len(labels_test_set)):
+        if labels_test_set[i] == 1:
+            bacilli_in_test += 1
+    print(f"Number of bacilli in test set: {bacilli_in_test}")
+    print(f"Number of non-bacilli in test set: {len(labels_test_set) - bacilli_in_test}")
     
     # compute and plot confusion matrix of each model
     for i in range(n_splits):
         cm = confusion_matrix(labels_test_set, all_predictions_binarized[i])
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[0,1])
         disp.plot()
         plt.show()
         plt.draw()
         fig = plt.gcf()
         fig.savefig(f'plots/{save_folder_name}/confusion_matrices/confusion_matrix_model_{i+1}.png')
+        # close figure 
+        plt.close(fig)
     print('Confusion matrices for each model saved in plots folder')    
     
     # unified plot of accuracies and losses
@@ -323,6 +384,13 @@ def main():
     # save metrics_on_test dictionary as csv
     metrics_on_test_df = pd.DataFrame(metrics_on_test)
     metrics_on_test_df.to_csv(f'plots/{save_folder_name}/metrics_on_test.csv', index=False)
+
+
+    cm = confusion_matrix(labels_test_set, averaged_predictions_binarized, normalize='true')
+    # plot confusion matrix using heatmap
+    cm_analysis(labels_test_set, averaged_predictions_binarized, f'plots/{save_folder_name}/confusion_matrix.png', labels=[0,1], classes=['Non-bacilli', 'Bacilli'])
+    print('Confusion matrix with predictions averaged from all models saved in plots folder')
+    
 
     
     # save the config variable to a json file in the save_folder_name folder
