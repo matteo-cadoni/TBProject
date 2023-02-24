@@ -8,7 +8,7 @@ load:
 
 train:
   batch_size: 2500
-  epochs: 50
+  epochs: 1
   n_splits: 5
 
 results:
