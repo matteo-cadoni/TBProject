@@ -27,9 +27,9 @@ class StatsSvm:
             df = df.drop(['predictions_ellipse'], axis=1)
         # we separate each of the stats in the stat column into different columns
         df['area'] = self.stats[0:self.number_of_entries, 4]
-        #df['hight'] = self.stats[0:self.number_of_entries, 2]
-        #df['width'] = self.stats[0:self.number_of_entries, 3]
-        df['mix'] = self.stats[0:self.number_of_entries, 2]-self.stats[0:self.number_of_entries, 3]
+        df['hight'] = self.stats[0:self.number_of_entries, 2]
+        df['width'] = self.stats[0:self.number_of_entries, 3]
+        #df['sqrt(height^2+width^2)'] = np.sqrt((self.stats[0:self.number_of_entries, 2])**2+(self.stats[0:self.number_of_entries, 3])**2)
        
         # we do not need the 'stats' column anymore
         df = df.drop(['stats'], axis=1)
@@ -89,10 +89,12 @@ class StatsSvm:
         # create a 2D scatterplot for the stats
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.scatter(df['area'], df['mix'], c=df['label'], marker='o', label='bacilli')
-        ax.set_xlabel('area')
-        ax.set_ylabel('mix')
-        plt.legend()
+        ax.scatter(df['area'], df['sqrt(height^2+width^2)'], c=df['label'], marker='o', cmap='jet', label='bacilli')
+        ax.set_xlabel('Area', fontsize=14)
+        ax.set_ylabel('sqrt(Height^2+Width^2)', fontsize=14)
+        # increase font size of the labels and axis
+        ax.tick_params(axis='both', which='major', labelsize=14)
+        plt.legend(['Bacilli', 'No bacilli'], loc='upper right', fontsize=14)
         plt.show()
     
 whole_dataset = pd.DataFrame()
@@ -110,6 +112,6 @@ procedure.train_svm()
 
 procedure.tests_for_svm()
 
-#procedure.visualize_3D_scatterplot_for_stats(procedure.create_dataframe())
+procedure.visualize_3D_scatterplot_for_stats(procedure.create_dataframe())
 
-procedure.visualize_2D_scatterplot_for_stats(procedure.create_dataframe())
+#procedure.visualize_2D_scatterplot_for_stats(procedure.create_dataframe())
