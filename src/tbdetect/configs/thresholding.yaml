@@ -1,0 +1,38 @@
+load:
+  czi_path: TB_sample/extern_Synlab_2156_17_3_MTB.czi         # insert path to file
+  tile: 673                         # None if whole smear, otherwise number of tile
+  interactive_config: True          # whether to use interactive config or not
+
+thresholding:
+  algorithm: adaptive_gaussian      # otsu, hard, adaptive_gaussian, adaptive_mean
+  hard_threshold_param: 5000        # only used for hard thresholding
+  block_size: 25                    # only used for adaptive thresholding (defines the size of the neighborhood)
+  c: -7                             # only used for adaptive thresholding (defines constant to be substracted from the (Gaussian) mean)
+  split: True                       # whether to use adaptive otsu thresholding or not
+
+  tile_size: 16                     # size of single tiles if split is True
+  x_tiles: 128
+  y_tiles: 94
+
+postprocessing:
+  algorithm: adaptive_gaussian      # otsu, hard, adaptive_gaussian, adaptive_mean
+  number_of_black_pixels: 215       # number of black pixels to decide whether a tile is classified as background or not
+  x_tiles: 128
+  y_tiles: 94
+  tile_size: 16
+  crop: True                        # whether to crop the image or not (needed for inference)
+
+labelling_dataset: 
+  create_dataset: False              # lets you label the cropped images in an interactive window
+
+saving: 
+  save: False                        # whether to save the dataset labelled by hand or not
+  save_stats: False                 # whether to save the statistics of the labelled dataset or not (used to train the svm)
+
+inference:
+  do_inference: True                # whether to do inference or not
+  prediction: CNN                   # SVM, CNN, STATS
+
+visualization:
+  show: False                       # whether to show the image or not
+
