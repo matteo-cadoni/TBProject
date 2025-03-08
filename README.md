@@ -1,6 +1,30 @@
 
 # Tuberculosis Project [[Project Page]](https://github.com/marinadominguez/TBProject)
 
+## Overview
+Tuberculosis remains one of the leading causes of death worldwide. The standard diagnostic tool, especially in low- and middle-income countries, is the microscopic examination of stained sputum smears, which is performed manually and is prone to inefficiencies. This project aims to automate the detection and diagnosis of TB using computer vision techniques and convolutional neural networks to analyze whole-slide images of stained sputum smears.
+
+## Features
+
+- **Image Preprocessing**: Preprocess images to remove noise and enhance tuberculosis bacilli visibility. Thresholding Methods and Morphological Operations.
+- **Segmentation**: Segment images to identify tuberculosis bacilli, through connected component analysis.
+- **Dataset Creation and Annotation**: Create a dataset of segmented 50x50 px images and annotate them.
+- **Classification**: Classify images as containing tuberculosis bacilli or not with the help of a CNN, SVM or a Shape based classifier.
+- **Visualization**: Visualize images and annotations.
+- **Analysis on Whole Slide Images**: Apply the pipeline to whole slide images.
+- **Comparative Analysis Across Patients**: Assess bacilli counts across multiple patients to enhance risk stratification and clinical decision-making. Evaluate bacilli distribution patterns within WSIs to refine severity grading and improve diagnostic accuracy.
+
+
+
+
+## Data
+The dataset consists of 86 grayscale whole slide images, stored in .CZI format, of stained sputum smears with a resolution of 112534 × 55519 pixels at 20X magnification. The slides were preprocessed, binarized, and annotated for further classification. The severity of the disease was graded by a trained pathologist on an integer scale from 0 (low risk) to 4 (high risk).
+
+Data should be saved under
+```
+TB_sample/
+```
+
 ## Installation
 
 Create an empty environment specifying the python version as "python=3.8" and activate it.
@@ -32,57 +56,8 @@ project.main()
 
 All parameters can be changed using the interactive interface.
 
+## Further Reading
+For more information refer to the Projects  report and presentation:
+- [Report](resources/final_report.pdf)
+- [Presentation](resources/final_presentation.pdf)
 
-## Data
-
-Data, i.e., the smear images, should be saved under
-```
-TB_sample/
-```
-
-
-
-TO DO's:
-- [x] Virtual Machine -> mounting the extended storage 
-
-- [x] ELLIPSE: 
-	- [x] Is this brute force approach worth it?  Answer this question by plotting: 
-	- [x] create a scatter plot for the MA and ma for all of the objects (diagonal are the circular objects)
-	- [x] then with the predictions of the neural net paint the dots, and observe if we arrrive to the ideal case of having the two clusters.
-	- [x] check whether the nn give us more insights than the plain computer vision ellipse approach
-  
-- [x] k fold cross validation idea:
-  - [x] Plot graphics to assess classification accuracy, with different percentages of training dataset.
-  - [x] we need to check what is happening with the loss
-  - [x] cross-validation
-  - [x] check the different measures
-  - [x] plot the distribution certainty of the classifier
-  - [x] confussion matrices <--
-
-- [ ] Try the module branch for all the functionalities -- implement all the options
-- [ ] polish and finish all the implementations
-- [ ] integrate everything together
-- [ ] merge branchs
-- [x] brief hands-on presentation for the meeting next week
-- [ ] write report
-- [x] show the plot ( * )
-- [ ] we take our clean branch and we implement everything nice and correctly 
-- [x] Meeting on Monday to practise 
-
-
- - [x] Active learning capabilities 
- 	- [x] (expert will explain in the meeting)
-	- [x] next tuesday 2pm
-	- [ ] play with his tool <- how is it performing in our data, one of us plays the profesional patholoigist role
-	- [x] active learning platform
-	- [ ] Core set with feature vectors / optimal transport distance.
-	- [ ] Assess whether chosen active learning strategy results in better traning
-	- [ ] subsample randomly and with active learning strategy -> Train models -> Evaluate differences in accuracy.
-
-
-
-
-
-
-### References
-https://packaging.python.org/tutorials/packaging-projects/
